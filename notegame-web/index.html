@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NOTEBUILDER - Hệ Thống Hóa Tri Thức & Nâng Cấp Không Gian Godot</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- =========================================
+       HEADER / NAVIGATION
+       ========================================= -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">
+        <svg class="logo-icon-svg" viewBox="0 0 24 24">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+        <span class="logo-text-yellow">NOTEBUILDER</span>
+      </a>
+
+      <nav class="main-nav">
+        <ul>
+          <li><a href="#home" class="active">Trang Chủ</a></li>
+          <li><a href="#about">Về NoteBuilder</a></li>
+          <li><a href="#features">Tính Năng</a></li>
+          <li><a href="#templates">Mẫu Ghi Chú</a></li>
+          <li><a href="#gallery">Không Gian Godot</a></li>
+          <li>
+            <a href="notes.html" class="btn-nav-action">
+              <span>Kho Ghi Chú</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <button class="mobile-menu-btn" aria-label="Toggle navigation">
+        ☰
+      </button>
+    </div>
+  </header>
+
+  <!-- =========================================
+       HERO SECTION (DARK THEME & ELEMENT BACKGROUND)
+       ========================================= -->
+  <section id="home" class="hero-section">
+    <div class="container hero-grid">
+      <!-- Hero Left: NOTEBUILDER in Yellow -->
+      <div class="hero-left">
+        <div class="hero-badge">
+          <span>✨ Gamified Knowledge Hub</span>
+        </div>
+        <h2 class="hero-title-prefix">Chào Mừng Đến Với</h2>
+        <h1 class="hero-brand-name">NOTEBUILDER</h1>
+        <h3 class="hero-subtitle">Hệ Thống Hóa Tri Thức & Nâng Cấp Không Gian Game</h3>
+        <p class="hero-description">
+          Nền tảng ghi chú thông minh giúp học sinh xây dựng kiến thức có hệ thống. 
+          Từng lượng kiến thức bạn tích lũy sẽ tự động nâng cấp asset và mở khóa không gian 
+          đồ họa 3D lộng lẫy trong thế giới trò chơi kết nối Godot!
+        </p>
+
+        <div class="hero-actions">
+          <a href="notes.html" class="btn-primary-yellow">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            <span>Mở Kho Ghi Chú</span>
+          </a>
+          <a href="#about" class="btn-outline-yellow">
+            <span>Tìm Hiểu Thêm</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Hero Right: Isometric Floating Game Island Graphic -->
+      <div class="hero-right">
+        <div class="hero-element-wrapper">
+          <div class="hero-glow-back"></div>
+          <img src="assets/new_element_trans.png" alt="NOTEBUILDER Floating Game Island" class="hero-element-img">
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll down indicator -->
+    <div class="hero-scroll-indicator" title="Cuộn xuống khám phá">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+  </section>
+
+  <!-- =========================================
+       SECTION 2: ABOUT NOTEBUILDER (Matching template_web.png)
+       ========================================= -->
+  <section id="about" class="about-section">
+    <div class="container about-grid">
+      <!-- Left: Yellow blob background with stats card -->
+      <div class="about-image-wrapper">
+        <div class="yellow-blob-bg"></div>
+        <div class="about-card-showcase">
+          <span class="about-showcase-badge">Hệ Thống Đang Hoạt Động</span>
+          <h4 class="about-showcase-title">Tiến Trình Học Tập Của Bạn</h4>
+          <p style="font-size: 0.9rem; color: #6c727c; margin-bottom: 16px;">
+            Hệ thống tự động ghi nhận mọi bài học và quy đổi thành điểm kinh nghiệm tri thức.
+          </p>
+
+          <div class="about-showcase-stats">
+            <div class="stat-item">
+              <span class="stat-num" id="stat-total-notes">4+</span>
+              <span class="stat-label">Ghi Chú Đã Lưu</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-num">4</span>
+              <span class="stat-label">Mẫu Giấy Note</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-num">100%</span>
+              <span class="stat-label">Cá Nhân Hóa</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-num">Godot</span>
+              <span class="stat-label">Sẵn Sàng Kết Nối</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: About description -->
+      <div class="about-content">
+        <div class="section-accent-line" style="justify-content: flex-start; margin: 0 0 16px 0;">
+          <div class="accent-bar" style="width: 40px;"></div>
+          <div class="accent-dot"></div>
+        </div>
+        <span style="font-size: 0.85rem; font-weight: 700; color: var(--primary-yellow); text-transform: uppercase; letter-spacing: 1px;">Về Ý Tưởng Dự Án</span>
+        <h3>Biến Kiến Thức Thành Không Gian Trò Chơi Độc Đáo</h3>
+        <p>
+          NOTEBUILDER được sinh ra nhằm giải quyết một vấn đề lớn: Học sinh thường ghi chép rời rạc, thiếu động lực và khó hệ thống hóa những gì đã học.
+        </p>
+        <p>
+          Bằng cách kết hợp giữa <strong>phương pháp ghi chú chủ động</strong> và <strong>cơ chế trò chơi (Gamification)</strong> từ engine Godot, mỗi kiến thức bạn đúc kết sẽ trở thành một viên gạch xây dựng thế giới ảo của riêng mình.
+        </p>
+
+        <ul class="about-features-list">
+          <li>
+            <div class="feature-check-icon">✓</div>
+            <span><strong>Hệ thống hóa bài bản:</strong> Phân chia danh mục theo môn học, thẻ tag và cấu trúc luận điểm logic.</span>
+          </li>
+          <li>
+            <div class="feature-check-icon">✓</div>
+            <span><strong>Nâng cấp không gian trực quan:</strong> Người có nhiều kiến thức được hệ thống sẽ nhận được căn phòng học tập và asset game đẹp mắt, xịn sò hơn.</span>
+          </li>
+          <li>
+            <div class="feature-check-icon">✓</div>
+            <span><strong>4 phong cách ghi chú cổ điển & hiện đại:</strong> Tự do chọn mẫu giấy note phù hợp cảm hứng học tập.</span>
+          </li>
+        </ul>
+
+        <a href="notes.html" class="btn-primary-yellow">
+          <span>Bắt Đầu Xây Dựng Tri Thức</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================
+       SECTION 3: FEATURES (Matching template_web.png What We Do)
+       ========================================= -->
+  <section id="features" class="features-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Tính Năng Cốt Lõi</h2>
+        <div class="section-accent-line">
+          <div class="accent-bar"></div>
+          <div class="accent-dot"></div>
+          <div class="accent-bar"></div>
+        </div>
+        <p class="section-subtitle">
+          Quy trình 3 bước hoàn chỉnh giúp bạn học tập có hệ thống và tận hưởng thành quả trong thế giới ảo.
+        </p>
+      </div>
+
+      <div class="features-grid">
+        <!-- Feature 1 -->
+        <div class="feature-card">
+          <div class="feature-icon-circle">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          </div>
+          <h3 class="feature-title">Ghi Chú Đa Dạng</h3>
+          <p class="feature-desc">
+            Sử dụng 4 mẫu ghi chú độc đáo: Cuộn giấy cổ phong, Sticky note dán tường, Ghim giấy bảng tin và Bản thảo nhăn để biến bài học khô khan thành tác phẩm sáng tạo.
+          </p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="feature-card">
+          <div class="feature-icon-circle">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+          </div>
+          <h3 class="feature-title">Tích Lũy Điểm Tri Thức</h3>
+          <p class="feature-desc">
+            Mỗi bài học được ghi chú và gắn tag có hệ thống sẽ mang lại điểm XP. Thanh cấp bậc tri thức sẽ tự động tăng tiến theo nỗ lực rèn luyện của bạn.
+          </p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="feature-card">
+          <div class="feature-icon-circle">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <h3 class="feature-title">Nâng Cấp Asset Godot</h3>
+          <p class="feature-desc">
+            Dữ liệu tri thức được đồng bộ sang game làm từ Godot Engine. Cấp bậc tri thức càng cao thì phòng học 3D, thư viện và đồ họa môi trường càng hoành tráng!
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================
+       SECTION 4: NOTE TEMPLATES SHOWCASE
+       (Displaying note1, note2, note3, note4)
+       ========================================= -->
+  <section id="templates" class="notes-preview-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">4 Mẫu Ghi Chú Độc Quyền</h2>
+        <div class="section-accent-line">
+          <div class="accent-bar"></div>
+          <div class="accent-dot"></div>
+          <div class="accent-bar"></div>
+        </div>
+        <p class="section-subtitle">
+          Lựa chọn phong cách ghi chú yêu thích của bạn để bắt đầu hệ thống hóa bài giảng.
+        </p>
+      </div>
+
+      <div class="templates-showcase-grid">
+        <!-- Template 1: Scroll -->
+        <div class="template-card">
+          <div class="template-img-holder">
+            <img src="assets/note1.png" alt="Mẫu cuộn giấy cổ">
+          </div>
+          <span class="template-badge">Mẫu 01</span>
+          <h4 class="template-name">Cuộn Giấy Cổ Phong</h4>
+          <p class="template-info">Thích hợp cho định lý toán học, công thức và triết lý quan trọng.</p>
+          <a href="notes.html" class="btn-try-template">Sử Dụng Mẫu Này</a>
+        </div>
+
+        <!-- Template 2: Tape -->
+        <div class="template-card">
+          <div class="template-img-holder">
+            <img src="assets/note2.png" alt="Mẫu giấy dán tape">
+          </div>
+          <span class="template-badge">Mẫu 02</span>
+          <h4 class="template-name">Giấy Dán Băng Keo</h4>
+          <p class="template-info">Hoàn hảo cho to-do list, checklist bài tập và nhắc nhở nhanh.</p>
+          <a href="notes.html" class="btn-try-template">Sử Dụng Mẫu Này</a>
+        </div>
+
+        <!-- Template 3: Pin -->
+        <div class="template-card">
+          <div class="template-img-holder">
+            <img src="assets/note3.png" alt="Mẫu ghim bảng">
+          </div>
+          <span class="template-badge">Mẫu 03</span>
+          <h4 class="template-name">Ghim Giấy Đính Tường</h4>
+          <p class="template-info">Dành cho từ vựng mới, định nghĩa và mẹo giải bài hay.</p>
+          <a href="notes.html" class="btn-try-template">Sử Dụng Mẫu Này</a>
+        </div>
+
+        <!-- Template 4: Crumpled Parchment -->
+        <div class="template-card">
+          <div class="template-img-holder">
+            <img src="assets/note4.png" alt="Mẫu bản thảo nhăn">
+          </div>
+          <span class="template-badge">Mẫu 04</span>
+          <h4 class="template-name">Bản Thảo Cổ Nhăn</h4>
+          <p class="template-info">Phù hợp ghi chép lịch sử, tóm tắt chương sách và ý tưởng sáng tạo.</p>
+          <a href="notes.html" class="btn-try-template">Sử Dụng Mẫu Này</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================
+       SECTION 5: GALLERY / ASSET TIERS (Matching template_web.png Gallery)
+       ========================================= -->
+  <section id="gallery" class="gallery-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Các Cấp Độ Không Gian Game</h2>
+        <div class="section-accent-line">
+          <div class="accent-bar"></div>
+          <div class="accent-dot"></div>
+          <div class="accent-bar"></div>
+        </div>
+        <p class="section-subtitle">
+          Càng nhiều ghi chú kiến thức có hệ thống, không gian của bạn trong Godot càng trở nên tráng lệ.
+        </p>
+      </div>
+
+      <div class="gallery-grid">
+        <!-- Tier 1 -->
+        <div class="gallery-item">
+          <div class="gallery-visual">
+            <span class="gallery-badge">Cấp 1 • Cơ Bản</span>
+            <div class="gallery-icon-large">🪑</div>
+          </div>
+          <div class="gallery-info">
+            <div class="gallery-tier">Asset Tier 1</div>
+            <h4 class="gallery-name">Góc Bàn Học Khởi Đầu</h4>
+            <p class="gallery-desc">Bàn gỗ mộc mạc, ngọn nến sáng và những trang sách đầu tiên trên hành trình học tập.</p>
+          </div>
+        </div>
+
+        <!-- Tier 2 -->
+        <div class="gallery-item">
+          <div class="gallery-visual">
+            <span class="gallery-badge">Cấp 2 • Hiện Đại</span>
+            <div class="gallery-icon-large">🔬</div>
+          </div>
+          <div class="gallery-info">
+            <div class="gallery-tier">Asset Tier 2</div>
+            <h4 class="gallery-name">Phòng Nghiên Cứu Tri Thức</h4>
+            <p class="gallery-desc">Mở khóa màn hình biểu đồ số liệu vàng, giá sách phân loại thông minh và máy tính mô phỏng.</p>
+          </div>
+        </div>
+
+        <!-- Tier 3 -->
+        <div class="gallery-item">
+          <div class="gallery-visual">
+            <span class="gallery-badge">Cấp 3 • Thần Kỳ</span>
+            <div class="gallery-icon-large">🏛️</div>
+          </div>
+          <div class="gallery-info">
+            <div class="gallery-tier">Asset Tier 3</div>
+            <h4 class="gallery-name">Thư Viện Hoàng Gia Vô Cực</h4>
+            <p class="gallery-desc">Không gian kiến trúc cổ điển lộng lẫy, cột đá hoa cương, sách bay lơ lửng và hào quang tri thức rực rỡ.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================
+       SECTION 6: CTA BANNER
+       ========================================= -->
+  <section class="cta-section">
+    <div class="container cta-box">
+      <h2 class="cta-title">Sẵn Sàng Hệ Thống Hóa <span>Tri Thức</span> Của Bạn?</h2>
+      <p class="cta-desc">
+        Truy cập trang Kho Ghi Chú ngay bây giờ để tạo những ghi chú đầu tiên và chuẩn bị nâng cấp không gian trò chơi của bạn!
+      </p>
+      <a href="notes.html" class="btn-primary-yellow">
+        <span>Vào Kho Ghi Chú Ngay</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </section>
+
+  <!-- =========================================
+       FOOTER (Matching template_web.png)
+       ========================================= -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-top">
+        <a href="index.html" class="logo">
+          <svg class="logo-icon-svg" viewBox="0 0 24 24">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+          <span class="logo-text-yellow">NOTEBUILDER</span>
+        </a>
+
+        <p style="color: #8b929e; font-size: 0.95rem; max-width: 480px;">
+          Nền tảng kết nối giữa học tập chủ động và không gian game Godot. Phát triển tư duy hệ thống cho học sinh thế hệ mới.
+        </p>
+
+        <a href="notes.html" class="btn-nav-action">
+          <span>Kho Ghi Chú</span>
+        </a>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 NOTEBUILDER. All Rights Reserved. Thiết kế dựa trên ý tưởng kết nối Web & Godot Engine.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/main.js"></script>
+</body>
+</html>

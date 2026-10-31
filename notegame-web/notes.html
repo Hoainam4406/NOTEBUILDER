@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kho Ghi Chú Kiến Thức - NOTEBUILDER</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/notes.css">
+</head>
+<body class="notes-body">
+
+  <!-- =========================================
+       NAVBAR (STICKY)
+       ========================================= -->
+  <header class="notes-navbar">
+    <div class="container notes-nav-inner">
+      <div class="nav-left-brand">
+        <a href="index.html" class="back-to-home-link" title="Quay về trang chủ">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <span>Trang Chủ</span>
+        </a>
+
+        <a href="index.html" class="logo">
+          <svg class="logo-icon-svg" viewBox="0 0 24 24">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+          <span class="logo-text-yellow">NOTEBUILDER</span>
+        </a>
+      </div>
+
+      <div class="nav-right-actions">
+        <button id="btnExportGodot" class="btn-export-godot" title="Xuất dữ liệu ghi chú cho Godot">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>Xuất Cho Godot</span>
+        </button>
+
+        <button id="btnOpenCreateModal" class="btn-new-note">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span>+ Viết Note Mới</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- =========================================
+       GAMIFICATION DASHBOARD (PROGRESS & GODOT STATUS)
+       ========================================= -->
+  <section class="gamification-bar">
+    <div class="container gamification-grid">
+      <!-- Left: Player Level & Progress -->
+      <div class="level-badge-container">
+        <div class="level-shield">
+          <span class="level-shield-label">Cấp Độ</span>
+          <span class="level-shield-num" id="statLevelNum">1</span>
+        </div>
+
+        <div class="level-info">
+          <div class="level-name-wrap">
+            <span class="level-title" id="statLevelTitle">Cấp 1: Tập Sự Tri Thức</span>
+            <span class="level-xp-text" id="statXpText">200 XP (0/100 để lên cấp)</span>
+          </div>
+          <div class="progress-track" title="Thanh tiến trình lên cấp">
+            <div class="progress-fill" id="statProgressFill"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Godot Engine Asset Status -->
+      <div class="godot-status-box">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div class="godot-status-icon">🎮</div>
+          <div class="godot-status-text">
+            <h4>Không Gian Trò Chơi Mở Khóa:</h4>
+            <p id="godotAssetStatus">Đang tải không gian...</p>
+          </div>
+        </div>
+        <span class="godot-tag">Godot Linked</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================
+       TOOLBAR: SEARCH & FILTER
+       ========================================= -->
+  <section class="notes-toolbar">
+    <div class="container toolbar-flex">
+      <!-- Search Input -->
+      <div class="search-box">
+        <i>🔍</i>
+        <input type="text" id="searchInput" placeholder="Tìm kiếm ghi chú theo tiêu đề, nội dung, thẻ tag...">
+      </div>
+
+      <!-- Filter by Template -->
+      <div class="filter-pills">
+        <button class="filter-btn active" data-filter="all">Tất cả mẫu</button>
+        <button class="filter-btn" data-filter="1">📜 Cuộn giấy cổ</button>
+        <button class="filter-btn" data-filter="2">📌 Giấy dán Tape</button>
+        <button class="filter-btn" data-filter="3">📍 Ghim bảng</button>
+        <button class="filter-btn" data-filter="4">📄 Bản thảo nhăn</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================
+       NOTE BOARD / GRID
+       ========================================= -->
+  <main class="notes-container">
+    <div class="container">
+      <div class="notes-grid" id="notesGrid">
+        <!-- Dynamic Notes Rendered Here via js/notes.js -->
+      </div>
+    </div>
+  </main>
+
+  <!-- =========================================
+       MODAL: FABRIC.JS INTERACTIVE CANVAS STUDIO
+       (Drawing directly on paper, pen mode, sticky text mode)
+       ========================================= -->
+  <div class="modal-overlay" id="noteModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 1.4rem;">🎨</span>
+          <h3 id="modalTitle">Xưởng Sáng Tạo Note - Vẽ & Gõ Trực Tiếp Lên Giấy</h3>
+        </div>
+        <button class="btn-close-modal" id="btnCloseModal">&times;</button>
+      </div>
+
+      <form id="noteForm">
+        <div class="modal-body">
+          <div class="modal-studio-layout">
+            <!-- Left Column: Fabric.js Canvas Studio -->
+            <div class="studio-canvas-column">
+              <!-- Canvas Tools Toolbar -->
+              <div class="canvas-toolbar">
+                <!-- Row 1: Mode Switcher & Actions -->
+                <div class="toolbar-row" style="justify-content: space-between;">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="tool-group-label">Chế độ:</span>
+                    <button type="button" class="mode-btn active" id="btnModePen">
+                      ✏️ Vẽ Tay (Pen Mode)
+                    </button>
+                    <button type="button" class="mode-btn" id="btnModeText">
+                      🔤 Gõ Chữ (Text Mode)
+                    </button>
+                  </div>
+
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <button type="button" class="btn-canvas-action" id="btnUndoCanvas" title="Hoàn tác nét vẽ">
+                      ↩️ Hoàn Tác
+                    </button>
+                    <button type="button" class="btn-canvas-action" id="btnDeleteSelected" title="Xóa vật thể đang chọn">
+                      🧹 Xóa Nét Chọn
+                    </button>
+                    <button type="button" class="btn-canvas-action" id="btnClearCanvas" title="Làm mới tờ giấy">
+                      🗑️ Xóa Tất Cả
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Row 2: Pen Palette & Sticky Tools -->
+                <div class="toolbar-row" style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px;">
+                  <!-- Pen Colors & Sizes -->
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="tool-group-label">Mực:</span>
+                    <div class="color-palette">
+                      <button type="button" class="color-dot active" data-color="#1a1a1a" style="background:#1a1a1a;" title="Mực đen"></button>
+                      <button type="button" class="color-dot" data-color="#1d4ed8" style="background:#1d4ed8;" title="Mực xanh"></button>
+                      <button type="button" class="color-dot" data-color="#dc2626" style="background:#dc2626;" title="Mực đỏ"></button>
+                      <button type="button" class="color-dot" data-color="rgba(251, 191, 36, 0.5)" style="background:#f59e0b;" title="Bút dạ quang vàng (Highlighter)"></button>
+                      <button type="button" class="color-dot" data-color="#15803d" style="background:#15803d;" title="Mực xanh lá"></button>
+                    </div>
+
+                    <select id="brushSizeSelect" class="brush-size-select" title="Cỡ nét bút">
+                      <option value="2">Nét mảnh (2px)</option>
+                      <option value="4" selected>Nét vừa (4px)</option>
+                      <option value="8">Nét đậm (8px)</option>
+                      <option value="18">Bút dạ quang (18px)</option>
+                    </select>
+                  </div>
+
+                  <!-- Sticky & Text Insertion Tools -->
+                  <div style="display: flex; align-items: center; gap: 6px; margin-left: auto;">
+                    <span class="tool-group-label">Công cụ:</span>
+                    <button type="button" class="btn-canvas-action" id="btnAddText" title="Thêm một dòng chữ">
+                      + Thêm Chữ
+                    </button>
+                    <button type="button" class="btn-canvas-action btn-sticky-add" id="btnAddStickyYellow" title="Dán một mẩu sticky note vàng">
+                      + Sticky Vàng
+                    </button>
+                    <button type="button" class="btn-canvas-action" id="btnAddStickyBlue" style="background:#dbeafe; color:#1e40af; border-color:#bfdbfe;" title="Dán một mẩu sticky note xanh">
+                      + Sticky Xanh
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Canvas Paper Container -->
+              <div class="canvas-paper-wrapper">
+                <canvas id="noteCanvas" width="460" height="490"></canvas>
+              </div>
+
+              <div class="canvas-tips-bar">
+                💡 <strong>Vẽ Tay:</strong> Dùng chuột hoặc bút vẽ tự do trực tiếp lên cuộn giấy. <strong>Gõ Chữ:</strong> Nhấp vào chữ để sửa hoặc kéo di chuyển các mẩu giấy dán Sticky!
+              </div>
+            </div>
+
+            <!-- Right Column: Template Selector & Metadata -->
+            <div class="studio-meta-column">
+              <!-- Template Picker -->
+              <div class="form-group">
+                <label>Mẫu Giấy Làm Nền (Background):</label>
+                <div class="template-selector-grid">
+                  <!-- Template 1: Scroll -->
+                  <label class="template-radio-label selected">
+                    <input type="radio" name="noteTemplate" value="1" checked>
+                    <div class="template-thumb-img">
+                      <img src="assets/note1.png" alt="Cuộn giấy cổ">
+                    </div>
+                    <div class="template-thumb-name">Cuộn Giấy</div>
+                  </label>
+
+                  <!-- Template 2: Tape -->
+                  <label class="template-radio-label">
+                    <input type="radio" name="noteTemplate" value="2">
+                    <div class="template-thumb-img">
+                      <img src="assets/note2.png" alt="Giấy dán Tape">
+                    </div>
+                    <div class="template-thumb-name">Dán Tape</div>
+                  </label>
+
+                  <!-- Template 3: Pin -->
+                  <label class="template-radio-label">
+                    <input type="radio" name="noteTemplate" value="3">
+                    <div class="template-thumb-img">
+                      <img src="assets/note3.png" alt="Ghim bảng">
+                    </div>
+                    <div class="template-thumb-name">Ghim Đính</div>
+                  </label>
+
+                  <!-- Template 4: Crumpled -->
+                  <label class="template-radio-label">
+                    <input type="radio" name="noteTemplate" value="4">
+                    <div class="template-thumb-img">
+                      <img src="assets/note4.png" alt="Bản thảo nhăn">
+                    </div>
+                    <div class="template-thumb-name">Bản Thảo Cổ</div>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Note Title -->
+              <div class="form-group">
+                <label for="noteTitleInput">Tiêu Đề Kiến Thức *</label>
+                <input type="text" id="noteTitleInput" placeholder="Ví dụ: Định Lý Pitago, Kiến Trúc Node Godot..." required>
+              </div>
+
+              <!-- Note Category / Subject -->
+              <div class="form-group">
+                <label for="noteCategoryInput">Môn Học / Chủ Đề</label>
+                <input type="text" id="noteCategoryInput" placeholder="Ví dụ: Toán Học, Lập Trình Godot, Vật Lý...">
+              </div>
+
+              <!-- Tags -->
+              <div class="form-group">
+                <label for="noteTagsInput">Thẻ Tags (phân cách bằng dấu phẩy)</label>
+                <input type="text" id="noteTagsInput" placeholder="toan, hinhhoc, congthuc, godot">
+              </div>
+
+              <!-- Quick Description / Summary Text -->
+              <div class="form-group">
+                <label for="noteContentInput">Tóm Tắt Ý Chính (Tùy chọn)</label>
+                <textarea id="noteContentInput" rows="3" placeholder="Ghi chú thêm nội dung tìm kiếm nhanh hoặc lưu ý quan trọng..."></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" id="btnCancelModal">Hủy Bỏ</button>
+          <button type="submit" class="btn-save-note">
+            <span>💾 Lưu Ghi Chú Vào Bảng (+50 XP)</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div class="toast-msg" id="toastMsg">
+    <span style="font-size: 1.2rem;">✨</span>
+    <span id="toastText">Thao tác thành công!</span>
+  </div>
+
+  <!-- Scripts: Fabric.js Canvas Library + Custom Script -->
+  <script src="js/fabric.min.js"></script>
+  <script src="js/notes.js"></script>
+</body>
+</html>
