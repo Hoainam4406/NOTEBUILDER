@@ -3,6 +3,13 @@
  * Supports drawing directly on paper templates, text mode, sticky notes, and gamification
  */
 
+// API & Backend Configuration
+const API_BASE_URL = (window.location.protocol.startsWith('http') && window.location.port === '5050') 
+  ? '' 
+  : 'http://localhost:5050';
+
+let isMongoConnected = false;
+
 // Initial Seed Data with default canvas mockups
 const DEFAULT_SAMPLE_NOTES = [
   {
@@ -110,15 +117,93 @@ const statProgressFill = document.getElementById('statProgressFill');
 const godotAssetStatus = document.getElementById('godotAssetStatus');
 
 // Initialize App
-document.addEventListener('DOMContentLoaded', () => {
-  loadNotes();
+document.addEventListener('DOMContentLoaded', async () => {
   setupEventListeners();
-  updateGamification();
-  renderNotes();
+  await checkDatabaseConnection();
+  await autoMigrateLocalStorage();
+  await loadNotes();
 });
 
-// Load notes from localStorage
-function loadNotes() {
+// Check MongoDB Connection via Backend API
+async function checkDatabaseConnection() {
+  const dbBadge = document.getElementById('dbStatusBadge');
+  const dbText = document.getElementById('dbStatusText');
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/health`, { method: 'GET' });
+    if (res.ok) {
+      const data = await res.json();
+      isMongoConnected = true;
+      if (dbBadge && dbText) {
+        dbBadge.classList.remove('offline');
+        dbText.textContent = '🍃 MongoDB Connected';
+        dbBadge.title = `Đã kết nối cơ sở dữ liệu MongoDB (${data.totalNotes} ghi chú)`;
+      }
+      return true;
+    }
+  } catch (err) {
+    console.warn('Backend server chưa chạy. Sử dụng chế độ Offline LocalStorage.');
+  }
+
+  isMongoConnected = false;
+  if (dbBadge && dbText) {
+    dbBadge.classList.add('offline');
+    dbText.textContent = '💾 Offline LocalStorage';
+    dbBadge.title = 'Đang lưu trữ cục bộ trên trình duyệt (Chạy server Node.js để kết nối MongoDB)';
+  }
+  return false;
+}
+
+// Auto migrate LocalStorage to MongoDB
+async function autoMigrateLocalStorage() {
+  if (!isMongoConnected) return;
+  const migratedFlag = localStorage.getItem('notebuilder_migrated_to_mongo');
+  const saved = localStorage.getItem('notebuilder_notes');
+
+  if (saved && !migratedFlag) {
+    try {
+      const localNotes = JSON.parse(saved);
+      // Chỉ migrate ghi chú thực tế của người dùng
+      const userCustomNotes = localNotes.filter(n => n.id && !n.id.startsWith('seed-'));
+      if (userCustomNotes.length > 0) {
+        console.log(`Đang tự động di chuyển ${userCustomNotes.length} ghi chú lên MongoDB...`);
+        const res = await fetch(`${API_BASE_URL}/api/notes/migrate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ notes: userCustomNotes })
+        });
+        if (res.ok) {
+          localStorage.setItem('notebuilder_migrated_to_mongo', 'true');
+          showToast(`Đã đồng bộ ${userCustomNotes.length} ghi chú lên MongoDB thành công! 🍃`);
+        }
+      } else {
+        localStorage.setItem('notebuilder_migrated_to_mongo', 'true');
+      }
+    } catch (e) {
+      console.error('Lỗi khi migrate LocalStorage:', e);
+    }
+  }
+}
+
+// Load notes from MongoDB (with fallback to localStorage)
+async function loadNotes() {
+  if (isMongoConnected) {
+    try {
+      const url = currentFilter !== 'all' 
+        ? `${API_BASE_URL}/api/notes?template=${currentFilter}`
+        : `${API_BASE_URL}/api/notes`;
+      const res = await fetch(url);
+      if (res.ok) {
+        notes = await res.json();
+        updateGamification();
+        renderNotes();
+        return;
+      }
+    } catch (e) {
+      console.error('Lỗi tải từ MongoDB, chuyển sang LocalStorage:', e);
+    }
+  }
+
+  // Fallback to localStorage
   const saved = localStorage.getItem('notebuilder_notes');
   if (saved) {
     try {
@@ -130,6 +215,8 @@ function loadNotes() {
     notes = [...DEFAULT_SAMPLE_NOTES];
     saveNotesToStorage();
   }
+  updateGamification();
+  renderNotes();
 }
 
 function saveNotesToStorage() {
@@ -602,7 +689,7 @@ function closeModal() {
 }
 
 // Save or Update Note
-function saveNoteFromForm() {
+async function saveNoteFromForm() {
   const title = document.getElementById('noteTitleInput').value.trim();
   const category = document.getElementById('noteCategoryInput').value.trim() || 'Tri Thức';
   const content = document.getElementById('noteContentInput').value.trim();
@@ -615,7 +702,6 @@ function saveNoteFromForm() {
   }
 
   const tags = rawTags ? rawTags.split(',').map(t => t.trim().replace(/^#/, '')).filter(Boolean) : [];
-
   const today = new Date();
   const dateFormatted = `${today.getDate().toString().padStart(2, '0')}/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`;
 
@@ -631,34 +717,66 @@ function saveNoteFromForm() {
     canvasJSON = JSON.stringify(fabricCanvas.toJSON());
   }
 
+  const notePayload = {
+    title,
+    category,
+    content,
+    tags,
+    template: selectedTemplate,
+    canvasImage: canvasThumbnail,
+    canvasJSON: canvasJSON,
+    createdAt: dateFormatted
+  };
+
+  // Lưu vào MongoDB nếu đang kết nối
+  if (isMongoConnected) {
+    try {
+      if (editingNoteId) {
+        const res = await fetch(`${API_BASE_URL}/api/notes/${editingNoteId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(notePayload)
+        });
+        if (res.ok) {
+          showToast('Đã lưu bài học vào MongoDB! 🍃');
+          await loadNotes();
+          closeModal();
+          return;
+        }
+      } else {
+        const res = await fetch(`${API_BASE_URL}/api/notes`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(notePayload)
+        });
+        if (res.ok) {
+          showToast('Đã lưu ghi chú mới vào MongoDB! (+50 XP) 🌟');
+          await loadNotes();
+          closeModal();
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('Lỗi kết nối MongoDB khi lưu, chuyển sang lưu máy cục bộ:', e);
+    }
+  }
+
+  // Fallback LocalStorage
   if (editingNoteId) {
-    // Update existing
     const index = notes.findIndex(n => n.id === editingNoteId);
     if (index !== -1) {
       notes[index] = {
         ...notes[index],
-        title,
-        category,
-        content,
-        tags,
-        template: selectedTemplate,
+        ...notePayload,
         canvasImage: canvasThumbnail || notes[index].canvasImage,
         canvasJSON: canvasJSON || notes[index].canvasJSON
       };
-      showToast('Đã lưu bài học vào kho!');
+      showToast('Đã lưu bài học vào máy cục bộ!');
     }
   } else {
-    // Create new
     const newNote = {
       id: 'note_' + Date.now(),
-      title,
-      category,
-      content,
-      tags,
-      template: selectedTemplate,
-      createdAt: dateFormatted,
-      canvasImage: canvasThumbnail,
-      canvasJSON: canvasJSON
+      ...notePayload
     };
     notes.unshift(newNote);
     showToast('Đã lưu ghi chú mới! Bạn nhận được +50 XP Tri Thức 🌟');
@@ -671,19 +789,46 @@ function saveNoteFromForm() {
 }
 
 // Global functions for inline HTML buttons
-window.openEditModal = function(id) {
-  const note = notes.find(n => n.id === id);
+window.openEditModal = async function(id) {
+  let note = notes.find(n => n.id === id);
+  // Nếu có MongoDB, fetch chi tiết để lấy canvasJSON mới nhất
+  if (isMongoConnected && id) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/notes/${id}`);
+      if (res.ok) {
+        note = await res.json();
+      }
+    } catch (e) {
+      console.warn('Không lấy được chi tiết từ DB, sử dụng dữ liệu cục bộ:', e);
+    }
+  }
   if (note) openModal(note);
 };
 
-window.deleteNote = function(id) {
-  if (confirm('Bạn có chắc chắn muốn xóa ghi chú này?')) {
-    notes = notes.filter(n => n.id !== id);
-    saveNotesToStorage();
-    updateGamification();
-    renderNotes();
-    showToast('Đã xóa ghi chú.');
+window.deleteNote = async function(id) {
+  if (!confirm('Bạn có chắc chắn muốn xóa ghi chú này?')) return;
+
+  if (isMongoConnected) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/notes/${id}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        showToast('Đã xóa ghi chú khỏi MongoDB 🍃');
+        await loadNotes();
+        return;
+      }
+    } catch (e) {
+      console.warn('Lỗi kết nối MongoDB khi xóa, xóa cục bộ:', e);
+    }
   }
+
+  // Fallback LocalStorage
+  notes = notes.filter(n => n.id !== id);
+  saveNotesToStorage();
+  updateGamification();
+  renderNotes();
+  showToast('Đã xóa ghi chú.');
 };
 
 // Toast notification

@@ -9,32 +9,57 @@ Dự án website ghi chú kiến thức cho học sinh, kết nối với thế 
 ## 📁 Cấu Trúc Dự Án
 
 ```
-F:\WEB2\notebuilder-web\
-├── index.html                  # Landing Page (Nền đen, NOTEBUILDER vàng, element laptop tri thức)
-├── notes.html                  # Kho Ghi Chú Kiến Thức (Lưu trữ, lọc, tìm kiếm, nâng cấp Level)
-├── assets/                     # Thư mục hình ảnh & template mẫu
-│   ├── element_background.png  # Hình gốc element laptop tri thức
-│   ├── element_hero_trans.png  # Phiên bản tách nền trong suốt tối ưu cho Landing Page
-│   ├── note1.png               # Mẫu 1: Cuộn giấy cổ phong
-│   ├── note2.png               # Mẫu 2: Giấy note dán băng dính (Tape)
-│   ├── note3.png               # Mẫu 3: Giấy note ghim đính tường (Pin)
-│   ├── note4.png               # Mẫu 4: Bản thảo cổ nhăn
-│   └── template_web.png        # Ảnh template web mẫu đối chiếu
-├── css/
-│   ├── style.css               # Phong cách chung & Landing Page (Dark hero, Yellow accents)
-│   └── notes.css               # Phong cách bảng ghim ghi chú, thẻ bài & dashboard
-└── js/
-    ├── main.js                 # Hiệu ứng cuộn, menu và thống kê nhanh
-    └── notes.js                # Quản lý ghi chú (CRUD), LocalStorage, Level XP & Godot Bridge
+E:\NOTEBUILDER\
+├── notegame-web/               # Giao diện Frontend Web
+│   ├── index.html              # Landing Page (Nền đen, NOTEBUILDER vàng, element laptop tri thức)
+│   ├── notes.html              # Kho Ghi Chú Kiến Thức (Lưu trữ, lọc, tìm kiếm, nâng cấp Level)
+│   ├── assets/                 # Thư mục hình ảnh, 4 mẫu giấy note & template mẫu
+│   ├── css/
+│   │   ├── style.css           # Phong cách chung & Landing Page (Dark hero, Yellow accents)
+│   │   └── notes.css           # Phong cách bảng ghim ghi chú, thẻ bài & dashboard
+│   └── js/
+│       ├── fabric.min.js       # Thư viện Canvas Studio vẽ tự do
+│       ├── main.js             # Hiệu ứng cuộn, menu và thống kê nhanh
+│       └── notes.js            # Quản lý ghi chú (CRUD), API MongoDB, Fallback LocalStorage, Level XP & Godot Bridge
+│
+├── server/                     # BACKEND API MONGODB (Node.js + Express + Mongoose)
+│   ├── index.js                # Server REST API & Static File Server
+│   ├── seed.js                 # Script nạp dữ liệu mẫu ban đầu vào MongoDB
+│   ├── models/Note.js          # Mongoose Schema quản lý Ghi chú & Canvas Fabric.js
+│   ├── .env                    # Cấu hình PORT=5050 & MONGODB_URI
+│   └── package.json            # Dependencies: express, mongoose, cors, dotenv
 ```
 
 ---
 
-## 🚀 Cách Mở Website
+## 🚀 Cách Khởi Chạy Website Với MongoDB
 
-Bạn có thể mở trực tiếp bằng bất kỳ trình duyệt nào:
-- Cách 1: Click đúp vào file `F:\WEB2\notebuilder-web\index.html` để vào **Landing Page**.
-- Cách 2: Click vào nút **"Kho Ghi Chú"** trên thanh menu hoặc nút **"Mở Kho Ghi Chú"** để chuyển sang trang lưu trữ note (`notes.html`).
+### Cách 1: Chạy Fullstack Với MongoDB (Khuyên Dùng)
+1. Đảm bảo dịch vụ MongoDB trên máy của bạn đang chạy (cổng mặc định `27017`).
+2. Mở terminal và khởi động backend server:
+   ```powershell
+   cd e:\NOTEBUILDER\server
+   npm start
+   ```
+3. Mở trình duyệt truy cập:
+   - **Trang chủ:** `http://localhost:5050`
+   - **Kho ghi chú:** `http://localhost:5050/notes.html`
+   - **Kiểm tra trạng thái DB:** `http://localhost:5050/api/health`
+
+### Cách 2: Chạy Tĩnh Offline (Fallback)
+Nếu server Node.js chưa bật, website vẫn hoạt động bình thường bằng cách mở trực tiếp file `notegame-web/index.html` hoặc `notegame-web/notes.html`. Hệ thống sẽ tự động chuyển sang chế độ **Offline LocalStorage** và khi bật lại server, dữ liệu sẽ được tự động đồng bộ lên MongoDB!
+
+---
+
+## 🍃 Các API MongoDB Sẵn Sàng Kết Nối
+- `GET /api/health`: Kiểm tra trạng thái kết nối MongoDB.
+- `GET /api/notes`: Lấy danh sách ghi chú (hỗ trợ `?template=1` và `?search=...`).
+- `GET /api/notes/:id`: Lấy chi tiết 1 ghi chú (kèm dữ liệu vector `canvasJSON` để vẽ tiếp).
+- `POST /api/notes`: Tạo ghi chú mới (+50 XP).
+- `PUT /api/notes/:id`: Cập nhật ghi chú và nét vẽ canvas.
+- `DELETE /api/notes/:id`: Xóa ghi chú.
+- `POST /api/notes/migrate`: Đồng bộ dữ liệu từ `localStorage` lên MongoDB.
+- `GET /api/godot/export`: Xuất dữ liệu đồng bộ cho game engine Godot.
 
 ---
 

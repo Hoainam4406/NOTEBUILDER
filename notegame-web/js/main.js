@@ -42,10 +42,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 4. Quick stats loader from localStorage
-  const savedNotes = JSON.parse(localStorage.getItem('notebuilder_notes') || '[]');
+  // 4. Quick stats loader from MongoDB or localStorage
   const statNotesCount = document.getElementById('stat-total-notes');
-  if (statNotesCount) {
-    statNotesCount.textContent = savedNotes.length > 0 ? savedNotes.length : '12+';
-  }
+  const API_BASE_URL = (window.location.protocol.startsWith('http') && window.location.port === '5050') 
+    ? '' 
+    : 'http://localhost:5050';
+
+  fetch(`${API_BASE_URL}/api/health`)
+    .then(res => res.json())
+    .then(data => {
+      if (statNotesCount && data.totalNotes !== undefined) {
+        statNotesCount.textContent = `${data.totalNotes}+`;
+      }
+    })
+    .catch(() => {
+      const savedNotes = JSON.parse(localStorage.getItem('notebuilder_notes') || '[]');
+      if (statNotesCount) {
+        statNotesCount.textContent = savedNotes.length > 0 ? `${savedNotes.length}+` : '4+';
+      }
+    });
 });
