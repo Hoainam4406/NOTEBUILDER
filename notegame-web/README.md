@@ -34,17 +34,14 @@ E:\NOTEBUILDER\
 
 ## 🚀 Cách Khởi Chạy Website Với MongoDB
 
-### Cách 1: Chạy Fullstack Với MongoDB (Khuyên Dùng)
+### Cách 1: Chạy Server + Tự Động Bật Website (Khuyên Dùng)
 1. Đảm bảo dịch vụ MongoDB trên máy của bạn đang chạy (cổng mặc định `27017`).
-2. Mở terminal và khởi động backend server:
+2. Mở terminal tại thư mục dự án (hoặc trong thư mục `server`) và gõ:
    ```powershell
-   cd e:\NOTEBUILDER\server
-   npm start
+   # Bạn có thể gõ ngay tại E:\NOTEBUILDER\ hoặc trong E:\NOTEBUILDER\server\
+   npm run dev
    ```
-3. Mở trình duyệt truy cập:
-   - **Trang chủ:** `http://localhost:5050`
-   - **Kho ghi chú:** `http://localhost:5050/notes.html`
-   - **Kiểm tra trạng thái DB:** `http://localhost:5050/api/health`
+   * **Tính năng:** Lệnh này sẽ khởi động Server với tính năng tự động reload (`--watch`), kết nối MongoDB, đồng thời **tự động mở trình duyệt web hiển thị trang chủ ngay lập tức**!
 
 ### Cách 2: Chạy Tĩnh Offline (Fallback)
 Nếu server Node.js chưa bật, website vẫn hoạt động bình thường bằng cách mở trực tiếp file `notegame-web/index.html` hoặc `notegame-web/notes.html`. Hệ thống sẽ tự động chuyển sang chế độ **Offline LocalStorage** và khi bật lại server, dữ liệu sẽ được tự động đồng bộ lên MongoDB!

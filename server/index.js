@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
+const { exec } = require('child_process');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const Note = require('./models/Note');
@@ -206,6 +207,16 @@ app.get('/api/godot/export', async (req, res) => {
   }
 });
 
+// Hàm mở trình duyệt tự động
+function openBrowser(url) {
+  const startCmd = process.platform === 'win32'
+    ? `start "" "${url}"`
+    : (process.platform === 'darwin' ? `open "${url}"` : `xdg-open "${url}"`);
+  exec(startCmd, (err) => {
+    if (err) console.log(`ℹ️ Bạn có thể truy cập website tại: ${url}`);
+  });
+}
+
 // 3. Khởi động kết nối MongoDB và Server
 async function startServer() {
   try {
@@ -227,6 +238,12 @@ async function startServer() {
       console.log(`👉 http://localhost:${PORT}/notes.html`);
       console.log(`👉 API Health: http://localhost:${PORT}/api/health`);
       console.log(`===============================================`);
+
+      if (process.argv.includes('--open') || process.env.AUTO_OPEN === 'true') {
+        const url = `http://localhost:${PORT}`;
+        console.log(`🌐 Đang tự động mở website trên trình duyệt: ${url}`);
+        openBrowser(url);
+      }
     });
   } catch (error) {
     console.error('❌ Không thể kết nối MongoDB:', error.message);
