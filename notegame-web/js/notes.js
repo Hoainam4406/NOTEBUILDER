@@ -4,7 +4,7 @@
  */
 
 // API & Backend Configuration
-const API_BASE_URL = (window.location.protocol.startsWith('http') && window.location.port === '5050') 
+const API_BASE_URL = window.location.protocol.startsWith('http')
   ? '' 
   : 'http://localhost:5050';
 
@@ -198,8 +198,11 @@ async function loadNotes() {
         renderNotes();
         return;
       }
+      throw new Error('Không thể tải danh sách từ server');
     } catch (e) {
-      console.error('Lỗi tải từ MongoDB, chuyển sang LocalStorage:', e);
+      console.error('Lỗi tải danh sách từ server:', e);
+      showToast('Không thể tải ghi chú từ server. Dữ liệu đang hiển thị được giữ nguyên; hãy thử lại.');
+      return;
     }
   }
 
@@ -743,6 +746,7 @@ async function saveNoteFromForm() {
           closeModal();
           return;
         }
+        throw new Error('Server từ chối cập nhật');
       } else {
         const res = await fetch(`${API_BASE_URL}/api/notes`, {
           method: 'POST',
@@ -750,14 +754,17 @@ async function saveNoteFromForm() {
           body: JSON.stringify(notePayload)
         });
         if (res.ok) {
-          showToast('Đã lưu ghi chú mới vào MongoDB! (+50 XP) 🌟');
+          showToast('Đã lưu ghi chú mới vào MongoDB! 🍃');
           await loadNotes();
           closeModal();
           return;
         }
+        throw new Error('Server từ chối tạo ghi chú');
       }
     } catch (e) {
-      console.warn('Lỗi kết nối MongoDB khi lưu, chuyển sang lưu máy cục bộ:', e);
+      console.warn('Không thể xác nhận lưu trên server:', e);
+      showToast('Chưa xác nhận lưu trên server. Nội dung vẫn còn trong trình soạn thảo; hãy thử lại.');
+      return;
     }
   }
 
@@ -818,8 +825,11 @@ window.deleteNote = async function(id) {
         await loadNotes();
         return;
       }
+      throw new Error('Server từ chối xóa ghi chú');
     } catch (e) {
-      console.warn('Lỗi kết nối MongoDB khi xóa, xóa cục bộ:', e);
+      console.warn('Không thể xác nhận xóa trên server:', e);
+      showToast('Chưa xác nhận xóa trên server. Danh sách được giữ nguyên; hãy thử lại.');
+      return;
     }
   }
 

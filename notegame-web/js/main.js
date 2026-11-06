@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 4. Quick stats loader from MongoDB or localStorage
   const statNotesCount = document.getElementById('stat-total-notes');
-  const API_BASE_URL = (window.location.protocol.startsWith('http') && window.location.port === '5050') 
+  const API_BASE_URL = window.location.protocol.startsWith('http')
     ? '' 
     : 'http://localhost:5050';
 
