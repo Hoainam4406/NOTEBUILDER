@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const { fork } = require('node:child_process');
 const { once } = require('node:events');
 const path = require('node:path');
+const { randomUUID } = require('node:crypto');
 const mongoose = require('mongoose');
 const { createApp } = require('../../app');
 const User = require('../../models/User');
@@ -41,7 +42,7 @@ after(async () => {
 const password = 'secure student password 123';
 async function request(url, method = 'GET', body, login, origin = base) {
   const response = await fetch(origin + url, { method,
-    headers: { 'Content-Type': 'application/json', ...(login ? { Cookie: login.cookie, 'X-CSRF-Token': login.csrfToken } : {}) },
+    headers: { 'Content-Type': 'application/json', 'Idempotency-Key': randomUUID(), ...(login ? { Cookie: login.cookie, 'X-CSRF-Token': login.csrfToken } : {}) },
     body: body === undefined ? undefined : JSON.stringify(body) });
   return { status: response.status, headers: response.headers, body: response.status === 204 ? null : await response.json() };
 }

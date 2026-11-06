@@ -1,6 +1,11 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { contentClaim, awardDecision, threshold, progressFor, rewardsFor } = require('../progression-policy');
+const { ensureProgressionDatabase } = require('../progression');
+test('startup refuses standalone MongoDB before enabling progression writes', async () => {
+  const connection = { db: { admin: () => ({ command: async () => ({ isWritablePrimary: true }) }) } };
+  await assert.rejects(ensureProgressionDatabase(connection), error => error.status === 503 && error.code === 'TRANSACTIONS_REQUIRED');
+});
 test('XP eligibility uses normalized Unicode code points, not UTF-16 or whitespace padding', () => {
   assert.equal(contentClaim(' '.repeat(200)).eligible, false);
   assert.equal(contentClaim('x'.repeat(79)).eligible, false);

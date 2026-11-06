@@ -3,13 +3,14 @@ const path = require('node:path');
 const { execFile } = require('node:child_process');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 const { createApp } = require('./app');
+const { ensureProgressionDatabase } = require('./progression');
 
 async function startServer() {
   const port = Number(process.env.PORT || 5000);
   if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('PORT không hợp lệ');
   await mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/notebuilder_db');
   // Unique auth indexes must exist before accepting concurrent registrations/login.
-  await Promise.all(['User', 'Session', 'AuthAttempt'].map(name => mongoose.model(name).init()));
+  await ensureProgressionDatabase();
   const server = createApp().listen(port, () => {
     const url = `http://localhost:${port}`;
     console.log(`NOTEBUILDER: ${url}`);
@@ -22,6 +23,9 @@ async function startServer() {
   return server;
 }
 if (require.main === module) {
-  startServer().catch(() => { console.error('Không thể khởi động server; kiểm tra cấu hình và MongoDB.'); process.exitCode = 1; });
+  startServer().catch(async error => {
+    console.error(error.code === 'TRANSACTIONS_REQUIRED' ? error.message : 'Không thể khởi động server; kiểm tra cấu hình và MongoDB.');
+    await mongoose.disconnect(); process.exitCode = 1;
+  });
 }
 module.exports = { startServer };

@@ -63,6 +63,7 @@ let notes = [];
 let currentFilter = 'all';
 let editingNoteId = null;
 let editingRevision = null;
+let pendingCreate = null;
 const noteFetch = (...args) => window.KnowledgeAuth ? window.KnowledgeAuth.fetch(...args) : fetch(...args);
 
 // Paper Template Images
@@ -617,6 +618,7 @@ function renderNotes() {
 function openModal(noteToEdit = null) {
   editingNoteId = noteToEdit ? noteToEdit.id : null;
   editingRevision = noteToEdit?.revision ?? null;
+  pendingCreate = null;
   const modalTitle = document.getElementById('modalTitle');
   noteModal?.classList.add('active');
 
@@ -677,6 +679,7 @@ function closeModal() {
   noteModal?.classList.remove('active');
   editingNoteId = null;
   editingRevision = null;
+  pendingCreate = null;
 }
 
 // Save or Update Note
@@ -740,12 +743,24 @@ async function saveNoteFromForm() {
         }
         throw new Error('Server từ chối cập nhật');
       } else {
+        // Freeze the first payload/key until a possibly committed request is confirmed.
+        if (!pendingCreate) pendingCreate = { key: window.crypto.randomUUID(), payload: notePayload };
+        const draftChanged = JSON.stringify(pendingCreate.payload) !== JSON.stringify(notePayload);
         const res = await noteFetch(`${API_BASE_URL}/api/notes`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(notePayload)
+          headers: { 'Content-Type': 'application/json', 'Idempotency-Key': pendingCreate.key },
+          body: JSON.stringify(pendingCreate.payload)
         });
         if (res.ok) {
+          const saved = await res.json();
+          pendingCreate = null;
+          if (draftChanged) {
+            editingNoteId = saved.id;
+            editingRevision = saved.revision;
+            await loadNotes();
+            showToast('Đã xác nhận lần lưu trước. Bản nháp mới vẫn mở; nhấn Lưu để cập nhật nội dung mới.');
+            return;
+          }
           showToast('Đã lưu ghi chú mới vào MongoDB! 🍃');
           await loadNotes();
           closeModal();

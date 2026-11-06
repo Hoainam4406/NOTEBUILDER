@@ -10,7 +10,7 @@ npm run test:integration
 git diff --check
 ```
 
-`npm test`: 50 tests HTTP/model giả và VM frontend, nhanh và không cần mongod.
+`npm test`: HTTP/model giả, policy XP và VM frontend, nhanh và không cần mongod.
 `test:integration`: MongoDB **8.2.6** thật, replica set một node WiredTiger,
 được quản lý bởi dev dependency `mongodb-memory-server-core` 11.3.0.
 Lần đầu cần tải binary từ MongoDB; cache trong `server/node_modules/.cache`,
@@ -39,3 +39,12 @@ CI Linux chạy cả hai suite; kết quả local không thay thế kết quả 
 API fixture là tiến trình test riêng, không dùng startup/seed của ứng dụng.
 Tham khảo API replica-set của thư viện:
 [MongoMemoryReplSet](https://typegoose.github.io/mongodb-memory-server/docs/api/classes/mongo-memory-replset/).
+
+## X01b evidence
+
+Thêm 9 case real-DB cho XP-01..05/RWD-01..02: 12 retries cùng key qua hai tiến
+trình, payload conflict, retry note đã xóa, duplicate fingerprint, daily cap và
+rollover UTC, toàn bộ milestone còn thiếu, fault sau ledger/inventory, edit/delete
+giữ XP và owner isolation. Tổng 16 integration tests đạt. Fixture multi-level seed
+530 XP rồi nhận 20 XP để kiểm tra phục hồi đủ mốc tới level 5; public API không
+cho gửi số XP tùy ý. Chưa mô phỏng network partition hoặc primary failover.

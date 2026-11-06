@@ -27,11 +27,23 @@
 
 ## X01a — progression policy v1
 
+- Commit `5ed7cf0`, đã push websiteWorkandTest.
+
 - `PROGRESSION_SPEC.md` chốt eligibility, chống trùng, UTC cap, idempotent create,
   schema ledger, level/rewards và transaction boundaries trước triển khai.
 - 55/55 tests unit/HTTP/VM đạt; 7/7 integration N02 đã đạt.
 - 4 reward catalog IDs đối chiếu catalog Godot; chưa mở placement server.
 - Tiếp theo X01b transaction và real-DB tests; X01c UI dùng server progress.
+
+## X01b — atomic note / XP / rewards
+
+- Note create có idempotency key, XP events/fingerprint, total XP, unlock và
+  inventory cùng MongoDB transaction; GET progress/rewards theo session.
+- Startup yêu cầu replica set/sharded MongoDB và tạo indexes trước khi listen.
+- UI retry giữ payload/key trong editor; bản nháp mới không bị mất khi xác nhận
+  request cũ. Legacy notes không tự backfill XP.
+- 58/58 regression tests và 16/16 integration tests đạt; syntax/diff checks đạt.
+- Tiếp theo X01c bỏ XP demo online, dùng progress backend cho UI và export.
 
 | Task | Commit | Kiểm tra local | Push |
 |---|---|---|---|

@@ -11,7 +11,7 @@ function client(fetchImpl, online = true) {
   const fields = { noteTitleInput: 'Test note', noteCategoryInput: 'Vật lý', noteContentInput: 'F = ma', noteTagsInput: '' };
   const context = vm.createContext({
     document: { getElementById: id => ({ value: fields[id] || '' }), querySelector: () => ({ value: '1' }), addEventListener(name, fn) { callbacks[name] = fn; } },
-    window: { location: { protocol: 'http:', port: '5000' } },
+    window: { location: { protocol: 'http:', port: '5000' }, crypto: { randomUUID: () => 'client-test-create-request' } },
     fetch: fetchImpl, console: { warn() {}, error() {} }, confirm: () => true,
     localStorage: { setItem() { effects.storageWrites++; }, getItem() { return null; } }, effects
   });
@@ -25,7 +25,7 @@ function client(fetchImpl, online = true) {
     renderNotes = () => effects.renders++;
     updateGamification = () => {};
   `, context);
-  return { context, effects, callbacks, run: code => vm.runInContext(code, context) };
+  return { context, effects, callbacks, fields, run: code => vm.runInContext(code, context) };
 }
 for (const [label, fetchImpl] of [
   ['HTTP 400', async () => ({ ok: false, status: 400 })],
@@ -50,7 +50,7 @@ for (const [label, fetchImpl] of [
 }
 test('online save uses same origin, confirms success and closes editor', async () => {
   let requested;
-  const c = client(async url => { requested = url; return { ok: true }; });
+  const c = client(async url => { requested = url; return { ok: true, json: async () => ({ id: 'created', revision: 0 }) }; });
   await c.run('saveNoteFromForm()');
   assert.equal(requested, '/api/notes');
   assert.equal(c.effects.closed, 1);
@@ -109,4 +109,29 @@ test('served startup with DB failure retains server mode without local fallback/
   await c.callbacks.DOMContentLoaded();
   assert.equal(c.run('isMongoConnected'), true);
   assert.equal(c.effects.reloads, 1); assert.equal(c.effects.storageWrites, 0);
+});
+test('uncertain create retries the identical payload/key without creating a second request', async () => {
+  const calls = [];
+  const c = client(async (url, options) => {
+    calls.push(options);
+    if (calls.length === 1) throw new Error('response lost after commit');
+    return { ok: true, json: async () => ({ id: 'confirmed', revision: 0 }) };
+  });
+  await c.run('saveNoteFromForm()'); await c.run('saveNoteFromForm()');
+  assert.equal(calls[0].headers['Idempotency-Key'], calls[1].headers['Idempotency-Key']);
+  assert.equal(calls[0].body, calls[1].body); assert.equal(c.effects.closed, 1);
+});
+test('draft changed after uncertain create remains open once the original save is confirmed', async () => {
+  const calls = [];
+  const c = client(async (url, options) => {
+    calls.push(options);
+    if (calls.length === 1) throw new Error('response lost');
+    return { ok: true, json: async () => ({ id: 'confirmed', revision: 0 }) };
+  });
+  await c.run('saveNoteFromForm()');
+  c.fields.noteTitleInput = 'New draft title';
+  await c.run('saveNoteFromForm()');
+  assert.equal(c.run('editingNoteId'), 'confirmed'); assert.equal(c.run('editingRevision'), 0);
+  assert.equal(calls[0].body, calls[1].body);
+  assert.equal(c.effects.closed, 0); assert.match(c.effects.messages.at(-1), /Bản nháp mới vẫn mở/);
 });

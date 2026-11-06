@@ -25,12 +25,13 @@ const SessionModel = { async findOne(query) {
 } };
 let server, base;
 before(async () => {
-  server = createApp({ NoteModel, dbReady: () => true, auth: createAuth({ UserModel, SessionModel }) }).listen(0, '127.0.0.1');
+  const progression = { async createNote(ownerId, input) { return { note: await new NoteModel({ ...input, ownerId, revision: 0 }).save(), replayed: false }; } };
+  server = createApp({ NoteModel, progression, dbReady: () => true, auth: createAuth({ UserModel, SessionModel }) }).listen(0, '127.0.0.1');
   await once(server, 'listening'); base = `http://127.0.0.1:${server.address().port}`;
 });
 after(() => new Promise(resolve => server.close(resolve)));
 async function request(path, method = 'GET', body, user = 'A', csrf = 'csrf') {
-  const response = await fetch(base + path, { method, headers: { 'Content-Type': 'application/json',
+  const response = await fetch(base + path, { method, headers: { 'Content-Type': 'application/json', 'Idempotency-Key': 'ownership-request-key',
     ...(user ? { Cookie: `kc_session=${user.toLowerCase().repeat(64)}`, 'X-CSRF-Token': csrf } : {}) },
   body: body === undefined ? undefined : JSON.stringify(body) });
   return { status: response.status, body: await response.json() };

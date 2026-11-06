@@ -27,13 +27,14 @@ class FakeNote {
 }
 before(async () => {
   const auth = { mount() {}, requireUser(req, res, next) { req.user = { _id: 'owner' }; next(); }, csrf(req, res, next) { next(); } };
-  server = createApp({ NoteModel: FakeNote, auth, dbReady: () => ready, logger: { error() {} } }).listen(0, '127.0.0.1');
+  const progression = { async createNote(ownerId, input) { return { note: await new FakeNote({ ...input, ownerId, revision: 0 }).save(), replayed: false }; } };
+  server = createApp({ NoteModel: FakeNote, auth, progression, dbReady: () => ready, logger: { error() {} } }).listen(0, '127.0.0.1');
   await once(server, 'listening');
   base = `http://127.0.0.1:${server.address().port}`;
 });
 after(async () => { await new Promise(resolve => server.close(resolve)); });
 async function request(path, method = 'GET', body) {
-  const response = await fetch(base + path, { method, headers: { 'Content-Type': 'application/json' },
+  const response = await fetch(base + path, { method, headers: { 'Content-Type': 'application/json', 'Idempotency-Key': 'api-test-request-key' },
     body: body === undefined ? undefined : JSON.stringify(body) });
   return { status: response.status, body: await response.json() };
 }

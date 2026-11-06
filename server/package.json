@@ -9,7 +9,7 @@
     "seed": "node seed.js",
     "test": "node --test test/*.test.js",
     "test:integration": "node --test --test-concurrency=1 test/integration/*.test.js",
-    "check": "node --check index.js && node --check app.js && node --check validation.js && node --check auth.js && node --check models/User.js && node --check models/Session.js && node --check models/AuthAttempt.js"
+    "check": "node scripts/check.js"
   },
   "keywords": [],
   "author": "",

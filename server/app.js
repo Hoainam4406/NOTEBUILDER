@@ -4,8 +4,9 @@ const mongoose = require('mongoose');
 const Note = require('./models/Note');
 const { InputError, noteInput, objectId, noteQuery } = require('./validation');
 const { createAuth } = require('./auth');
+const { createProgression, ProgressionError, idempotencyKey } = require('./progression');
 
-function createApp({ NoteModel = Note, auth = createAuth(), dbReady = () => mongoose.connection.readyState === 1, logger = console } = {}) {
+function createApp({ NoteModel = Note, auth = createAuth(), progression = createProgression(), dbReady = () => mongoose.connection.readyState === 1, logger = console } = {}) {
   const app = express();
   app.disable('x-powered-by');
   app.use(express.json({ limit: '25mb' }));
@@ -22,7 +23,9 @@ function createApp({ NoteModel = Note, auth = createAuth(), dbReady = () => mong
     next();
   });
   auth.mount(app);
-  app.use(['/api/notes', '/api/godot'], auth.requireUser, auth.csrf);
+  app.use(['/api/notes', '/api/godot', '/api/progress', '/api/rewards'], auth.requireUser, auth.csrf);
+  app.get('/api/progress', async (req, res) => res.json(await progression.getProgress(req.user._id)));
+  app.get('/api/rewards', async (req, res) => res.json(await progression.getRewards(req.user._id)));
   app.get('/api/notes', async (req, res) => {
     const notes = await NoteModel.find({ ...noteQuery(req.query), ownerId: req.user._id }).sort({ createdAt: -1 });
     res.json(notes.map(note => note.toJSON()));
@@ -36,8 +39,10 @@ function createApp({ NoteModel = Note, auth = createAuth(), dbReady = () => mong
     res.json(note.toJSON());
   });
   app.post('/api/notes', async (req, res) => {
-    const note = await new NoteModel({ ...noteInput(req.body), ownerId: req.user._id, revision: 0 }).save();
-    res.status(201).json(note.toJSON());
+    const input = noteInput(req.body);
+    const key = idempotencyKey(req.get('Idempotency-Key'));
+    const { note, replayed } = await progression.createNote(req.user._id, input, key);
+    res.status(replayed ? 200 : 201).json(note.toJSON());
   });
   app.route('/api/notes/:id').put(updateNote).patch(updateNote);
   async function updateNote(req, res) {
@@ -76,12 +81,12 @@ function createApp({ NoteModel = Note, auth = createAuth(), dbReady = () => mong
   app.use('/api', (req, res) => res.status(404).json({ error: 'API không tồn tại', code: 'NOT_FOUND' }));
   app.use((error, req, res, next) => {
     if (res.headersSent) return next(error);
-    const status = error instanceof InputError || error.type === 'entity.parse.failed' ? 400
+    const status = error instanceof ProgressionError ? error.status : error instanceof InputError || error.type === 'entity.parse.failed' ? 400
       : error.type === 'entity.too.large' ? 413 : 500;
     if (status === 500) logger.error('API request failed', { method: req.method, path: req.path, name: error.name });
-    res.status(status).json({ error: status === 500 ? 'Lỗi server khi xử lý yêu cầu'
+    res.status(status).json({ error: error instanceof ProgressionError ? error.message : status === 500 ? 'Lỗi server khi xử lý yêu cầu'
       : status === 413 ? 'Dữ liệu quá lớn' : error instanceof InputError ? error.message : 'JSON không hợp lệ',
-      code: status === 500 ? 'INTERNAL_ERROR' : status === 413 ? 'PAYLOAD_TOO_LARGE' : 'INVALID_INPUT' });
+      code: error instanceof ProgressionError ? error.code : status === 500 ? 'INTERNAL_ERROR' : status === 413 ? 'PAYLOAD_TOO_LARGE' : 'INVALID_INPUT' });
   });
   return app;
 }
