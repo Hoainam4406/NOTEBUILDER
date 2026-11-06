@@ -1,5 +1,15 @@
 # Checkpoints nền tảng
 
+## C01a / C01b — City backend
+
+- C01a: web `dd7feaf`, game main `0d1721a`, đều push thành công. Catalog 4 items,
+  polygon thực và axial→native offset được đối chiếu bằng Godot contract test;
+  audit placement 498 scenes đạt. Map/API decisions ở `CITY_SPEC.md`.
+- C01b: authenticated catalog/read/place; City + inventory debit + receipt cùng
+  transaction, revision CAS, replay không nhân công trình. 68/68 regression và
+  24/24 MongoDB integration tests đạt, syntax/diff đạt.
+- Tiếp theo C01c move/remove/refund/restart/corrupt layout; sau đó C02 Web export.
+
 ## Batch identity / notes (2026-11-06)
 
 - S01: `4cc4a07`, specification `AUTH_NOTES_SPEC.md`, baseline 31/31 tests;

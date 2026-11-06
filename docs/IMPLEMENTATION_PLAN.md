@@ -28,7 +28,7 @@ quyết định triển khai và công việc chưa hoàn thành.
 | A01 | Đăng ký/login/logout, session và profile | F02 | Code + HTTP tests đạt; cần gate MongoDB thật |
 | N01 | Owner isolation, note version, search, migration | A01 | Code + HTTP/VM tests đạt; legacy import tắt, note chung không tự gán |
 | X01 | XP ledger, level và rewards atomic | N01 | X01a/b/c code + unit/DB concurrency/rollback đạt; E2E browser còn chờ city |
-| C01 | City API, inventory và version | X01 | CITY-01..05; ownership/collision/rollback/save-load |
+| C01 | City API, inventory và version | X01 | C01a spec/native contract và C01b read/place đạt; C01c move/remove/save-load tiếp theo |
 | C02a | Godot Web export và trang game nhúng tương tác | Game main; có thể preview trước C01 | Browser tải game thật; camera/input/placement dùng được, lỗi tải rõ ràng |
 | C02b | Bridge tài khoản và lưu/tải city qua API | C01 + C02a | Server xác thực XP/ownership/placement; reload đúng city, không dùng debug unlock-all |
 | C02c | Browser E2E vòng lặp đầy đủ | C02b | E2E-01 account→note→XP→build→reload/login lại, không duplicate XP/reward |

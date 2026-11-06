@@ -5,8 +5,10 @@ const Note = require('./models/Note');
 const { InputError, noteInput, objectId, noteQuery } = require('./validation');
 const { createAuth } = require('./auth');
 const { createProgression, ProgressionError, idempotencyKey } = require('./progression');
+const { createCityService } = require('./city');
+const { CATALOG, CityError, mutationInput } = require('./city-rules');
 
-function createApp({ NoteModel = Note, auth = createAuth(), progression = createProgression(), dbReady = () => mongoose.connection.readyState === 1, logger = console } = {}) {
+function createApp({ NoteModel = Note, auth = createAuth(), progression = createProgression(), city = createCityService(), dbReady = () => mongoose.connection.readyState === 1, logger = console } = {}) {
   const app = express();
   app.disable('x-powered-by');
   app.use(express.json({ limit: '25mb' }));
@@ -23,7 +25,14 @@ function createApp({ NoteModel = Note, auth = createAuth(), progression = create
     next();
   });
   auth.mount(app);
-  app.use(['/api/notes', '/api/godot', '/api/progress', '/api/rewards'], auth.requireUser, auth.csrf);
+  app.use(['/api/notes', '/api/godot', '/api/progress', '/api/rewards', '/api/city'], auth.requireUser, auth.csrf);
+  app.get('/api/city/catalog', (req, res) => res.json(CATALOG));
+  app.get('/api/city', async (req, res) => res.json(await city.getCity(req.user._id)));
+  app.post('/api/city/buildings', async (req, res) => {
+    const input = mutationInput('place', req.body);
+    const result = await city.place(req.user._id, input, req.get('Idempotency-Key'));
+    res.status(result.replayed ? 200 : 201).json(result);
+  });
   app.get('/api/progress', async (req, res) => res.json(await progression.getProgress(req.user._id)));
   app.get('/api/rewards', async (req, res) => res.json(await progression.getRewards(req.user._id)));
   app.get('/api/notes', async (req, res) => {
@@ -79,12 +88,13 @@ function createApp({ NoteModel = Note, auth = createAuth(), progression = create
   app.use('/api', (req, res) => res.status(404).json({ error: 'API không tồn tại', code: 'NOT_FOUND' }));
   app.use((error, req, res, next) => {
     if (res.headersSent) return next(error);
-    const status = error instanceof ProgressionError ? error.status : error instanceof InputError || error.type === 'entity.parse.failed' ? 400
+    const domainError = error instanceof ProgressionError || error instanceof CityError;
+    const status = domainError ? error.status : error instanceof InputError || error.type === 'entity.parse.failed' ? 400
       : error.type === 'entity.too.large' ? 413 : 500;
     if (status === 500) logger.error('API request failed', { method: req.method, path: req.path, name: error.name });
-    res.status(status).json({ error: error instanceof ProgressionError ? error.message : status === 500 ? 'Lỗi server khi xử lý yêu cầu'
+    res.status(status).json({ error: domainError ? error.message : status === 500 ? 'Lỗi server khi xử lý yêu cầu'
       : status === 413 ? 'Dữ liệu quá lớn' : error instanceof InputError ? error.message : 'JSON không hợp lệ',
-      code: error instanceof ProgressionError ? error.code : status === 500 ? 'INTERNAL_ERROR' : status === 413 ? 'PAYLOAD_TOO_LARGE' : 'INVALID_INPUT' });
+      code: domainError ? error.code : status === 500 ? 'INTERNAL_ERROR' : status === 413 ? 'PAYLOAD_TOO_LARGE' : 'INVALID_INPUT' });
   });
   return app;
 }
