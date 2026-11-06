@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Tài khoản — Knowledge City</title>
+  <link rel="stylesheet" href="css/account.css">
+</head>
+<body>
+  <main>
+    <a href="index.html">← Knowledge City</a>
+    <h1>Tài khoản học tập</h1>
+    <p>Lưu ghi chú riêng và tiếp tục học trên các thiết bị của bạn.</p>
+    <p id="accountStatus" role="status" aria-live="polite"></p>
+    <section id="signedOut">
+      <form id="loginForm">
+        <h2>Đăng nhập</h2>
+        <label>Email<input name="email" type="email" autocomplete="username" maxlength="254" required></label>
+        <label>Mật khẩu<input name="password" type="password" autocomplete="current-password" minlength="12" maxlength="128" required></label>
+        <button>Đăng nhập</button>
+      </form>
+      <form id="registerForm">
+        <h2>Tạo tài khoản</h2>
+        <label>Tên hiển thị<input name="displayName" autocomplete="nickname" maxlength="80" required></label>
+        <label>Email<input name="email" type="email" autocomplete="username" maxlength="254" required></label>
+        <label>Mật khẩu (ít nhất 12 ký tự)<input name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required></label>
+        <button>Đăng ký</button>
+      </form>
+    </section>
+    <section id="signedIn" hidden>
+      <h2 id="welcome"></h2>
+      <a class="primary" href="notes.html">Mở ghi chú của tôi →</a>
+      <form id="profileForm">
+        <label>Tên hiển thị<input name="displayName" autocomplete="nickname" maxlength="80" required></label>
+        <button>Lưu hồ sơ</button>
+      </form>
+      <button id="logoutButton" type="button">Đăng xuất</button>
+    </section>
+  </main>
+  <script src="js/auth.js"></script>
+  <script src="js/account.js"></script>
+</body>
+</html>

@@ -8,7 +8,7 @@
     "dev": "node --watch index.js --open",
     "seed": "node seed.js",
     "test": "node --test test/*.test.js",
-    "check": "node --check index.js && node --check app.js && node --check validation.js"
+    "check": "node --check index.js && node --check app.js && node --check validation.js && node --check auth.js && node --check models/User.js && node --check models/Session.js && node --check models/AuthAttempt.js"
   },
   "keywords": [],
   "author": "",

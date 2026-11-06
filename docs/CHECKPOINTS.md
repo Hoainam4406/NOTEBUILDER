@@ -1,5 +1,14 @@
 # Checkpoints nền tảng
 
+## Batch identity / notes (2026-11-06)
+
+- S01: `4cc4a07`, specification `AUTH_NOTES_SPEC.md`, baseline 31/31 tests;
+  push websiteWorkandTest thành công.
+- A01: register/login/logout/me/profile và trang `account.html`; hash scrypt,
+  session MongoDB 7 ngày, CSRF, auth rate limits. 39/39 tests và syntax đạt.
+  HTTP tests dùng model giả, chưa kiểm thử unique index/TTL trên MongoDB thật.
+- Tiếp theo N01: owner isolation, revision CAS và tích hợp tài khoản vào notes.
+
 | Task | Commit | Kiểm tra local | Push |
 |---|---|---|---|
 | F01: kế hoạch, Git hygiene | f98e056 | diff check; env/dependencies giữ trên máy | Chưa xác nhận; CLI thiếu credential |

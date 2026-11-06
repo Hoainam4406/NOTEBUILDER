@@ -1,14 +1,13 @@
 const express = require('express');
-const cors = require('cors');
 const path = require('node:path');
 const mongoose = require('mongoose');
 const Note = require('./models/Note');
 const { InputError, noteInput, objectId, noteQuery } = require('./validation');
+const { createAuth } = require('./auth');
 
-function createApp({ NoteModel = Note, dbReady = () => mongoose.connection.readyState === 1, logger = console } = {}) {
+function createApp({ NoteModel = Note, auth = createAuth(), dbReady = () => mongoose.connection.readyState === 1, logger = console } = {}) {
   const app = express();
   app.disable('x-powered-by');
-  app.use(cors());
   app.use(express.json({ limit: '25mb' }));
   app.use(express.static(path.join(__dirname, '..', 'notegame-web')));
   app.get('/api/health', async (req, res) => {
@@ -18,9 +17,11 @@ function createApp({ NoteModel = Note, dbReady = () => mongoose.connection.ready
       database: connected ? 'MongoDB Connected' : 'Disconnected', totalNotes: count, timestamp: new Date().toISOString() });
   });
   app.use('/api', (req, res, next) => {
+    res.set('Cache-Control', 'no-store');
     if (!dbReady()) return res.status(503).json({ error: 'Cơ sở dữ liệu chưa sẵn sàng', code: 'DATABASE_UNAVAILABLE' });
     next();
   });
+  auth.mount(app);
   app.get('/api/notes', async (req, res) => {
     const notes = await NoteModel.find(noteQuery(req.query)).sort({ createdAt: -1 });
     res.json(notes.map(note => note.toJSON()));

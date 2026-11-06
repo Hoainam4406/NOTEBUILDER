@@ -8,6 +8,8 @@ async function startServer() {
   const port = Number(process.env.PORT || 5000);
   if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('PORT không hợp lệ');
   await mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/notebuilder_db');
+  // Unique auth indexes must exist before accepting concurrent registrations/login.
+  await Promise.all(['User', 'Session', 'AuthAttempt'].map(name => mongoose.model(name).init()));
   const server = createApp().listen(port, () => {
     const url = `http://localhost:${port}`;
     console.log(`NOTEBUILDER: ${url}`);
