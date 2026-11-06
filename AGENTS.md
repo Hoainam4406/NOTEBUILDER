@@ -26,7 +26,7 @@ MVP ưu tiên vòng lặp hoàn chỉnh, bảo vệ dữ liệu và khả năng 
 | Persistence | `server/models/`, `server/index.js` | Unique indexes và kiểm tra transaction trước khi listen |
 | Web UI | `notegame-web/js/notes.js`, `auth.js`, `account.js` | Online đọc XP từ server; lỗi lưu giữ bản nháp |
 | City API | `server/city.js`, `city-rules.js`, `models/City.js`, `CityMutation.js` | Layout/inventory/receipt atomic; revision CAS; catalog/map ở `server/data/` |
-| Godot | Companion `Scenes/Buildings/`, `Scenes/Knowledge/`, `World/` | Native catalog contract; C02 Web export/embed/bridge và browser E2E chưa hoàn thành |
+| Godot | Companion `Scenes/Buildings/`, `Scenes/Knowledge/`, `World/` | C02a Web preview đã có; authenticated bridge C02b và browser E2E C02c chưa làm |
 
 ## Quy tắc kỹ thuật
 
@@ -66,6 +66,8 @@ MVP ưu tiên vòng lặp hoàn chỉnh, bảo vệ dữ liệu và khả năng 
 Web checks: `npm run check`, `npm test`, `npm run test:integration`, `git diff --check`.
 Integration tự tạo mongod test riêng; không trỏ test phá dữ liệu vào DB ứng dụng.
 Godot checks và giới hạn verification xem `AI_HANDOFF.md` / `docs/TESTING.md`.
+Web preview build/host và pinned game source xem `docs/WEB_GAME.md`; không sửa
+project đang mở khi export, không commit WASM/PCK hoặc đổi pin chưa kiểm chứng.
 Không đánh đồng unit/local pass với CI remote, browser E2E, staging hoặc UAT.
 
 ## Handoff giữa agents

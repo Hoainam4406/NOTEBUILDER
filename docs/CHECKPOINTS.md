@@ -1,5 +1,16 @@
 # Checkpoints nền tảng
 
+## C02a — playable Web preview
+
+- Game `ddee89a` main đã push: Web preset/shell và local move M;
+  knowledge/catalog/move/placement 498 scenes/support regressions đạt.
+- Website có staging builder, pinned source, ignored artifacts/atomic publish và
+  checksums, readonly loopback server, `/game.html` và navigation home/notes.
+- Browser đã chạy WASM/WebGL thật: place/move/camera/zoom/delete, resize,
+  fullscreen/exit, missing-build/retry. 74 regression + 34 MongoDB tests đạt.
+- CI artifact đã cấu hình; remote pass chưa xác nhận. Chưa có account/city sync;
+  tiếp theo C02b/c. Specs: `WEB_GAME.md`, `CITY_SPEC.md`.
+
 ## C01a / C01b — City backend
 
 - C01a: web `dd7feaf`, game main `0d1721a`, đều push thành công. Catalog 4 items,

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Chơi thử thành phố — NOTEBUILDER</title>
+  <link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+  <header class="game-header">
+    <a class="brand" href="index.html">▱ NOTEBUILDER</a>
+    <nav aria-label="Điều hướng"><a href="index.html">Trang chủ</a><a href="notes.html">Kho ghi chú</a></nav>
+  </header>
+  <main>
+    <section class="intro">
+      <div><span class="eyebrow">KHÔNG GIAN SÁNG TẠO</span><h1>Xây một góc thành phố của bạn.</h1>
+        <p>Chọn công trình, đặt lên bản đồ và thử những cách sắp xếp mới.</p></div>
+      <span class="preview-badge">Bản chơi thử</span>
+    </section>
+    <p class="preview-note">Bạn đang xây thử tự do. Bố cục sẽ đặt lại khi tải trang; bản chơi thử chưa đồng bộ với ghi chú và tài khoản.</p>
+    <section class="game-panel" aria-label="Game xây thành phố">
+      <div class="toolbar">
+        <div><span class="live-dot" aria-hidden="true"></span><span id="gameStatus" role="status" aria-live="polite">Sẵn sàng khám phá</span></div>
+        <div class="actions"><button id="fullscreenButton" type="button" disabled>Toàn màn hình</button><button id="restartButton" type="button" disabled>Chơi lại</button></div>
+      </div>
+      <div id="gameStage" class="game-stage">
+        <button id="exitFullscreenButton" class="leave-fullscreen" type="button">Thoát toàn màn hình</button>
+        <div id="gameCover" class="game-cover">
+          <span class="city-mark" aria-hidden="true">▥ ▟ ▥</span>
+          <h2 id="coverTitle">Thành phố bắt đầu từ một ý tưởng.</h2>
+          <p id="coverMessage">Bấm bắt đầu, chọn công trình trong thanh bên dưới rồi đặt vào bản đồ.</p>
+          <progress id="gameProgress" max="100" hidden aria-label="Tiến trình tải game"></progress>
+          <button id="playButton" class="play-button" type="button">Bắt đầu xây <span aria-hidden="true">↗</span></button>
+        </div>
+      </div>
+    </section>
+    <section class="controls" aria-label="Hướng dẫn điều khiển">
+      <div><kbd>W A S D</kbd><span>Di chuyển camera</span></div>
+      <div><kbd>Con lăn</kbd><span>Thu phóng bản đồ</span></div>
+      <div><kbd>Chuột trái</kbd><span>Chọn và đặt công trình</span></div>
+      <div><kbd>M</kbd><span>Di chuyển công trình đã chọn</span></div>
+      <div><kbd>Esc</kbd><span>Hủy thao tác</span></div>
+      <div><kbd>Delete</kbd><span>Xóa công trình đã chọn</span></div>
+    </section>
+    <p class="footnote">Bấm vào vùng game trước khi dùng bàn phím. Hoạt động tốt nhất trên máy tính với chuột và trình duyệt hỗ trợ WebGL 2.</p>
+  </main>
+  <script src="js/game.js"></script>
+</body>
+</html>

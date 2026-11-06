@@ -1,8 +1,8 @@
 # NOTEBUILDER - Gamified Knowledge Hub & Godot Integration
 
 > Tài liệu UI prototype cũ; trạng thái triển khai lấy [README root](../README.md)
-> và [AI_HANDOFF.md](../AI_HANDOFF.md) làm chuẩn. Game Godot chưa được nhúng vào web;
-> phần Web export/embed và bridge thực nằm ở C02a/b/c trong implementation plan.
+> và [AI_HANDOFF.md](../AI_HANDOFF.md) làm chuẩn. Game đã có preview nhúng ở
+> [game.html](game.html); đồng bộ tài khoản/City API và E2E còn chờ C02b/c.
 
 Dự án website ghi chú kiến thức cho học sinh, kết nối với thế giới game Godot. 
 - **Ý tưởng:** Giúp học sinh ghi chép có hệ thống; mỗi mốc tri thức đạt được sẽ nhận điểm XP, nâng cấp cấp bậc và mở khóa asset / không gian game 3D/2D lộng lẫy hơn trong Godot.
@@ -87,7 +87,7 @@ Nếu server Node.js chưa bật, website vẫn hoạt động bình thường b
 3. **Cầu Nối Với Godot Engine (`window.GodotBridge`):**
    - `await window.GodotBridge.getKnowledgeData()` trả JSON từ API đã xác thực
      khi chạy online; `exportJSONFile()` cũng là async và phải xử lý lỗi.
-   - Đây mới là lớp xuất dữ liệu. Chưa có Web export/embed hay bridge GDScript
-     đã kiểm thử; không gọi trực tiếp Promise qua `JavaScriptBridge.eval` rồi
-     coi như dữ liệu đã đến game. C02 phải chốt cơ chế async và kiểm thử browser.
+   - JSON export là lớp riêng; `/game.html` đã chạy preview WASM/WebGL qua iframe.
+     Bridge GDScript với dữ liệu tài khoản chưa làm. Không gọi Promise qua
+     `JavaScriptBridge.eval` rồi coi như dữ liệu đã đến game; C02b chốt bridge async.
    - Nút **"Xuất Cho Godot"** trên trang note cho phép tải file JSON bất cứ lúc nào.

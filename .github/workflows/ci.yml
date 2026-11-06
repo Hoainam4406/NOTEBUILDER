@@ -21,3 +21,47 @@ jobs:
       - run: npm test
       - run: npm run test:integration
       - run: git diff --check
+  web-preview-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GODOT_BIN: /tmp/godot/Godot_v4.7.2-stable_linux.x86_64
+      GODOT_PROJECT_PATH: /tmp/knowledge-city-game
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.14.0'
+      - name: Get pinned companion game source
+        run: |
+          GAME_REPOSITORY=$(node -p "require('./server/game-source.json').repository")
+          GAME_COMMIT=$(node -p "require('./server/game-source.json').commit")
+          git init "$GODOT_PROJECT_PATH"
+          git -C "$GODOT_PROJECT_PATH" remote add origin "$GAME_REPOSITORY"
+          git -C "$GODOT_PROJECT_PATH" fetch --depth 1 origin "$GAME_COMMIT"
+          git -C "$GODOT_PROJECT_PATH" checkout -b main FETCH_HEAD
+      - name: Install pinned Godot
+        run: |
+          curl --fail --location --retry 3 -o /tmp/godot.zip https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          chmod +x "$GODOT_BIN"
+      - uses: actions/cache@v4
+        id: web-template
+        with:
+          path: ~/.local/share/godot/export_templates/4.7.2.stable
+          key: godot-4.7.2-web-nothreads-v1
+      - name: Install official Web template
+        if: steps.web-template.outputs.cache-hit != 'true'
+        run: |
+          curl --fail --location --retry 3 -o /tmp/templates.tpz https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_export_templates.tpz
+          mkdir -p "$HOME/.local/share/godot/export_templates/4.7.2.stable"
+          unzip -j -q /tmp/templates.tpz 'templates/web_nothreads_*.zip' -d "$HOME/.local/share/godot/export_templates/4.7.2.stable"
+      - run: npm run build:game
+      - name: Require committed game source
+        run: node -e "if (require('./notegame-web/game-build/build.json').sourceDirty) process.exit(1)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: knowledge-city-web-preview
+          path: notegame-web/
+          if-no-files-found: error
+          retention-days: 14

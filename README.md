@@ -3,10 +3,11 @@
 Website ghi chú HTML/JavaScript/Fabric với Express 5 và MongoDB; city renderer nằm
 ở repository `isometric_building_game` (Godot 4.7.2).
 
-**Game chưa chạy nhúng trong website.** Hiện có JSON export cho Godot; phần game
-chơi tương tác trên browser thuộc C02a (Web export/embed), rồi C02b (nối City API)
-và C02c (browser E2E). Chi tiết ở implementation plan; có thể làm preview C02a
-trước City API, còn bản đồng bộ tài khoản cần C01 hoàn thành.
+**Đã có Godot chơi thử nhúng tại `/game.html` (C02a).** Sau build, dùng
+`npm run preview:game` và mở `http://127.0.0.1:5050/game.html`. Bản này xây thử tự
+do, chưa lưu city vào tài khoản; C02b nối City API và C02c xác nhận browser E2E.
+Hướng dẫn export/host: [docs/WEB_GAME.md](docs/WEB_GAME.md). Artifacts không nằm
+trong Git; cần build local hoặc lấy artifact CI khi triển khai.
 
 Agent tiếp quản: đọc [AGENTS.md](AGENTS.md) và [AI_HANDOFF.md](AI_HANDOFF.md)
 trước khi làm việc. Snapshot trạng thái, Git và bước tiếp theo nằm trong handoff.
@@ -33,7 +34,7 @@ npm run test:integration
 git diff --check
 ```
 
-68 tests dùng HTTP thật trên cổng loopback ngẫu nhiên với model thay thế,
+74 tests dùng HTTP thật trên cổng loopback ngẫu nhiên với model thay thế,
 và VM chạy mã frontend để kiểm tra lỗi save/delete, revision và khởi động session.
 Tests kiểm tra auth/CSRF/owner isolation ở tầng HTTP nhưng không kết nối MongoDB
 thật. Thêm 34 integration tests chạy MongoDB 8.2.6 replica set cục bộ riêng để
@@ -69,8 +70,8 @@ GitHub Actions chạy syntax/tests trên Linux khi push feature branch hoặc m�
 - City backend C01: GET `/api/city/catalog`, GET `/api/city`, POST
   `/api/city/buildings`, PATCH/DELETE `/api/city/buildings/:id`; session/CSRF,
   ownership, polygon collision, revision CAS, idempotent debit/refund và save/load.
-  Xem `docs/CITY_SPEC.md`. Godot Web export/embed tiếp theo ở C02a.
-- **Chưa sẵn sàng production:** còn thiếu Web integration,
+  Xem `docs/CITY_SPEC.md`. Web preview đã có; sync tài khoản/city còn chờ C02b.
+- **Chưa sẵn sàng production:** còn thiếu authenticated Web integration,
   backup/restore, staging/UAT. Không triển khai công khai dữ liệu người dùng ở trạng thái này.
 
 Kế hoạch task, acceptance criteria và quyết định còn phải chốt:

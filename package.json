@@ -8,7 +8,9 @@
     "seed": "npm --prefix server run seed",
     "test": "npm --prefix server test",
     "test:integration": "npm --prefix server run test:integration",
-    "check": "npm --prefix server run check && node --check notegame-web/js/notes.js && node --check notegame-web/js/main.js && node --check notegame-web/js/auth.js && node --check notegame-web/js/account.js"
+    "build:game": "node server/scripts/build-game.js",
+    "preview:game": "node server/preview.js",
+    "check": "npm --prefix server run check && node --check notegame-web/js/notes.js && node --check notegame-web/js/main.js && node --check notegame-web/js/auth.js && node --check notegame-web/js/account.js && node --check notegame-web/js/game.js"
   },
   "keywords": [
     "notebuilder",

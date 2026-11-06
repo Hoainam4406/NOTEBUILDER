@@ -4,9 +4,9 @@ Cập nhật: 2026-11-06. Đọc cùng `AGENTS.md`; kiểm tra Git/source trư�
 
 ## Mục tiêu hiện tại / phạm vi session
 
-- C01 backend hoàn tất code và kiểm thử local: catalog/read/place/move/remove,
-  inventory, revision/receipt và persistence. Chưa có UI chơi game trên website.
-- Tiếp theo C02a Web export/embed, rồi C02b bridge dữ liệu và C02c browser E2E.
+- C02a đã có Web export thật và trang `/game.html` chơi thử tương tác; localhost
+  tại `http://127.0.0.1:5050/game.html` (`npm run preview:game`).
+- Tiếp theo C02b bridge auth/catalog/inventory/City API; C02c browser E2E sau đó.
 
 ## Quyết định đang có hiệu lực
 
@@ -28,6 +28,9 @@ Cập nhật: 2026-11-06. Đọc cùng `AGENTS.md`; kiểm tra Git/source trư�
 - `Inventory.quantity` là lượng chưa đặt. Place trừ 1; move không đổi; remove
   hoàn 1. City + inventory + receipt cùng transaction. Replay trả state hiện tại,
   không tự dựng lại công trình đã thu hồi. Tối đa 256 instances/city.
+- Web Preview là sandbox RAM, reset khi reload, chưa đồng bộ notes/account/city.
+  Single-thread WebGL2; build staging bỏ MCP/editor tooling trong bản copy, không
+  sửa project đang mở. Artifacts ignored; source pin ở `server/game-source.json`.
 
 ## Task state
 
@@ -42,7 +45,8 @@ Cập nhật: 2026-11-06. Đọc cùng `AGENTS.md`; kiểm tra Git/source trư�
 | C01a | `dd7feaf` web, `0d1721a` game: spec/rules/native contract đã push |
 | C01b | `abc7b8f`: read/catalog/place + transaction/CAS đã push |
 | C01c | Move/remove/refund/restart/corrupt layout; 68 regression + 34 DB tests đạt |
-| C02a | Chưa làm: Godot Web export + trang game nhúng tương tác trong website |
+| C02a game | `ddee89a` main đã push: Web preset/shell, move M, 5 native suites đạt |
+| C02a web | `/game.html`, builder, preview server, loader tests/CI artifact; browser chơi thật |
 | C02b | Chưa làm, sau C01+C02a: auth bridge, server entitlement, save/load city |
 | C02c | Chưa làm: browser E2E account → note → XP → build → reload/login lại |
 | L01/Q01/O01/AI01 | Chưa làm: review, quests/QOL, staging/backup/release, AI V2 |
@@ -56,6 +60,12 @@ không tự cấp server XP/inventory. Bản tích hợp dữ liệu đầy đ�
   `server/test/city-rules.test.js`; geometry và contract trước City API.
 - C01b/c: `server/city.js`, `models/City.js`, `models/CityMutation.js`, routes trong
   `app.js`, `server/test/integration/city.test.js`; CRUD placement/receipt/rollback.
+- C02a web: `game.html`, `css/game.css`, `js/game.js`, navigation home/notes;
+  `server/preview.js` (loopback, DB writes 503), `scripts/build-game.js` (staging/
+  pinned source/atomic publish), `server/game-source.json`, CI Web artifact job.
+  Tests mới `game-client.test.js`, `game-http.test.js`; spec `docs/WEB_GAME.md`.
+- C02a game: `export_presets.cfg`, `web/preview-shell.html`, local move trong
+  grid placement system, move regression/CI. Source game main đã commit.
 - Game: `tests/city_catalog_contract.gd`, `tests/fixtures/city-catalog.v1.json`,
   `.github/workflows/ci.yml`, `docs/KNOWLEDGE_CITY.md`; kiểm tra catalog/mapping.
   Hai bản catalog phải byte-identical; native source không bị đổi để khớp test.
@@ -74,7 +84,7 @@ không tự cấp server XP/inventory. Bản tích hợp dữ liệu đầy đ�
   ACL trước sửa lưu local tại `.godot/acl-before-admin-fix.json` (ignored).
   Admin non-elevated đã mở ghi metadata và atomic replace probe thành công;
   Godot `--headless --editor --import --quit` hoàn tất, log mới không có ERROR,
-  safe-save hoặc parent/popup errors. GUI tương tác chưa được kiểm chứng lại.
+  safe-save hoặc parent/popup errors. User đã xác nhận mọi thứ ổn trước C02a.
   Popup cũ nhiều khả năng là hệ quả báo lỗi lưu lặp; không sửa plugin/gameplay
   khi chưa có evidence lỗi độc lập. Cache/ACL là sửa local, không versioned.
 - Chẩn đoán parser error (2026-11-06): checkout game gốc thiếu
@@ -85,9 +95,9 @@ không tự cấp server XP/inventory. Bản tích hợp dữ liệu đầy đ�
   Godot vẫn báo lỗi đọc certificate store trong sandbox như các lần trước.
   Để chạy bản phát triển, import `.worktrees/knowledge-main/project.godot`.
   Chẩn đoán này không khôi phục/xóa các local changes trong checkout gốc.
-- Chưa có Godot Web export preset/artifacts, trang embed/canvas/iframe. City
-  API đã đủ read/place/move/remove. Game native debug unlock-all chưa phải
-  quyền sở hữu backend. Không báo game đã tích hợp chỉ vì có `GodotBridge`.
+- Web export/iframe đã chạy thật; preview bật native sandbox catalog/debug
+  unlock-all và local knowledge milestones, chưa phải server ownership/XP.
+  C02b phải dùng 4-item authenticated catalog và coordinate contract C01.
 - Landing page/README UI cũ có mô tả ý tưởng tương lai; lấy README root/spec làm
   chuẩn. Backend tests không xác nhận browser bridge hoạt động.
 - C01a: 68/68 regression tests; native Godot catalog contract đạt (4 footprints,
@@ -97,25 +107,33 @@ không tự cấp server XP/inventory. Bản tích hợp dữ liệu đầy đ�
   17 city cases gồm auth/CSRF/owner, revision races hai tiến trình, same-key retry,
   invalid move, remove/refund, fault injection, API restart, corrupt layout,
   concurrent note reward, cross-operation key conflict và capacity 256.
+- C02a: 74/74 regression và 34/34 MongoDB tests đạt, 5 native suites đạt.
+  Export release từ pin ddee89a sạch; 4 artifact checksums và MIME đúng. Browser
+  IAB Chromium đã thử select/place/Esc/M-move/camera/zoom/Delete; normal gameplay
+  không warn/error. Missing manifest có kiểm soát báo lỗi; restore + Retry chạy
+  được. Fullscreen/exit, canvas resize/focus đạt. Chưa test Safari/mobile.
+  Ảnh kiểm chứng local: `.artifacts/web-preview.png` (ignored).
 - Chưa xác nhận: CI remote, TTL worker xóa vật lý, failover/network partition,
-  browser E2E, web export/hosting, cross-device, staging/UAT, backup/restore.
+  browser E2E account→XP→persisted city, public hosting, cross-device, staging/UAT,
+  backup/restore. CI build mới cấu hình; chưa xác nhận remote Linux pass.
 
 ## Git / workspace
 
 - Web repo `E:/NOTEBUILDER`, branch `websiteWorkandTest`, origin
   `https://github.com/Hoainam4406/NOTEBUILDER.git`.
-- Baseline trước sửa quyền editor: `1cab981` (chẩn đoán parser), đã push;
-  C01c ở `8197b7e`. Checkpoint này chỉ cập nhật docs; ACL sửa local.
+- Baseline trước C02a: `4c6e839`, đã push; C01c ở `8197b7e`.
   Lấy hash checkpoint đang chứa snapshot bằng
   `git log -1 --oneline -- AGENTS.md AI_HANDOFF.md`. Không cần lịch sử chat.
-- Web checkout sạch khi bắt đầu C01; chỉ các file C01 nêu trên được sửa.
+- C02a chỉ commit source/docs/tests đã nêu; build và ảnh kiểm chứng ignored.
+  Checkpoint này được commit/push trên branch web; lấy hash và xác nhận remote
+  bằng các lệnh dưới đây, không coi snapshot tài liệu là bằng chứng push.
   Xác minh trạng thái hiện tại bằng `git status --short`; kiểm tra push bằng
   `git rev-parse HEAD` và `git ls-remote origin refs/heads/websiteWorkandTest`.
 - Game worktree làm việc: `E:/isometric_building_game/.worktrees/knowledge-main`,
-  branch `main`, HEAD `0d1721a`, origin `https://github.com/SubNhatSan/isometric_building_game.git`,
-  C01a contract + placement 498 scenes đạt; commit main đã push.
+  branch `main`, HEAD `ddee89a`, origin `https://github.com/SubNhatSan/isometric_building_game.git`,
+  C02a export + 5 suites đạt; main đã push và source pin đúng hash.
   Có untracked `tests/city_catalog_contract.gd.uid` do editor sinh, đã có trước
-  task safe-save; chưa đưa vào commit, giữ nguyên. Source game không bị sửa.
+  task safe-save; chưa đưa vào commit, giữ nguyên.
 - **Không sửa checkout game gốc để đổi branch:** `E:/isometric_building_game`
   đang ở `websiteWorkandTest` với user changes: README modified,
   `Scenes/Knowledge/knowledge_validation.gd` và `.uid` deleted. Phải giữ nguyên.
@@ -126,13 +144,13 @@ không tự cấp server XP/inventory. Bản tích hợp dữ liệu đầy đ�
 
 1. Đọc hai file root, kiểm tra Git/status/remote/diff ở cả repo cần sửa; đối chiếu
    specs và commit history nếu có khác biệt. Không chạy restore/reset để làm sạch.
-2. C02a: kiểm tra Godot Web export templates/version; chốt threaded/non-threaded
-   export và hosting headers/MIME bằng tài liệu/runtime hiện tại. Dùng game main
-   worktree, giữ nguyên checkout gốc có user changes. Không commit build artifacts.
-3. Tạo trang vào game từ website, export/serve thật, loading/error/retry,
-   resize/focus và kiểm chứng camera/selection/placement/input trên browser.
-4. C02b nối auth/catalog/inventory/city APIs đã có (CITY_SPEC), chuyển tọa độ đúng,
-   xác nhận mutation backend trước thay state, xử lý revision/retry/session expiry;
-   C02c chạy E2E học→XP→xây→reload/login lại.
+2. C02b: viết bridge spec async; messages cần đúng origin/source/schema, không
+   credential qua URL. Dùng session/CSRF cùng origin. Preview server cố ý chặn
+   API; auth E2E cần backend replica set, không dùng preview server để test login.
+3. Thêm authenticated game mode: render map v1/blocked cells, chỉ 4 reward items,
+   chuyển axial→offset đúng; load city/revision trước tương tác.
+4. Place/move/remove chỉ commit renderer sau backend success; retry giữ key/body,
+   conflict reload không mất draft; xử lý expiry. C02c chạy E2E đăng ký→note→XP→
+   xây→reload/login lại, hai tab và failure cases.
 5. Sau mỗi checkpoint cập nhật file này, báo hash/push/tests; kết thúc session
    ghi rõ việc còn dở và không đánh dấu production/E2E khi chưa kiểm chứng.

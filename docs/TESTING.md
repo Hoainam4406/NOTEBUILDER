@@ -74,4 +74,18 @@ CITY-01..05 backend, auth/CSRF/owner, invalid placement/move, same-key và revis
 races, idempotent refund, fault sau inventory/city/receipt, process restart,
 corrupt saved layouts, concurrent note rewards, giới hạn 256 buildings. Test full
 city và thêm owned copy dùng fixture DB có kiểm soát; không có public endpoint
-tự cấp inventory/XP. Browser/E2E/hosting vẫn cần C02 và chưa được xác nhận.
+tự cấp inventory/XP. Authenticated browser E2E/hosting vẫn cần C02b/c.
+
+## C02a evidence
+
+74 regression tests: thêm loader VM (origin/source/schema, stale iframe, network/
+missing build, timeout) và HTTP preview không DB/không ghi dữ liệu. Tổng 34 MongoDB
+integration vẫn đạt. Godot knowledge/catalog/move/placement/support đều đạt.
+
+Đã export release thật từ game pin `ddee89a`, kiểm tra 4 artifact SHA-256/MIME,
+sourceDirty=false. IAB Chromium đã click play, chọn/đặt/Esc/M-move, camera D, wheel
+zoom, Delete fixture; normal gameplay không warn/error. Resize và fullscreen/exit
+đạt. Missing build thử bằng manifest tạm đổi tên trên loopback cho lỗi rõ ràng;
+manifest khôi phục, Retry mở game thành công. Build artifacts/cache không commit.
+Đây là preview browser smoke; chưa chứng minh persisted account/city loop C02c,
+Safari/mobile, deploy công khai hoặc CI remote job mới đã pass.
