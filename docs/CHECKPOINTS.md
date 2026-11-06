@@ -14,6 +14,15 @@
   Chưa có MongoDB local sẵn sàng trong môi trường này; không gọi fake tests là
   DB integration hoặc xác nhận persistence cross-device.
 
+## N02 — MongoDB integration (2026-11-06)
+
+- Đã vượt qua gate DB trước đây: 7/7 tests dùng MongoDB 8.2.6 replica set thật,
+  hai tiến trình API; indexes, owner isolation, CAS, login counters, expiry/logout,
+  API restart và rollback transaction đạt. 50/50 tests cũ vẫn đạt.
+- CI chạy suite integration; binary/cache/data không track. Không dùng `.env`
+  hoặc database ứng dụng. Chi tiết: `TESTING.md`.
+- Tiếp theo: X01 specification -> ledger/rewards transaction -> UI server progress.
+
 | Task | Commit | Kiểm tra local | Push |
 |---|---|---|---|
 | F01: kế hoạch, Git hygiene | f98e056 | diff check; env/dependencies giữ trên máy | Chưa xác nhận; CLI thiếu credential |

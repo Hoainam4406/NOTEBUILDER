@@ -19,13 +19,16 @@ Khi mở file HTML trực tiếp, chế độ localStorage vẫn là prototype o
 ```text
 npm run check
 npm test
+npm run test:integration
 git diff --check
 ```
 
 50 tests dùng HTTP thật trên cổng loopback ngẫu nhiên với model thay thế,
 và VM chạy mã frontend để kiểm tra lỗi save/delete, revision và khởi động session.
 Tests kiểm tra auth/CSRF/owner isolation ở tầng HTTP nhưng không kết nối MongoDB
-thật và không chứng minh index/TTL/transaction hay persistence cross-device.
+thật. Thêm 7 integration tests chạy MongoDB 8.2.6 replica set cục bộ riêng để
+kiểm tra indexes, auth/owner/CAS giữa hai tiến trình, restart API và rollback.
+Xem [docs/TESTING.md](docs/TESTING.md); chưa xác nhận persistence cross-device.
 GitHub Actions chạy syntax/tests trên Linux khi push feature branch hoặc mở PR.
 
 ## Trạng thái
@@ -44,7 +47,7 @@ GitHub Actions chạy syntax/tests trên Linux khi push feature branch hoặc m�
 - Notes MongoDB cũ chưa có owner được giữ nguyên, ẩn khỏi mọi tài khoản;
   không tự gán dữ liệu cũ. Import localStorage tự động đã tắt; file HTML mở trực
   tiếp vẫn là prototype offline riêng, không đồng bộ lên tài khoản.
-- **Chưa sẵn sàng production:** còn thiếu integration DB thật, city API,
+- **Chưa sẵn sàng production:** còn thiếu XP ledger/rewards atomic, city API,
   backup/restore, staging/UAT. Không triển khai công khai dữ liệu người dùng ở trạng thái này.
 
 Kế hoạch task, acceptance criteria và quyết định còn phải chốt:

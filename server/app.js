@@ -45,7 +45,7 @@ function createApp({ NoteModel = Note, auth = createAuth(), dbReady = () => mong
     const input = noteInput(req.body, true);
     const version = revision(req.body);
     const note = await NoteModel.findOneAndUpdate({ _id: id, ownerId: req.user._id, revision: version },
-      { $set: input, $inc: { revision: 1 } }, { new: true, runValidators: true });
+      { $set: input, $inc: { revision: 1 } }, { returnDocument: 'after', runValidators: true });
     if (!note) return missingOrConflict(req, res, id);
     res.json(note.toJSON());
   }

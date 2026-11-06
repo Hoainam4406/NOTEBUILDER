@@ -54,10 +54,10 @@ function createAuth({ UserModel = User, SessionModel = Session, AttemptModel = A
       // The unique index is created before listening. Retry an upsert race as an update.
       let attempt;
       try {
-        attempt = await AttemptModel.findOneAndUpdate({ key }, { $inc: { count: 1 }, $setOnInsert: { expiresAt } }, { upsert: true, new: true });
+        attempt = await AttemptModel.findOneAndUpdate({ key }, { $inc: { count: 1 }, $setOnInsert: { expiresAt } }, { upsert: true, returnDocument: 'after' });
       } catch (error) {
         if (error.code !== 11000) throw error;
-        attempt = await AttemptModel.findOneAndUpdate({ key }, { $inc: { count: 1 } }, { new: true });
+        attempt = await AttemptModel.findOneAndUpdate({ key }, { $inc: { count: 1 } }, { returnDocument: 'after' });
       }
       if (attempt.count > limit) {
         res.set('Retry-After', String(Math.ceil((expiresAt.getTime() - timestamp) / 1000)));
@@ -111,7 +111,7 @@ function createAuth({ UserModel = User, SessionModel = Session, AttemptModel = A
       res.sendStatus(204);
     });
     app.patch('/api/profile', requireUser, csrf, async (req, res) => {
-      const user = await UserModel.findByIdAndUpdate(req.user._id, { $set: { displayName: displayName(req.body?.displayName) } }, { new: true });
+      const user = await UserModel.findByIdAndUpdate(req.user._id, { $set: { displayName: displayName(req.body?.displayName) } }, { returnDocument: 'after' });
       res.json({ user: publicUser(user) });
     });
   }
