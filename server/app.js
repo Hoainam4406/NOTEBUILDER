@@ -12,9 +12,9 @@ function createApp({ NoteModel = Note, auth = createAuth(), dbReady = () => mong
   app.use(express.static(path.join(__dirname, '..', 'notegame-web')));
   app.get('/api/health', async (req, res) => {
     const connected = dbReady();
-    const count = connected ? await NoteModel.countDocuments() : undefined;
+    res.set('Cache-Control', 'no-store');
     res.status(connected ? 200 : 503).json({ status: connected ? 'online' : 'unavailable',
-      database: connected ? 'MongoDB Connected' : 'Disconnected', totalNotes: count, timestamp: new Date().toISOString() });
+      database: connected ? 'MongoDB Connected' : 'Disconnected', timestamp: new Date().toISOString() });
   });
   app.use('/api', (req, res, next) => {
     res.set('Cache-Control', 'no-store');
@@ -22,42 +22,51 @@ function createApp({ NoteModel = Note, auth = createAuth(), dbReady = () => mong
     next();
   });
   auth.mount(app);
+  app.use(['/api/notes', '/api/godot'], auth.requireUser, auth.csrf);
   app.get('/api/notes', async (req, res) => {
-    const notes = await NoteModel.find(noteQuery(req.query)).sort({ createdAt: -1 });
+    const notes = await NoteModel.find({ ...noteQuery(req.query), ownerId: req.user._id }).sort({ createdAt: -1 });
     res.json(notes.map(note => note.toJSON()));
   });
-  app.post('/api/notes/migrate', async (req, res) => {
-    const notes = req.body?.notes;
-    if (!Array.isArray(notes) || notes.length < 1 || notes.length > 100) throw new InputError('Batch phải có 1..100 note');
-    const validated = notes.map(note => noteInput(note));
-    for (const data of validated) await new NoteModel(data).save();
-    res.json({ success: true, migratedCount: validated.length });
+  app.post('/api/notes/migrate', (req, res) => {
+    res.status(410).json({ error: 'Import tự động đã tắt để bảo vệ dữ liệu trên thiết bị dùng chung', code: 'IMPORT_DISABLED' });
   });
   app.get('/api/notes/:id', async (req, res) => {
-    const note = await NoteModel.findById(objectId(req.params.id));
+    const note = await NoteModel.findOne({ _id: objectId(req.params.id), ownerId: req.user._id });
     if (!note) return res.status(404).json({ error: 'Không tìm thấy ghi chú', code: 'NOTE_NOT_FOUND' });
     res.json(note.toJSON());
   });
   app.post('/api/notes', async (req, res) => {
-    const note = await new NoteModel(noteInput(req.body)).save();
+    const note = await new NoteModel({ ...noteInput(req.body), ownerId: req.user._id, revision: 0 }).save();
     res.status(201).json(note.toJSON());
   });
   app.route('/api/notes/:id').put(updateNote).patch(updateNote);
   async function updateNote(req, res) {
     const id = objectId(req.params.id);
     const input = noteInput(req.body, true);
-    const note = await NoteModel.findById(id);
-    if (!note) return res.status(404).json({ error: 'Không tìm thấy ghi chú', code: 'NOTE_NOT_FOUND' });
-    Object.assign(note, input);
-    res.json((await note.save()).toJSON());
+    const version = revision(req.body);
+    const note = await NoteModel.findOneAndUpdate({ _id: id, ownerId: req.user._id, revision: version },
+      { $set: input, $inc: { revision: 1 } }, { new: true, runValidators: true });
+    if (!note) return missingOrConflict(req, res, id);
+    res.json(note.toJSON());
   }
   app.delete('/api/notes/:id', async (req, res) => {
-    const note = await NoteModel.findByIdAndDelete(objectId(req.params.id));
-    if (!note) return res.status(404).json({ error: 'Không tìm thấy ghi chú', code: 'NOTE_NOT_FOUND' });
+    const id = objectId(req.params.id);
+    const note = await NoteModel.findOneAndDelete({ _id: id, ownerId: req.user._id, revision: revision(req.body) });
+    if (!note) return missingOrConflict(req, res, id);
     res.json({ success: true });
   });
+  function revision(body) {
+    if (!Number.isSafeInteger(body?.revision) || body.revision < 0 || body.revision >= Number.MAX_SAFE_INTEGER) throw new InputError('revision phải là số nguyên hợp lệ');
+    return body.revision;
+  }
+  async function missingOrConflict(req, res, id) {
+    const exists = await NoteModel.findOne({ _id: id, ownerId: req.user._id });
+    return res.status(exists ? 409 : 404).json(exists
+      ? { error: 'Ghi chú đã thay đổi ở phiên khác. Hãy giữ bản nháp và tải bản mới trước khi lưu lại.', code: 'NOTE_CONFLICT' }
+      : { error: 'Không tìm thấy ghi chú', code: 'NOTE_NOT_FOUND' });
+  }
   app.get('/api/godot/export', async (req, res) => {
-    const notes = (await NoteModel.find().sort({ createdAt: -1 })).map(note => note.toJSON());
+    const notes = (await NoteModel.find({ ownerId: req.user._id }).sort({ createdAt: -1 })).map(note => note.toJSON());
     // Prototype only: X01 replaces this with an authenticated XP ledger.
     const totalXp = notes.length * 50;
     res.json({ level: Math.floor(totalXp / 100) + 1, totalXp, notesCount: notes.length,

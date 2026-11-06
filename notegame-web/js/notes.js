@@ -62,6 +62,8 @@ const DEFAULT_SAMPLE_NOTES = [
 let notes = [];
 let currentFilter = 'all';
 let editingNoteId = null;
+let editingRevision = null;
+const noteFetch = (...args) => window.KnowledgeAuth ? window.KnowledgeAuth.fetch(...args) : fetch(...args);
 
 // Paper Template Images
 const TEMPLATE_IMAGES = {
@@ -119,8 +121,18 @@ const godotAssetStatus = document.getElementById('godotAssetStatus');
 // Initialize App
 document.addEventListener('DOMContentLoaded', async () => {
   setupEventListeners();
-  await checkDatabaseConnection();
-  await autoMigrateLocalStorage();
+  if (window.location.protocol.startsWith('http')) {
+    // Served mode must never silently expose shared localStorage after auth/DB failure.
+    isMongoConnected = true;
+    try { await window.KnowledgeAuth.me(); }
+    catch (error) {
+      if (error.status === 401) window.location.href = 'account.html';
+      else showToast('Không thể kết nối tài khoản. Hãy tải lại trang để thử lại.');
+      return;
+    }
+    await checkDatabaseConnection();
+    isMongoConnected = true;
+  }
   await loadNotes();
 });
 
@@ -136,7 +148,7 @@ async function checkDatabaseConnection() {
       if (dbBadge && dbText) {
         dbBadge.classList.remove('offline');
         dbText.textContent = '🍃 MongoDB Connected';
-        dbBadge.title = `Đã kết nối cơ sở dữ liệu MongoDB (${data.totalNotes} ghi chú)`;
+        dbBadge.title = 'Đã kết nối cơ sở dữ liệu MongoDB';
       }
       return true;
     }
@@ -147,41 +159,15 @@ async function checkDatabaseConnection() {
   isMongoConnected = false;
   if (dbBadge && dbText) {
     dbBadge.classList.add('offline');
-    dbText.textContent = '💾 Offline LocalStorage';
-    dbBadge.title = 'Đang lưu trữ cục bộ trên trình duyệt (Chạy server Node.js để kết nối MongoDB)';
+    dbText.textContent = window.location.protocol.startsWith('http') ? 'Server chưa sẵn sàng' : '💾 Offline LocalStorage';
+    dbBadge.title = window.location.protocol.startsWith('http') ? 'Không thể xác nhận kết nối; hãy tải lại trang' : 'Đang lưu trữ cục bộ trên trình duyệt';
   }
   return false;
 }
 
-// Auto migrate LocalStorage to MongoDB
+// Legacy entry point retained without writes; shared-device data needs explicit import.
 async function autoMigrateLocalStorage() {
-  if (!isMongoConnected) return;
-  const migratedFlag = localStorage.getItem('notebuilder_migrated_to_mongo');
-  const saved = localStorage.getItem('notebuilder_notes');
-
-  if (saved && !migratedFlag) {
-    try {
-      const localNotes = JSON.parse(saved);
-      // Chỉ migrate ghi chú thực tế của người dùng
-      const userCustomNotes = localNotes.filter(n => n.id && !n.id.startsWith('seed-'));
-      if (userCustomNotes.length > 0) {
-        console.log(`Đang tự động di chuyển ${userCustomNotes.length} ghi chú lên MongoDB...`);
-        const res = await fetch(`${API_BASE_URL}/api/notes/migrate`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ notes: userCustomNotes })
-        });
-        if (res.ok) {
-          localStorage.setItem('notebuilder_migrated_to_mongo', 'true');
-          showToast(`Đã đồng bộ ${userCustomNotes.length} ghi chú lên MongoDB thành công! 🍃`);
-        }
-      } else {
-        localStorage.setItem('notebuilder_migrated_to_mongo', 'true');
-      }
-    } catch (e) {
-      console.error('Lỗi khi migrate LocalStorage:', e);
-    }
-  }
+  return;
 }
 
 // Load notes from MongoDB (with fallback to localStorage)
@@ -630,6 +616,7 @@ function renderNotes() {
 // Modal Actions
 function openModal(noteToEdit = null) {
   editingNoteId = noteToEdit ? noteToEdit.id : null;
+  editingRevision = noteToEdit?.revision ?? null;
   const modalTitle = document.getElementById('modalTitle');
   noteModal?.classList.add('active');
 
@@ -689,6 +676,7 @@ function openModal(noteToEdit = null) {
 function closeModal() {
   noteModal?.classList.remove('active');
   editingNoteId = null;
+  editingRevision = null;
 }
 
 // Save or Update Note
@@ -735,10 +723,10 @@ async function saveNoteFromForm() {
   if (isMongoConnected) {
     try {
       if (editingNoteId) {
-        const res = await fetch(`${API_BASE_URL}/api/notes/${editingNoteId}`, {
+        const res = await noteFetch(`${API_BASE_URL}/api/notes/${editingNoteId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(notePayload)
+          body: JSON.stringify({ ...notePayload, revision: editingRevision })
         });
         if (res.ok) {
           showToast('Đã lưu bài học vào MongoDB! 🍃');
@@ -746,9 +734,13 @@ async function saveNoteFromForm() {
           closeModal();
           return;
         }
+        if (res.status === 409) {
+          showToast('Có xung đột phiên bản. Bản nháp vẫn còn; hãy sao chép nội dung rồi mở lại ghi chú mới nhất trước khi lưu.');
+          return;
+        }
         throw new Error('Server từ chối cập nhật');
       } else {
-        const res = await fetch(`${API_BASE_URL}/api/notes`, {
+        const res = await noteFetch(`${API_BASE_URL}/api/notes`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(notePayload)
@@ -801,12 +793,13 @@ window.openEditModal = async function(id) {
   // Nếu có MongoDB, fetch chi tiết để lấy canvasJSON mới nhất
   if (isMongoConnected && id) {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/notes/${id}`);
+      const res = await noteFetch(`${API_BASE_URL}/api/notes/${id}`);
       if (res.ok) {
         note = await res.json();
-      }
+      } else throw new Error('Không thể tải phiên bản ghi chú mới nhất');
     } catch (e) {
-      console.warn('Không lấy được chi tiết từ DB, sử dụng dữ liệu cục bộ:', e);
+      showToast('Không thể mở ghi chú từ server. Hãy thử lại.');
+      return;
     }
   }
   if (note) openModal(note);
@@ -817,12 +810,18 @@ window.deleteNote = async function(id) {
 
   if (isMongoConnected) {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/notes/${id}`, {
-        method: 'DELETE'
+      const res = await noteFetch(`${API_BASE_URL}/api/notes/${id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ revision: notes.find(note => note.id === id)?.revision })
       });
       if (res.ok) {
         showToast('Đã xóa ghi chú khỏi MongoDB 🍃');
         await loadNotes();
+        return;
+      }
+      if (res.status === 409) {
+        showToast('Ghi chú đã thay đổi ở phiên khác. Hãy tải lại danh sách trước khi xóa.');
         return;
       }
       throw new Error('Server từ chối xóa ghi chú');

@@ -13,7 +13,7 @@ const WINDOW_MS = 15 * 60 * 1000;
 function credentials(body) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) throw new InputError('Dữ liệu tài khoản không hợp lệ');
   const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
-  if (email.length > 254 || !/^[\x21-\x7e]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new InputError('Email không hợp lệ');
+  if (email.length > 254 || !/^[\x21-\x7e]+$/.test(email) || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new InputError('Email không hợp lệ');
   if (typeof body.password !== 'string' || body.password.length < 12 || body.password.length > 128) {
     throw new InputError('Mật khẩu phải có 12..128 ký tự');
   }

@@ -12,12 +12,22 @@ class FakeNote {
   async save() { if (fail) throw new Error('mongodb://secret:password@private'); writes++; rows.set(this.id, this); return this; }
   toJSON() { return { ...this }; }
   static find(query) { lastQuery = query; return { sort: async () => { if (fail) throw new Error('private'); return [...rows.values()]; } }; }
-  static async findById(value) { return rows.get(value); }
-  static async findByIdAndDelete(value) { const note = rows.get(value); rows.delete(value); return note; }
+  static async findOne(query) { const row = rows.get(query._id); return row?.ownerId === query.ownerId ? row : null; }
+  static async findOneAndUpdate(query, update) {
+    const row = await this.findOne(query);
+    if (!row || row.revision !== query.revision) return null;
+    Object.assign(row, update.$set); row.revision++; return row;
+  }
+  static async findOneAndDelete(query) {
+    const row = await this.findOne(query);
+    if (!row || row.revision !== query.revision) return null;
+    rows.delete(query._id); return row;
+  }
   static async countDocuments() { return rows.size; }
 }
 before(async () => {
-  server = createApp({ NoteModel: FakeNote, dbReady: () => ready, logger: { error() {} } }).listen(0, '127.0.0.1');
+  const auth = { mount() {}, requireUser(req, res, next) { req.user = { _id: 'owner' }; next(); }, csrf(req, res, next) { next(); } };
+  server = createApp({ NoteModel: FakeNote, auth, dbReady: () => ready, logger: { error() {} } }).listen(0, '127.0.0.1');
   await once(server, 'listening');
   base = `http://127.0.0.1:${server.address().port}`;
 });
@@ -43,10 +53,10 @@ test('create, read, patch, export and delete preserve the existing response shap
   assert.equal(created.body.title, 'Vật lý');
   assert.deepEqual(created.body.tags, ['Toán']);
   assert.equal((await request(`/api/notes/${id}`)).body.content, 'F = ma');
-  assert.equal((await request(`/api/notes/${id}`, 'PATCH', { content: 'E = mc²' })).body.title, 'Vật lý');
-  assert.equal((await request(`/api/notes/${id}`, 'PUT', { title: 'Năng lượng' })).body.title, 'Năng lượng');
+  assert.equal((await request(`/api/notes/${id}`, 'PATCH', { content: 'E = mc²', revision: 0 })).body.title, 'Vật lý');
+  assert.equal((await request(`/api/notes/${id}`, 'PUT', { title: 'Năng lượng', revision: 1 })).body.title, 'Năng lượng');
   assert.equal((await request('/api/godot/export')).body.notesCount, 1);
-  assert.equal((await request(`/api/notes/${id}`, 'DELETE')).status, 200);
+  assert.equal((await request(`/api/notes/${id}`, 'DELETE', { revision: 2 })).status, 200);
   assert.equal((await request(`/api/notes/${id}`)).status, 404);
 });
 for (const [label, payload] of Object.entries({
@@ -71,7 +81,7 @@ for (const [label, payload] of Object.entries({
 test('partial update cannot clear title or inject extra fields', async () => {
   await request('/api/notes', 'POST', { title: 'Note', totalXp: 999, ownerId: 'attacker' });
   assert.equal(rows.get(id).totalXp, undefined);
-  assert.equal(rows.get(id).ownerId, undefined);
+  assert.equal(rows.get(id).ownerId, 'owner');
   assert.equal((await request(`/api/notes/${id}`, 'PUT', { title: '' })).status, 400);
   assert.equal(rows.get(id).title, 'Note');
 });
@@ -90,12 +100,11 @@ test('search escapes regex metacharacters and rejects query operators', async ()
   assert.equal((await request('/api/notes?template=5')).status, 400);
   assert.throws(() => noteQuery({ search: { $ne: '' } }));
 });
-test('migration validates the entire batch before writing any notes', async () => {
+test('legacy automatic migration is disabled without writing notes', async () => {
   const beforeWrites = writes;
-  assert.equal((await request('/api/notes/migrate', 'POST', { notes: [{ title: 'Valid' }, { title: 3 }] })).status, 400);
+  assert.equal((await request('/api/notes/migrate', 'POST', { notes: [{ title: 'Valid' }, { title: 3 }] })).status, 410);
   assert.equal(writes, beforeWrites);
-  assert.equal((await request('/api/notes/migrate', 'POST', { notes: [] })).status, 400);
-  assert.equal((await request('/api/notes/migrate', 'POST', { notes: [{ title: 'Valid' }] })).body.migratedCount, 1);
+  assert.equal((await request('/api/notes/migrate', 'POST', { notes: [] })).body.code, 'IMPORT_DISABLED');
 });
 test('malformed JSON has a consistent error response', async () => {
   const response = await fetch(base + '/api/notes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{bad' });

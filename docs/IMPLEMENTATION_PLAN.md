@@ -8,7 +8,8 @@ quyết định triển khai và công việc chưa hoàn thành.
 
 - NOTEBUILDER: Express 5, Mongoose/MongoDB, giao diện HTML/JS và Fabric canvas.
 - isometric_building_game: Godot 4.7.2, catalog/placement/collision, ghi chú gắn với công trình.
-- Chưa có auth, owner isolation, XP ledger hay city backend. Không được coi demo là production.
+- Đã có auth/session/profile, owner isolation và revision CAS ở tầng code/HTTP tests.
+  Chưa kiểm chứng MongoDB thật; chưa có XP ledger hay city backend.
 - XP hiện tại = số note x 50; game unlock theo số kiến thức đang tồn tại.
   Hai cơ chế này chỉ là prototype, chưa đồng bộ và chưa chống farm.
 - Giữ stack hiện tại trong MVP; việc chuyển PostgreSQL/Next.js là quyết định kiến trúc riêng,
@@ -23,8 +24,8 @@ quyết định triển khai và công việc chưa hoàn thành.
 | F03 | Giao diện lưu/xóa trung thực khi API lỗi | F02 | Network/4xx/5xx giữ editor và dữ liệu; không báo lưu thành công giả |
 | F04 | Kiến thức Godot hợp lệ trước khi đổi unlock | F01 | Rỗng/quá dài/preview bị từ chối; sửa/xóa không reset unlock |
 | F05 | CI Linux cho kiểm tra nền tảng | F02-F04 | Syntax + automated tests, không dùng DB production |
-| A01 | Đăng ký/login/logout, session và profile | F02 | AUTH-01..03; password hash, cookie HttpOnly, CSRF, rate limit |
-| N01 | Owner isolation, note version, search, migration | A01 | AUTH-04, NOTE-01..05; migration không tự gán note chung cho tài khoản |
+| A01 | Đăng ký/login/logout, session và profile | F02 | Code + HTTP tests đạt; cần gate MongoDB thật |
+| N01 | Owner isolation, note version, search, migration | A01 | Code + HTTP/VM tests đạt; legacy import tắt, note chung không tự gán |
 | X01 | XP ledger, level và rewards atomic | N01 | XP-01..05, RWD-01..02 với DB transaction/concurrency thật |
 | C01 | City API, inventory và version | X01 | CITY-01..05; ownership/collision/rollback/save-load |
 | C02 | Godot bridge và vòng lặp liên ứng dụng | C01 | E2E-01; frontend không tự cấp XP hay quyền sở hữu |
@@ -37,6 +38,10 @@ Mỗi task phải test/review, commit Conventional Commits và push websiteWorka
 Không đánh dấu staging/UAT hoặc test DB concurrency đạt khi mới chạy unit test.
 
 ## Specification của batch nền tảng
+
+Batch identity/notes bổ sung và thay thế hành vi anonymous/migration bên dưới:
+xem [AUTH_NOTES_SPEC.md](AUTH_NOTES_SPEC.md). PUT/PATCH/DELETE cần revision,
+mọi note/export cần session, migration cũ trả 410.
 
 - API giữ prefix `/api` và response note hiện có để tương thích Fabric editor.
 - `POST /api/notes`: title bắt buộc 1..200 ký tự sau trim; content tối đa 100000,

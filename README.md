@@ -22,9 +22,10 @@ npm test
 git diff --check
 ```
 
-31 tests dùng HTTP thật trên cổng loopback ngẫu nhiên với Note model thay thế,
-và VM chạy mã frontend để kiểm tra lỗi save/delete. Tests không kết nối MongoDB
-thật và không chứng minh transaction, authorization hay persistence cross-device.
+50 tests dùng HTTP thật trên cổng loopback ngẫu nhiên với model thay thế,
+và VM chạy mã frontend để kiểm tra lỗi save/delete, revision và khởi động session.
+Tests kiểm tra auth/CSRF/owner isolation ở tầng HTTP nhưng không kết nối MongoDB
+thật và không chứng minh index/TTL/transaction hay persistence cross-device.
 GitHub Actions chạy syntax/tests trên Linux khi push feature branch hoặc mở PR.
 
 ## Trạng thái
@@ -34,10 +35,20 @@ GitHub Actions chạy syntax/tests trên Linux khi push feature branch hoặc m�
   DB disconnected, không log connection URI, không tự seed khi startup.
 - Lưu/xóa online thất bại giữ editor/list, không giả báo thành công local.
 - XP hiển thị vẫn là phép tính demo theo số note. Chưa có XP ledger/reward atomic.
-- **Chưa sẵn sàng production:** chưa có auth, ownership, conflict version, city API,
+- Auth/session/profile: mở `/account.html`; mật khẩu 12..128 ký tự, session cookie
+  HttpOnly, CSRF token và rate limit lưu MongoDB. Startup tạo unique indexes trước
+  khi mở cổng. Đặt `NODE_ENV=production` khi dùng HTTPS để cookie có Secure.
+- Notes online yêu cầu đăng nhập, lọc owner ở DB; update/delete cần `revision`.
+  Hai tab sửa cùng note: bản lưu cũ nhận 409, giữ nguyên editor để người dùng
+  sao chép bản nháp và mở lại phiên bản mới. Không có merge nội dung tự động.
+- Notes MongoDB cũ chưa có owner được giữ nguyên, ẩn khỏi mọi tài khoản;
+  không tự gán dữ liệu cũ. Import localStorage tự động đã tắt; file HTML mở trực
+  tiếp vẫn là prototype offline riêng, không đồng bộ lên tài khoản.
+- **Chưa sẵn sàng production:** còn thiếu integration DB thật, city API,
   backup/restore, staging/UAT. Không triển khai công khai dữ liệu người dùng ở trạng thái này.
 
 Kế hoạch task, acceptance criteria và quyết định còn phải chốt:
 [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md).
+Specification auth/notes: [docs/AUTH_NOTES_SPEC.md](docs/AUTH_NOTES_SPEC.md).
 Tài liệu UI cũ trong `notegame-web/README.md` mô tả prototype trước batch nền tảng;
 quy trình startup/test và giới hạn hiện tại lấy README này làm tham chiếu.

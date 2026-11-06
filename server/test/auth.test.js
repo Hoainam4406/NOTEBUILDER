@@ -47,7 +47,7 @@ test('AUTH-02 duplicate normalized email is 409', async () => {
   assert.equal(result.status, 409); assert.equal(users.size, 1);
 });
 test('input validation rejects weak passwords, invalid emails and blank names', async () => {
-  for (const body of [{ ...account, password: 'short' }, { ...account, email: 'bad' }, { ...account, displayName: ' ' }]) {
+  for (const body of [{ ...account, password: 'short' }, { ...account, email: 'bad' }, { ...account, email: 'a@@b.com' }, { ...account, displayName: ' ' }]) {
     assert.equal((await request('/api/auth/register', 'POST', body)).status, 400);
   }
 });
