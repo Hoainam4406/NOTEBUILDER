@@ -48,3 +48,17 @@ rollover UTC, toàn bộ milestone còn thiếu, fault sau ledger/inventory, edi
 giữ XP và owner isolation. Tổng 16 integration tests đạt. Fixture multi-level seed
 530 XP rồi nhận 20 XP để kiểm tra phục hồi đủ mốc tới level 5; public API không
 cho gửi số XP tùy ý. Chưa mô phỏng network partition hoặc primary failover.
+
+## C01 evidence
+
+6 geometry/catalog unit tests nâng regression lên 68. Godot main có
+`tests/city_catalog_contract.gd` đối chiếu 4 polygon thực, tile size và phép chuyển
+axial API sang native stacked-offset; hai bản JSON contract phải giống hệt nhau.
+Native contract và placement audit 498 scenes đạt. Không đổi native grid để lách test.
+
+17 city integration cases (tổng suite 34) dùng MongoDB thật và hai tiến trình API:
+CITY-01..05 backend, auth/CSRF/owner, invalid placement/move, same-key và revision
+races, idempotent refund, fault sau inventory/city/receipt, process restart,
+corrupt saved layouts, concurrent note rewards, giới hạn 256 buildings. Test full
+city và thêm owned copy dùng fixture DB có kiểm soát; không có public endpoint
+tự cấp inventory/XP. Browser/E2E/hosting vẫn cần C02 và chưa được xác nhận.

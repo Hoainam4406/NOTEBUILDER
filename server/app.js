@@ -6,7 +6,7 @@ const { InputError, noteInput, objectId, noteQuery } = require('./validation');
 const { createAuth } = require('./auth');
 const { createProgression, ProgressionError, idempotencyKey } = require('./progression');
 const { createCityService } = require('./city');
-const { CATALOG, CityError, mutationInput } = require('./city-rules');
+const { CATALOG, CityError, mutationInput, buildingId } = require('./city-rules');
 
 function createApp({ NoteModel = Note, auth = createAuth(), progression = createProgression(), city = createCityService(), dbReady = () => mongoose.connection.readyState === 1, logger = console } = {}) {
   const app = express();
@@ -32,6 +32,14 @@ function createApp({ NoteModel = Note, auth = createAuth(), progression = create
     const input = mutationInput('place', req.body);
     const result = await city.place(req.user._id, input, req.get('Idempotency-Key'));
     res.status(result.replayed ? 200 : 201).json(result);
+  });
+  app.patch('/api/city/buildings/:id', async (req, res) => {
+    const input = mutationInput('move', req.body);
+    res.json(await city.move(req.user._id, buildingId(req.params.id), input, req.get('Idempotency-Key')));
+  });
+  app.delete('/api/city/buildings/:id', async (req, res) => {
+    const input = mutationInput('remove', req.body);
+    res.json(await city.remove(req.user._id, buildingId(req.params.id), input, req.get('Idempotency-Key')));
   });
   app.get('/api/progress', async (req, res) => res.json(await progression.getProgress(req.user._id)));
   app.get('/api/rewards', async (req, res) => res.json(await progression.getRewards(req.user._id)));

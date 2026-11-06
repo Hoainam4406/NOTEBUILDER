@@ -36,7 +36,7 @@ git diff --check
 68 tests dùng HTTP thật trên cổng loopback ngẫu nhiên với model thay thế,
 và VM chạy mã frontend để kiểm tra lỗi save/delete, revision và khởi động session.
 Tests kiểm tra auth/CSRF/owner isolation ở tầng HTTP nhưng không kết nối MongoDB
-thật. Thêm 24 integration tests chạy MongoDB 8.2.6 replica set cục bộ riêng để
+thật. Thêm 34 integration tests chạy MongoDB 8.2.6 replica set cục bộ riêng để
 kiểm tra indexes, auth/owner/CAS giữa hai tiến trình, restart API và rollback.
 Xem [docs/TESTING.md](docs/TESTING.md); chưa xác nhận persistence cross-device.
 GitHub Actions chạy syntax/tests trên Linux khi push feature branch hoặc mở PR.
@@ -66,11 +66,11 @@ GitHub Actions chạy syntax/tests trên Linux khi push feature branch hoặc m�
 - Notes MongoDB cũ chưa có owner được giữ nguyên, ẩn khỏi mọi tài khoản;
   không tự gán dữ liệu cũ. Import localStorage tự động đã tắt; file HTML mở trực
   tiếp vẫn là prototype offline riêng, không đồng bộ lên tài khoản.
-- City backend C01b: GET `/api/city/catalog`, GET `/api/city` và POST
-  `/api/city/buildings`; session/CSRF, catalog ownership, polygon collision,
-  revision CAS và idempotent inventory debit. Xem `docs/CITY_SPEC.md`.
-  Move/remove và Godot Web chưa triển khai ở checkpoint này.
-- **Chưa sẵn sàng production:** còn thiếu city move/remove và Web integration,
+- City backend C01: GET `/api/city/catalog`, GET `/api/city`, POST
+  `/api/city/buildings`, PATCH/DELETE `/api/city/buildings/:id`; session/CSRF,
+  ownership, polygon collision, revision CAS, idempotent debit/refund và save/load.
+  Xem `docs/CITY_SPEC.md`. Godot Web export/embed tiếp theo ở C02a.
+- **Chưa sẵn sàng production:** còn thiếu Web integration,
   backup/restore, staging/UAT. Không triển khai công khai dữ liệu người dùng ở trạng thái này.
 
 Kế hoạch task, acceptance criteria và quyết định còn phải chốt:

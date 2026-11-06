@@ -25,7 +25,8 @@ MVP ưu tiên vòng lặp hoàn chỉnh, bảo vệ dữ liệu và khả năng 
 | Progression | `server/progression-policy.js`, `progression.js` | Note + ledger + fingerprint + XP + unlock/inventory cùng transaction |
 | Persistence | `server/models/`, `server/index.js` | Unique indexes và kiểm tra transaction trước khi listen |
 | Web UI | `notegame-web/js/notes.js`, `auth.js`, `account.js` | Online đọc XP từ server; lỗi lưu giữ bản nháp |
-| City/Godot | Companion `Scenes/Buildings/`, `Scenes/Knowledge/`, `World/` | C01 City API → C02 Web export/embed/bridge → browser E2E; chưa hoàn thành |
+| City API | `server/city.js`, `city-rules.js`, `models/City.js`, `CityMutation.js` | Layout/inventory/receipt atomic; revision CAS; catalog/map ở `server/data/` |
+| Godot | Companion `Scenes/Buildings/`, `Scenes/Knowledge/`, `World/` | Native catalog contract; C02 Web export/embed/bridge và browser E2E chưa hoàn thành |
 
 ## Quy tắc kỹ thuật
 

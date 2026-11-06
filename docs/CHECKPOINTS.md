@@ -8,7 +8,10 @@
 - C01b: authenticated catalog/read/place; City + inventory debit + receipt cùng
   transaction, revision CAS, replay không nhân công trình. 68/68 regression và
   24/24 MongoDB integration tests đạt, syntax/diff đạt.
-- Tiếp theo C01c move/remove/refund/restart/corrupt layout; sau đó C02 Web export.
+  Commit `abc7b8f` đã push websiteWorkandTest.
+- C01c: move/remove/refund idempotent, replay không hồi sinh object, API restart,
+  corrupt layout 503, capacity và concurrent rewards. 68/68 regression và 34/34
+  MongoDB integration tests đạt; syntax/diff đạt. Tiếp theo C02a Web export/embed.
 
 ## Batch identity / notes (2026-11-06)
 

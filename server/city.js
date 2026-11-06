@@ -34,11 +34,11 @@ function createCityService({ connection = mongoose.connection, now = () => new D
     return { city, inventory: rows.map(row => ({ catalogId: row.catalogId, quantity: row.quantity })) };
   }
   async function getCity(userId) { return connection.transaction(session => state(userId, session), transactionOptions); }
-  async function place(userId, input, key) {
+  async function mutate(userId, operation, input, key, targetId = null) {
     const owner = new mongoose.Types.ObjectId(String(userId));
     idempotencyKey(key);
-    const requestHash = hash(JSON.stringify({ operation: 'place', input }));
-    const id = new mongoose.Types.ObjectId().toString();
+    const requestHash = hash(JSON.stringify(operation === 'place' ? { operation, input } : { operation, buildingId: targetId, input }));
+    const id = operation === 'place' ? new mongoose.Types.ObjectId().toString() : buildingId(targetId);
     const createdAt = now();
     for (let attempt = 0; attempt < 5; attempt++) {
       try {
@@ -54,15 +54,31 @@ function createCityService({ connection = mongoose.connection, now = () => new D
           if (!row) await City.create([{ userId: owner, layoutVersion: 1, revision: 0, buildings: [] }], { session });
           const locked = await City.findOneAndUpdate({ userId: owner, revision: input.revision }, { $inc: { revision: 1 } }, { session, returnDocument: 'after' });
           if (!locked) throw conflict();
-          if (layout.buildings.length >= CATALOG.maxBuildings) throw new CityError(409, 'CITY_FULL', 'Thành phố đã đạt giới hạn công trình');
-          if (!await Unlock.exists({ userId: owner, catalogId: input.catalogId }).session(session)) throw new CityError(403, 'BUILDING_LOCKED', 'Bạn chưa mở khóa công trình này');
-          const placement = { id, catalogId: input.catalogId, x: input.x, y: input.y, rotation: input.rotation };
-          assertPlacement(placement, layout.buildings);
-          const inventory = await Inventory.findOneAndUpdate({ userId: owner, catalogId: input.catalogId, quantity: { $gte: 1 } },
-            { $inc: { quantity: -1 } }, { session, returnDocument: 'after' });
-          if (!inventory) throw new CityError(409, 'INVENTORY_EMPTY', 'Không còn công trình này trong kho');
-          await afterWrite('inventory');
-          await City.updateOne({ _id: locked._id }, { $set: { buildings: [...layout.buildings, placement] } }, { session, runValidators: true });
+          let buildings;
+          if (operation === 'place') {
+            if (layout.buildings.length >= CATALOG.maxBuildings) throw new CityError(409, 'CITY_FULL', 'Thành phố đã đạt giới hạn công trình');
+            if (!await Unlock.exists({ userId: owner, catalogId: input.catalogId }).session(session)) throw new CityError(403, 'BUILDING_LOCKED', 'Bạn chưa mở khóa công trình này');
+            const placement = { id, catalogId: input.catalogId, x: input.x, y: input.y, rotation: input.rotation };
+            assertPlacement(placement, layout.buildings);
+            const inventory = await Inventory.findOneAndUpdate({ userId: owner, catalogId: input.catalogId, quantity: { $gte: 1 } },
+              { $inc: { quantity: -1 } }, { session, returnDocument: 'after' });
+            if (!inventory) throw new CityError(409, 'INVENTORY_EMPTY', 'Không còn công trình này trong kho');
+            await afterWrite('inventory');
+            buildings = [...layout.buildings, placement];
+          } else {
+            const original = layout.buildings.find(building => building.id === id);
+            if (!original) throw new CityError(404, 'BUILDING_NOT_FOUND', 'Không tìm thấy công trình');
+            if (operation === 'move') {
+              const moved = { ...original, x: input.x, y: input.y, rotation: input.rotation };
+              assertPlacement(moved, layout.buildings, id);
+              buildings = layout.buildings.map(building => building.id === id ? moved : building);
+            } else {
+              await Inventory.updateOne({ userId: owner, catalogId: original.catalogId }, { $inc: { quantity: 1 } }, { upsert: true, session });
+              await afterWrite('inventory');
+              buildings = layout.buildings.filter(building => building.id !== id);
+            }
+          }
+          await City.updateOne({ _id: locked._id }, { $set: { buildings } }, { session, runValidators: true });
           await afterWrite('city');
           await CityMutation.create([{ userId: owner, key, requestHash, buildingId: id, createdAt }], { session });
           await afterWrite('receipt');
@@ -74,6 +90,10 @@ function createCityService({ connection = mongoose.connection, now = () => new D
       }
     }
   }
-  return { getCity, place };
+  return { getCity,
+    place: (userId, input, key) => mutate(userId, 'place', input, key),
+    move: (userId, id, input, key) => mutate(userId, 'move', input, key, id),
+    remove: (userId, id, input, key) => mutate(userId, 'remove', input, key, id)
+  };
 }
 module.exports = { createCityService, checkedLayout };
