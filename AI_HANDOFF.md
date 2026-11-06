@@ -68,6 +68,14 @@ không tự cấp server XP/inventory. Bản tích hợp dữ liệu đầy đ�
 
 ## Known gaps và verification
 
+- Chẩn đoán parser error (2026-11-06): checkout game gốc thiếu
+  `Scenes/Knowledge/knowledge_validation.gd` và `.uid` vì local uncommitted
+  deletions; không phải feature chờ C02. File đã có trong HEAD và game main.
+  Đã chạy knowledge regression và startup headless 60 frames tại main worktree
+  `0d1721a`: exit 0, không parser error. GUI interaction chưa kiểm tra ở lần này;
+  Godot vẫn báo lỗi đọc certificate store trong sandbox như các lần trước.
+  Để chạy bản phát triển, import `.worktrees/knowledge-main/project.godot`.
+  Chẩn đoán này không khôi phục/xóa các local changes trong checkout gốc.
 - Chưa có Godot Web export preset/artifacts, trang embed/canvas/iframe. City
   API đã đủ read/place/move/remove. Game native debug unlock-all chưa phải
   quyền sở hữu backend. Không báo game đã tích hợp chỉ vì có `GodotBridge`.
@@ -87,7 +95,7 @@ không tự cấp server XP/inventory. Bản tích hợp dữ liệu đầy đ�
 
 - Web repo `E:/NOTEBUILDER`, branch `websiteWorkandTest`, origin
   `https://github.com/Hoainam4406/NOTEBUILDER.git`.
-- Baseline trước C01c: `abc7b8f`, push đã xác nhận; source X01 ở `64481cb`.
+- Baseline trước chẩn đoán parser: `8197b7e` (C01c), push đã xác nhận.
   Lấy hash checkpoint đang chứa snapshot bằng
   `git log -1 --oneline -- AGENTS.md AI_HANDOFF.md`. Không cần lịch sử chat.
 - Web checkout sạch khi bắt đầu C01; chỉ các file C01 nêu trên được sửa.
