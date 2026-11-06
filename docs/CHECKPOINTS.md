@@ -16,12 +16,22 @@
 
 ## N02 — MongoDB integration (2026-11-06)
 
+- Commit `7ea440a`, đã push websiteWorkandTest.
+
 - Đã vượt qua gate DB trước đây: 7/7 tests dùng MongoDB 8.2.6 replica set thật,
   hai tiến trình API; indexes, owner isolation, CAS, login counters, expiry/logout,
   API restart và rollback transaction đạt. 50/50 tests cũ vẫn đạt.
 - CI chạy suite integration; binary/cache/data không track. Không dùng `.env`
   hoặc database ứng dụng. Chi tiết: `TESTING.md`.
 - Tiếp theo: X01 specification -> ledger/rewards transaction -> UI server progress.
+
+## X01a — progression policy v1
+
+- `PROGRESSION_SPEC.md` chốt eligibility, chống trùng, UTC cap, idempotent create,
+  schema ledger, level/rewards và transaction boundaries trước triển khai.
+- 55/55 tests unit/HTTP/VM đạt; 7/7 integration N02 đã đạt.
+- 4 reward catalog IDs đối chiếu catalog Godot; chưa mở placement server.
+- Tiếp theo X01b transaction và real-DB tests; X01c UI dùng server progress.
 
 | Task | Commit | Kiểm tra local | Push |
 |---|---|---|---|
