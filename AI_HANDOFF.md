@@ -4,6 +4,11 @@ Cập nhật 2026-11-06. Đọc cùng AGENTS.md; đối chiếu Git/source trư�
 
 ## Checkpoint hiện tại
 
+- User yêu cầu tạm dừng feature để audit blueprint; không tự tiếp tục L01.
+  Đã đọc đủ 14 mục trong `docs/Knowledge_City_Product_Blueprint_14_Muc.md`
+  (user commit `95db3fa`). Kết luận/đối chiếu từng mục: `docs/BLUEPRINT_ALIGNMENT.md`.
+  Chỉ một concept city/assets hiện có; nhiều theme/Subject District khác concept
+  ngoài scope, không tự xếp lại V2. Audit chỉ đổi docs/instructions, không code.
 - C02b đã có thành phố tài khoản thật tại `/city.html`, renderer Godot riêng,
   session/CSRF + catalog/progress/unlocks/city/inventory qua async parent bridge.
 - C02c local Chromium đã kiểm chứng core loop và failure cases; chưa có browser
@@ -91,6 +96,9 @@ Cập nhật 2026-11-06. Đọc cùng AGENTS.md; đối chiếu Git/source trư�
 - Pending: browser CI tự động, CI remote Linux, Safari/mobile, cross-device,
   public hosting, staging/UAT, TTL physical cleanup, failover/network partition,
   backup/restore. Không đánh đồng local/browser smoke với các gate này.
+- DoD blueprint 9.5 cần staging xác nhận: C02b/C02c đang ở mức implemented/local
+  verified, chưa Accepted/Done toàn phần. Autosave chưa có; responsive/accessibility,
+  review/onboarding và đo tác động giáo dục vẫn là khoảng trống cần theo dõi.
 
 ## Git / môi trường / thay đổi ngoài scope
 
@@ -99,10 +107,10 @@ Cập nhật 2026-11-06. Đọc cùng AGENTS.md; đối chiếu Git/source trư�
 - Game `D:/isometric-grid-building-game/isometric_building_game`, main, origin
   https://github.com/SubNhatSan/isometric_building_game.git. f1739c7 đã push; parent
   16721be; trước đó user commit c39347f sửa Godot AI, không bị ghi đè.
-- User-added untracked web `docs/Knowledge_City_Product_Blueprint_14_Muc.md`
-  xuất hiện trong lúc làm, không stage/sửa/xóa; giữ nguyên và đối chiếu trước L01.
-  Tên tương tự từng xuất hiện untracked ở game nhưng không còn tại kiểm tra cuối;
-  agent không thao tác file đó. Game working tree hiện sạch, HEAD vẫn f1739c7.
+- Blueprint đã được user commit trong `95db3fa`; audit giữ nguyên nội dung file.
+  Trước audit working tree web sạch. Tên tương tự từng xuất hiện untracked ở game
+  nhưng không còn tại kiểm tra cuối session trước; agent không thao tác file đó.
+  Audit chỉ đối chiếu source web/cập nhật docs, không sửa hoặc xác nhận mới repo game.
 - Đường dẫn E: và dirty checkout/worktree cũ trong lịch sử là môi trường trước;
   không restore/reset để tái tạo chúng. Game sandbox ownership mismatch có thể dùng
   git -c safe.directory=<đúng repo> cho read, không thêm global safe.directory.
@@ -110,9 +118,10 @@ Cập nhật 2026-11-06. Đọc cùng AGENTS.md; đối chiếu Git/source trư�
 
 ## Tiếp quản tiếp theo
 
-1. Đọc instructions/handoff, kiểm tra Git/remote/diff ở repo cần sửa; giữ blueprint
-   untracked của user, đối chiếu nội dung mới với roadmap trước feature tiếp theo.
-2. L01: viết acceptance/spec review/flashcards/onboarding; review events cần ID và
+1. Đang tạm dừng theo yêu cầu user. Đọc instructions/handoff, blueprint và audit;
+   chỉ tiếp tục feature khi user yêu cầu. Không tự thực hiện Subject District/
+   multi-theme hoặc đổi stack theo bảng gợi ý.
+2. Khi được tiếp tục L01: viết acceptance/spec review/flashcards/onboarding; review events cần ID và
    retry an toàn, không tự dùng edit/delete để cấp XP hoặc đổi XP policy v1.
 3. Browser regression có thể tái chạy bằng helper riêng; cần backend replica set,
    không dùng preview server để test auth. Không đưa fault controls vào app thật.

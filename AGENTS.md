@@ -2,6 +2,10 @@
 
 Áp dụng cho Codex, Google Antigravity và agent khác trong repository này.
 Đầu mỗi session đọc file này và `AI_HANDOFF.md`, rồi đối chiếu Git/source thực tế.
+Trước task feature, đọc `docs/Knowledge_City_Product_Blueprint_14_Muc.md`
+(tổng quan sản phẩm) và `docs/BLUEPRINT_ALIGNMENT.md` (scope/đối chiếu hiện hành),
+rồi spec chi tiết. Stack/balance ghi là gợi ý trong blueprint không tự thay quyết
+định đã chốt. “Local đạt” chưa là staging-accepted theo DoD mục 9.5.
 
 ## Mục tiêu và kiến trúc
 
@@ -15,6 +19,9 @@ MVP ưu tiên vòng lặp hoàn chỉnh, bảo vệ dữ liệu và khả năng 
 - Game companion: repository `D:/isometric-grid-building-game/isometric_building_game`, Godot 4.7.2, renderer
   isometric/grid. Game local chưa đồng nghĩa game đã nhúng vào website.
 - Giữ stack hiện có; không tự chuyển Next.js/PostgreSQL hoặc thay toàn bộ UI.
+- Scope user: chỉ một concept thành phố với assets hiện có. Nhiều theme/loại
+  thành phố và Subject District cần asset/concept khác nằm ngoài scope; không tự
+  đưa trở lại V2. Phân loại notes theo môn vẫn độc lập với giới hạn này.
 
 ## Modules và quan hệ
 
