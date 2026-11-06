@@ -5,6 +5,7 @@ node_modules/
 coverage/
 dist/
 notegame-web/game-build/
+notegame-web/game-city-build/
 .artifacts/
 *.log
 .DS_Store

@@ -51,6 +51,7 @@ CITY_SPEC trước mở input. Chỉ render state server trả về, kể cả r
 
 - Network/5xx/mất JSON response: giữ chính xác method/path/key/body và draft,
   chỉ `retry` gửi lại. Chặn mutation mới và refresh khi kết quả còn chưa rõ.
+  Mỗi API call timeout sau 20 giây, abort khi dispose; timeout write vẫn uncertain.
 - 409 CITY_CONFLICT: bỏ request đã bị từ chối, đọc lại /city, trả lỗi kèm draft
   để người dùng chọn lại. Không tự replay draft với revision mới. Nếu reload lỗi,
   khóa mutation tới khi refresh thành công.
@@ -67,3 +68,19 @@ VM acceptance C02b.1: forged origin/source/schema không gọi API; bootstrap kh
 lộ CSRF; mutation serialize, revision server; lost response retry byte-identical;
 conflict reload giữ draft; expiry/account switch khóa bridge; dispose chặn late replies.
 VM/HTTP tests không chứng minh Godot renderer hoặc browser E2E hoạt động.
+
+## C02b.2 renderer/host acceptance
+
+- `/city.html` yêu cầu session trước tạo iframe, dùng artifact `game-city-build`
+  riêng (manifest preview=false, bridgeVersion=1), giữ `/game.html` sandbox.
+- Preset Web City dùng scene ServerCity trong staging; không đổi native main scene,
+  KnowledgeManager hoặc native placement. Chỉ instantiate 4 scene paths cố định.
+- Dựng TileMapLayer axial→stacked-offset, 32×32 cells và tô 4 blocked cells.
+  Camera WASD/zoom; chọn inventory → click place, chọn footprint → M/move hoặc
+  Delete/thu hồi. Ghost không thay layout chính trước API success.
+- Chưa load/đang gửi/uncertain/expired khóa input ghi. Retry giữ draft, conflict
+  render snapshot reload và giữ ghost, không tự submit lại. Refresh đọc lại rewards.
+- Shell gọi JavaScriptBridge callback bằng JSON string; chỉ chuyển reply đúng
+  parent/origin/requestId/schema. Parent dispose trước unload/restart.
+- Native regression xác minh authoritative render/retry/conflict/expiry và map;
+  web VM/HTTP kiểm tra host/lifecycle. Export/browser phải có evidence riêng C02b.3.

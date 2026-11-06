@@ -3,9 +3,12 @@
 Website ghi chú HTML/JavaScript/Fabric với Express 5 và MongoDB; city renderer nằm
 ở repository `isometric_building_game` (Godot 4.7.2).
 
-**Đã có Godot chơi thử nhúng tại `/game.html` (C02a).** Sau build, dùng
+**Thành phố tài khoản tại `/city.html` đã nối City API (C02b).** Core loop và các
+case lỗi đã kiểm chứng trên Chromium local (C02c); chưa là staging/production.
+Sau build, chạy backend replica set, đăng nhập và mở thành phố từ kho ghi chú.
+Godot chơi thử riêng tại `/game.html` (C02a): dùng
 `npm run preview:game` và mở `http://127.0.0.1:5050/game.html`. Bản này xây thử tự
-do, chưa lưu city vào tài khoản; C02b nối City API và C02c xác nhận browser E2E.
+do, chưa lưu city vào tài khoản.
 Hướng dẫn export/host: [docs/WEB_GAME.md](docs/WEB_GAME.md). Artifacts không nằm
 trong Git; cần build local hoặc lấy artifact CI khi triển khai.
 
@@ -34,7 +37,7 @@ npm run test:integration
 git diff --check
 ```
 
-74 tests dùng HTTP thật trên cổng loopback ngẫu nhiên với model thay thế,
+92 tests dùng HTTP thật trên cổng loopback ngẫu nhiên với model thay thế,
 và VM chạy mã frontend để kiểm tra lỗi save/delete, revision và khởi động session.
 Tests kiểm tra auth/CSRF/owner isolation ở tầng HTTP nhưng không kết nối MongoDB
 thật. Thêm 34 integration tests chạy MongoDB 8.2.6 replica set cục bộ riêng để
@@ -70,9 +73,10 @@ GitHub Actions chạy syntax/tests trên Linux khi push feature branch hoặc m�
 - City backend C01: GET `/api/city/catalog`, GET `/api/city`, POST
   `/api/city/buildings`, PATCH/DELETE `/api/city/buildings/:id`; session/CSRF,
   ownership, polygon collision, revision CAS, idempotent debit/refund và save/load.
-  Xem `docs/CITY_SPEC.md`. Web preview đã có; sync tài khoản/city còn chờ C02b.
-- **Chưa sẵn sàng production:** còn thiếu authenticated Web integration,
-  backup/restore, staging/UAT. Không triển khai công khai dữ liệu người dùng ở trạng thái này.
+  Xem `docs/CITY_SPEC.md`. `/city.html` dùng renderer riêng, chỉ áp layout server
+  xác nhận; retry giữ key/body, conflict giữ draft, expiry khóa frame.
+- **Chưa sẵn sàng production:** còn thiếu backup/restore, staging/UAT,
+  CI browser và cross-device/cross-browser verification.
 
 Kế hoạch task, acceptance criteria và quyết định còn phải chốt:
 [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md).

@@ -1,5 +1,47 @@
 # Kiểm thử local và CI
 
+## C02b/C02c — authenticated city, 2026-11-06
+
+- Node 24.14.0: syntax, 92 regression tests và 34 MongoDB integration tests.
+  Bridge/host tests thêm strict envelope, origin/source, owner switch, timeout,
+  identical retry, conflict reload, obsolete async load/pagehide và dispose.
+  Editor form reset/fill trước khi hiện modal; delayed canvas init không được
+  xóa text vừa gõ hoặc khởi tạo lại editor đã đóng/thay thế (bug thấy khi E2E).
+- Game `f1739c7` main: 6 suites đạt (5 cũ + server_city_regression). Suite mới
+  kiểm tra 1024 cells/4 blocked, axial→native, 4 items, không optimistic commit,
+  retry/conflict/draft, remove và expiry. JSON numeric types được chuẩn hóa khi
+  so ô cấm. Sandbox certificate-store warning không phải parser failure.
+- Export thật cả Web Preview/Web City từ source pin sạch; mỗi build có 4 SHA-256,
+  WASM/PCK MIME đúng. City dùng main_scene riêng trong staging, không sửa World.
+- Chromium desktop local: UI đăng ký/login → note hợp lệ → 20 XP + 1 starter →
+  place → move → reload và logout/login lại vẫn đúng layout/XP. Final export
+  được kiểm tra thêm place → reload sau session mới.
+- Fault fixture: 503 ở move giữ original + ghost và khóa edits; retry thành công.
+  Hai tab cùng revision: remove ở A, move stale ở B nhận conflict; B render city
+  rỗng mới, giữ ghost và nhận đúng 1 refund trong kho. Place vào ô cấm không
+  trừ kho. Thu hồi session test khiến frame xóa layout/inventory riêng và khóa ghi.
+- Snapshot sau place/move/remove: revision 3, 3 receipts, inventory=1, XP=20.
+  Sau đặt lại/reload: revision 4, 4 receipts, 1 building, inventory=0, XP=20.
+  Preview riêng khởi động/đặt được; normal gameplay không warn/error trong console.
+- Ảnh local ignored: `.artifacts/city-persisted.png`, `city-retry.png`,
+  `city-conflict.png`, `city-expiry.png`. Test servers/replica sets đã dừng.
+
+Chạy browser fixture trong console tương tác:
+
+```text
+node server/test/helpers/browser-server.js
+```
+
+Fixture tự tạo replica set/port loopback, không đọc .env/URI ứng dụng, không seed.
+Tạo account/note qua UI hoặc API bình thường. stdin commands chỉ thuộc fixture:
+`fail-next-city` (503 trước write), `drop-next-city-response` (mất response sau
+commit; browser có thể tự retry HTTP), `expire-sessions`, `snapshot`, `stop`.
+Không có fault endpoints trong ứng dụng. Dùng `stop`/Ctrl+C để teardown.
+
+Đây là browser verification local qua tool, chưa có automated browser CI job.
+CI remote, Safari/mobile, cross-device, public hosting, staging/UAT và backup/
+restore vẫn pending; không coi 92 VM/HTTP tests là bằng chứng các mục đó.
+
 ## Windows editor / shared cache
 
 Khi agent và người dùng chạy Godot bằng hai tài khoản Windows khác nhau, kiểm tra

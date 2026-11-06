@@ -57,8 +57,9 @@ jobs:
           mkdir -p "$HOME/.local/share/godot/export_templates/4.7.2.stable"
           unzip -j -q /tmp/templates.tpz 'templates/web_nothreads_*.zip' -d "$HOME/.local/share/godot/export_templates/4.7.2.stable"
       - run: npm run build:game
+      - run: npm run build:game:city
       - name: Require committed game source
-        run: node -e "if (require('./notegame-web/game-build/build.json').sourceDirty) process.exit(1)"
+        run: node -e "for (const dir of ['game-build','game-city-build']) if (require('./notegame-web/'+dir+'/build.json').sourceDirty) process.exit(1)"
       - uses: actions/upload-artifact@v4
         with:
           name: knowledge-city-web-preview

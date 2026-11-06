@@ -10,15 +10,16 @@ const city = revision => ({ city: { layoutVersion: 1, revision, buildings: [] },
 const apiError = (status, code) => Object.assign(new Error('secret diagnostic'), { status, code });
 const deferred = () => { let resolve; const promise = new Promise(r => { resolve = r; }); return { promise, resolve }; };
 function client() {
-  const calls = [], replies = [], listeners = new Map();
+  const calls = [], replies = [], listeners = new Map(), timers = new Set();
   let sequence = 0, counter = 0;
   const target = { postMessage(data, origin) { assert.equal(origin, 'https://city.example'); replies.push(JSON.parse(JSON.stringify(data))); } };
   const frame = { contentWindow: target };
-  const c = { calls, replies, frame, target, owner: 'owner', mutation: async () => ({ ...city(8), buildingId, replayed: false }),
+  const c = { calls, replies, frame, target, timers, owner: 'owner', mutation: async () => ({ ...city(8), buildingId, replayed: false }),
     readCity: async () => city(7) };
   const request = async (url, options) => {
-    calls.push({ url, options: options ? JSON.parse(JSON.stringify(options)) : undefined });
-    if (options) return c.mutation(url, options);
+    const logged = options?.method ? { method: options.method, headers: options.headers, body: options.body } : undefined;
+    calls.push({ url, options: logged ? JSON.parse(JSON.stringify(logged)) : undefined });
+    if (options?.method) return c.mutation(url, options);
     if (url === '/api/auth/me') return { user: { id: c.owner }, csrfToken: 'parent-only-secret' };
     if (url === '/api/city/catalog') return catalog;
     if (url === '/api/progress') return { totalXp: 20 };
@@ -26,9 +27,10 @@ function client() {
     if (url === '/api/city') return c.readCity();
     assert.fail(url);
   };
-  const window = { KnowledgeAuth: { request, me: () => request('/api/auth/me') },
+  const window = { KnowledgeAuth: { request, me: options => request('/api/auth/me', options) },
     addEventListener(type, fn) { listeners.set(type, fn); }, removeEventListener(type) { listeners.delete(type); } };
-  vm.runInNewContext(source, { window, location: { origin: 'https://city.example' }, crypto: { randomUUID: () => `key-${++counter}` } });
+  vm.runInNewContext(source, { window, location: { origin: 'https://city.example' }, crypto: { randomUUID: () => `key-${++counter}` },
+    AbortController, setTimeout(fn) { timers.add(fn); return fn; }, clearTimeout(fn) { timers.delete(fn); } });
   c.bridge = window.KnowledgeCityBridge.create({ frame });
   c.send = (type, payload, override = {}) => listeners.get('message')?.({ origin: 'https://city.example', source: target,
     data: { channel: 'knowledge-city', version: 1, requestId: ++sequence, type, ...(payload === undefined ? {} : { payload }) }, ...override });
@@ -143,4 +145,20 @@ test('replaced frame never receives results from the old bridge', async () => {
   const loading = c.send('initialize'); c.frame.contentWindow = {};
   wait.resolve(city(7)); await loading;
   assert.equal(c.replies.length, 0); c.bridge.dispose();
+});
+
+test('stalled writes abort after timeout and retry keeps original key and body', async () => {
+  const c = client(); await c.send('initialize');
+  const started = deferred();
+  c.mutation = (_url, options) => new Promise((resolve, reject) => {
+    options.signal.addEventListener('abort', () => reject(new Error('timed out')));
+    started.resolve();
+  });
+  const writing = c.place(); await started.promise;
+  const original = c.calls.at(-1);
+  for (const timeout of c.timers) timeout();
+  await writing;
+  assert.equal(c.last().code, 'CITY_RETRY_REQUIRED'); assert.equal(c.timers.size, 0);
+  c.mutation = async () => ({ ...city(8), buildingId, replayed: true });
+  await c.send('retry'); assert.deepEqual(c.calls.at(-1), original); assert.equal(c.last().ok, true);
 });

@@ -12,7 +12,7 @@ quyết định triển khai và công việc chưa hoàn thành.
   N02 đã kiểm chứng auth/owner/CAS trên MongoDB thật giữa hai API processes.
 - X01 đã có ledger/progress/rewards/inventory atomic và dashboard/export đọc
   backend; xem PROGRESSION_SPEC.md. C01 City API đã có backend tests;
-  C02a Web export/embed preview đã chơi thử; authenticated bridge C02b chưa làm.
+  C02a preview và C02b authenticated city đã chạy thật; C02c local Chromium đạt.
 - Game local vẫn unlock theo số kiến thức đang tồn tại; chưa đồng bộ entitlement.
 - Giữ stack hiện tại trong MVP; việc chuyển PostgreSQL/Next.js là quyết định kiến trúc riêng,
   cần migration và kiểm thử dữ liệu, không phải điều kiện để bắt đầu sửa nền tảng.
@@ -31,8 +31,8 @@ quyết định triển khai và công việc chưa hoàn thành.
 | X01 | XP ledger, level và rewards atomic | N01 | X01a/b/c code + unit/DB concurrency/rollback đạt; E2E browser còn chờ city |
 | C01 | City API, inventory và version | X01 | C01a/b/c local đạt: catalog/native contract, place/move/remove, owner/CAS/rollback/restart; chờ browser C02 |
 | C02a | Godot Web export và trang game nhúng tương tác | Game main | Local đạt: WASM/WebGL, camera/zoom/place/move/delete, loader/retry/fullscreen; CI remote chưa xác nhận |
-| C02b | Bridge tài khoản và lưu/tải city qua API | C01 + C02a | C02b.1 transport/spec có VM tests; còn renderer/host C02b.2 và export/browser C02b.3. Xem GAME_BRIDGE_SPEC.md |
-| C02c | Browser E2E vòng lặp đầy đủ | C02b | E2E-01 account→note→XP→build→reload/login lại, không duplicate XP/reward |
+| C02b | Bridge tài khoản và lưu/tải city qua API | C01 + C02a | Local đạt: city.html, renderer riêng, auth/CAS/idempotency, 6 native suites, 2 exports pin f1739c7 |
+| C02c | Browser E2E vòng lặp đầy đủ | C02b | Local Chromium đạt: account→note→XP→build→reload/login lại; 503/retry, ô cấm, hai tab, expiry/refund. CI browser/staging chưa có |
 | L01 | Review, flashcards, onboarding | C02 | Phiên ôn tập có ID, retry an toàn, accessibility |
 | Q01 | Achievement, quest và QOL | L01 | Progress bền vững, không cấp thưởng trùng |
 | O01 | Staging, backup/restore, rollback, monitoring | C02 | DEP-01..02 và release checklist |
@@ -45,8 +45,8 @@ Không đánh dấu staging/UAT hoặc test DB concurrency đạt khi mới ch�
 
 `GodotBridge` vẫn là data export. C02a đã có Web preset/custom shell, staging
 builder và `/game.html` iframe preview; xem `WEB_GAME.md` để build/host.
-C02b/c chưa hoàn thành; không coi preview là core loop đồng bộ tài khoản.
-C02a/b/c là phần tách chi tiết của C02 cũ; L01/O01 vẫn phụ thuộc C02 hoàn chỉnh.
+C02b/c đã có evidence local ở TESTING.md; preview vẫn là sandbox riêng.
+C02a/b/c là phần tách chi tiết của C02 cũ; tiếp theo L01, chưa là staging/UAT.
 
 - **C02a — chơi thử trên web:** cấu hình Web export Godot 4.7.2; xác minh export
   templates, cấu hình threaded/non-threaded và yêu cầu hosting/header/MIME thực tế.

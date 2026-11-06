@@ -21,6 +21,15 @@ window.KnowledgeCityBridge = (() => {
   function create({ frame }) {
     const target = frame.contentWindow;
     let disposed = false, expired = false, busy = false, lastId = 0, state = null, pending = null, owner = null;
+    const controllers = new Set();
+    async function timed(run) {
+      const controller = new AbortController();
+      controllers.add(controller);
+      const timer = setTimeout(() => controller.abort(), 20000);
+      try { return await run(controller.signal); }
+      finally { clearTimeout(timer); controllers.delete(controller); }
+    }
+    const api = (path, options = {}) => timed(signal => window.KnowledgeAuth.request(path, { ...options, signal }));
     function reply(requestId, result) {
       if (!disposed && frame.contentWindow === target) target.postMessage({ channel, version: 1, requestId, type: 'result', ...result }, location.origin);
     }
@@ -29,7 +38,7 @@ window.KnowledgeCityBridge = (() => {
         ...(draft ? { draft } : {}), ...(state ? { state } : {}) };
     }
     async function checkSession() {
-      const session = await window.KnowledgeAuth.me();
+      const session = await timed(signal => window.KnowledgeAuth.me({ signal }));
       if (typeof session?.user?.id !== 'string' || !session.user.id || (owner !== null && owner !== session.user.id)) {
         const error = new Error('Session changed'); error.status = 401; throw error;
       }
@@ -39,9 +48,9 @@ window.KnowledgeCityBridge = (() => {
       await checkSession();
       if (disposed) return;
       const [catalog, progress, rewards] = await Promise.all([
-        window.KnowledgeAuth.request('/api/city/catalog'), window.KnowledgeAuth.request('/api/progress'), window.KnowledgeAuth.request('/api/rewards')
+        api('/api/city/catalog'), api('/api/progress'), api('/api/rewards')
       ]);
-      const snapshot = await window.KnowledgeAuth.request('/api/city');
+      const snapshot = await api('/api/city');
       if (!snapshotValid(snapshot) || catalog.version !== 1 || !object(catalog.grid) || !Array.isArray(catalog.items) || !Array.isArray(rewards.unlocks)) throw new Error('Invalid snapshot');
       if (!disposed) state = { catalog, progress, unlocks: rewards.unlocks, city: snapshot.city, inventory: snapshot.inventory };
     }
@@ -56,7 +65,7 @@ window.KnowledgeCityBridge = (() => {
         // Do not replay an uncertain write under a newly logged-in account.
         await checkSession();
         if (disposed) return null;
-        const result = await window.KnowledgeAuth.request(request.path, {
+        const result = await api(request.path, {
           method: request.method, headers: { 'Idempotency-Key': request.key }, body: request.body
         });
         if (disposed) return null;
@@ -72,7 +81,7 @@ window.KnowledgeCityBridge = (() => {
         if (error.code === 'CITY_CONFLICT') {
           const previous = state; state = null;
           try {
-            const snapshot = await window.KnowledgeAuth.request('/api/city');
+            const snapshot = await api('/api/city');
             if (!snapshotValid(snapshot)) throw new Error('Invalid snapshot');
             if (!disposed) state = { ...previous, city: snapshot.city, inventory: snapshot.inventory };
           } catch (reloadError) { expire(reloadError); }
@@ -114,6 +123,7 @@ window.KnowledgeCityBridge = (() => {
     window.addEventListener('message', receive);
     return { dispose() {
       disposed = true; pending = null; state = null; owner = null;
+      for (const controller of controllers) controller.abort();
       window.removeEventListener('message', receive);
     } };
   }

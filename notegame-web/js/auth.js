@@ -18,7 +18,7 @@ window.KnowledgeAuth = (() => {
   }
   return {
     request,
-    me: () => request('/api/auth/me'),
+    me: (options = {}) => request('/api/auth/me', options),
     logout: async () => { await request('/api/auth/logout', { method: 'POST' }); csrfToken = null; },
     async fetch(path, options = {}) {
       const headers = { ...options.headers };

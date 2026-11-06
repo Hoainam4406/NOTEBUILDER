@@ -26,7 +26,7 @@ MVP ưu tiên vòng lặp hoàn chỉnh, bảo vệ dữ liệu và khả năng 
 | Persistence | `server/models/`, `server/index.js` | Unique indexes và kiểm tra transaction trước khi listen |
 | Web UI | `notegame-web/js/notes.js`, `auth.js`, `account.js` | Online đọc XP từ server; lỗi lưu giữ bản nháp |
 | City API | `server/city.js`, `city-rules.js`, `models/City.js`, `CityMutation.js` | Layout/inventory/receipt atomic; revision CAS; catalog/map ở `server/data/` |
-| Godot | Companion `Scenes/Buildings/`, `Scenes/Knowledge/`, `World/` | C02a preview đã có; C02b.1 parent transport có tests, renderer/host authenticated và C02c còn chờ |
+| Godot | Companion `Scenes/City/`, `Scenes/Buildings/`, `World/` | C02a preview riêng; C02b authenticated + C02c local Chromium đạt, chưa staging/CI browser |
 
 ## Quy tắc kỹ thuật
 

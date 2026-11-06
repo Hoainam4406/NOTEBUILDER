@@ -63,6 +63,7 @@ let notes = [];
 let currentFilter = 'all';
 let editingNoteId = null;
 let editingRevision = null;
+let editorGeneration = 0;
 let pendingCreate = null;
 let serverProgress = null;
 let serverRewards = null;
@@ -544,7 +545,9 @@ function updateGamification() {
     if (statXpText) statXpText.textContent = `${totalXp} XP (${xpInLevel}/${levelCost} để lên cấp)`;
     if (statProgressFill) statProgressFill.style.width = `${Math.min(100, Math.max(0, xpInLevel / levelCost * 100))}%`;
     const count = serverRewards.inventory.reduce((sum, item) => sum + item.quantity, 0);
-    if (godotAssetStatus) godotAssetStatus.textContent = count ? `Đã nhận ${count} công trình trong kho` : 'Lưu bài học đầu tiên để nhận công trình khởi đầu';
+    if (godotAssetStatus) godotAssetStatus.textContent = count ? `Đã nhận ${count} công trình trong kho`
+      : serverRewards.unlocks?.length ? 'Kho đang trống · mở Thành phố của bạn để xem công trình đã đặt'
+        : 'Lưu bài học đầu tiên để nhận công trình khởi đầu';
     return;
   }
   const noteCount = notes.length;
@@ -661,23 +664,29 @@ function renderNotes() {
 
 // Modal Actions
 function openModal(noteToEdit = null) {
+  const generation = ++editorGeneration;
   editingNoteId = noteToEdit ? noteToEdit.id : null;
   editingRevision = noteToEdit?.revision ?? null;
   pendingCreate = null;
   const modalTitle = document.getElementById('modalTitle');
+  if (noteToEdit) {
+    if (modalTitle) modalTitle.textContent = 'Xưởng Ghi Chú - Vẽ & Chỉnh Sửa Bài Học';
+    document.getElementById('noteTitleInput').value = noteToEdit.title;
+    document.getElementById('noteCategoryInput').value = noteToEdit.category || '';
+    document.getElementById('noteContentInput').value = noteToEdit.content || '';
+    document.getElementById('noteTagsInput').value = (noteToEdit.tags || []).join(', ');
+  } else {
+    if (modalTitle) modalTitle.textContent = 'Xưởng Ghi Chú - Tạo Bài Học Mới';
+    noteForm.reset();
+  }
   noteModal?.classList.add('active');
 
   // Initialize Fabric.js if not yet ready
   setTimeout(() => {
+    if (generation !== editorGeneration) return;
     initFabricCanvas();
 
     if (noteToEdit) {
-      if (modalTitle) modalTitle.textContent = 'Xưởng Ghi Chú - Vẽ & Chỉnh Sửa Bài Học';
-      document.getElementById('noteTitleInput').value = noteToEdit.title;
-      document.getElementById('noteCategoryInput').value = noteToEdit.category || '';
-      document.getElementById('noteContentInput').value = noteToEdit.content || '';
-      document.getElementById('noteTagsInput').value = (noteToEdit.tags || []).join(', ');
-
       // Select template radio
       const radio = document.querySelector(`input[name="noteTemplate"][value="${noteToEdit.template}"]`);
       if (radio) {
@@ -699,9 +708,6 @@ function openModal(noteToEdit = null) {
         canvasUndoStack = [];
       }
     } else {
-      if (modalTitle) modalTitle.textContent = 'Xưởng Ghi Chú - Tạo Bài Học Mới';
-      noteForm.reset();
-
       // Default select template 1
       const defaultRadio = document.querySelector('input[name="noteTemplate"][value="1"]');
       if (defaultRadio) {
@@ -721,6 +727,7 @@ function openModal(noteToEdit = null) {
 }
 
 function closeModal() {
+  editorGeneration++;
   noteModal?.classList.remove('active');
   editingNoteId = null;
   editingRevision = null;

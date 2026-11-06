@@ -21,6 +21,7 @@ function client(fetchImpl, online = true) {
   vm.runInContext(source, context);
   vm.runInContext(`
     var originalUpdateGamification = updateGamification;
+    var originalCloseModal = closeModal;
     isMongoConnected = ${online};
     notes = [{id: 'existing', title: 'Original'}];
     showToast = message => effects.messages.push(message);
@@ -159,6 +160,46 @@ test('progress failure clears stale dashboard state and never invents XP from no
   assert.equal(c.elements.statXpText.textContent, 'XP chưa được xác nhận');
   assert.equal(c.run('notes.length'), 1);
   assert.equal(c.elements.statProgressFill.style.width, '0%');
+});
+
+test('empty unplaced inventory does not imply that an earned starter was never unlocked', async () => {
+  const c = client(async url => ({ ok: true, json: async () => url === '/api/progress'
+    ? { totalXp: 20, level: 1, xpInLevel: 20, xpToNextLevel: 80 }
+    : { inventory: [], unlocks: [{ catalogId: 'starter' }] } }));
+  await c.run('loadServerProgress()'); c.run('originalUpdateGamification()');
+  assert.match(c.elements.godotAssetStatus.textContent, /công trình đã đặt/);
+  assert.doesNotMatch(c.elements.godotAssetStatus.textContent, /bài học đầu tiên/);
+});
+
+function modalClient() {
+  const c = client(async () => ({ ok: true }));
+  const timers = [];
+  c.context.setTimeout = fn => timers.push(fn);
+  c.context.document.querySelector = () => null;
+  c.context.document.querySelectorAll = () => [];
+  c.elements.noteModal.classList = { add() {}, remove() {} };
+  c.elements.noteForm.reset = () => { for (const key of Object.keys(c.fields)) c.fields[key] = ''; };
+  c.run('initFabricCanvas = () => { effects.canvasInits = (effects.canvasInits || 0) + 1; fabricCanvas = {clear() {}}; }; setCanvasPaperBackground = () => {}; setPenMode = () => {};');
+  return { ...c, timers };
+}
+
+test('delayed canvas startup never resets new text typed immediately after opening create or edit', () => {
+  for (const edit of [false, true]) {
+    const c = modalClient();
+    c.run(edit ? 'openModal({id:"existing",revision:2,title:"Stored",content:"Stored body"})' : 'openModal()');
+    c.fields.noteTitleInput = 'Fast new title'; c.fields.noteContentInput = 'Fast new body';
+    c.timers[0]();
+    assert.equal(c.fields.noteTitleInput, 'Fast new title'); assert.equal(c.fields.noteContentInput, 'Fast new body');
+  }
+});
+
+test('closing or replacing an editor invalidates its pending canvas initialization', () => {
+  const c = modalClient();
+  c.run('openModal(); originalCloseModal();'); c.timers[0]();
+  assert.equal(c.effects.canvasInits, undefined);
+  c.run('openModal({id:"old",title:"Old"}); openModal({id:"new",title:"New"});');
+  c.timers[1](); assert.equal(c.effects.canvasInits, undefined);
+  c.timers[2](); assert.equal(c.effects.canvasInits, 1); assert.equal(c.fields.noteTitleInput, 'New');
 });
 test('online Godot export uses authenticated server data and fails without a fake fallback', async () => {
   const c = client(async url => {
