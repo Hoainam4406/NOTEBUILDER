@@ -12,7 +12,7 @@ MVP ưu tiên vòng lặp hoàn chỉnh, bảo vệ dữ liệu và khả năng 
 - Web: `notegame-web/`, HTML/CSS/JavaScript và Fabric.js; Express phục vụ cùng origin.
 - Backend: `server/`, Node 24.14.0, CommonJS, Express 5, Mongoose/MongoDB.
   Modular monolith; replica set hoặc sharded cluster là điều kiện transaction.
-- Game companion: repository `E:/isometric_building_game`, Godot 4.7.2, renderer
+- Game companion: repository `D:/isometric-grid-building-game/isometric_building_game`, Godot 4.7.2, renderer
   isometric/grid. Game local chưa đồng nghĩa game đã nhúng vào website.
 - Giữ stack hiện có; không tự chuyển Next.js/PostgreSQL hoặc thay toàn bộ UI.
 
@@ -26,7 +26,7 @@ MVP ưu tiên vòng lặp hoàn chỉnh, bảo vệ dữ liệu và khả năng 
 | Persistence | `server/models/`, `server/index.js` | Unique indexes và kiểm tra transaction trước khi listen |
 | Web UI | `notegame-web/js/notes.js`, `auth.js`, `account.js` | Online đọc XP từ server; lỗi lưu giữ bản nháp |
 | City API | `server/city.js`, `city-rules.js`, `models/City.js`, `CityMutation.js` | Layout/inventory/receipt atomic; revision CAS; catalog/map ở `server/data/` |
-| Godot | Companion `Scenes/Buildings/`, `Scenes/Knowledge/`, `World/` | C02a Web preview đã có; authenticated bridge C02b và browser E2E C02c chưa làm |
+| Godot | Companion `Scenes/Buildings/`, `Scenes/Knowledge/`, `World/` | C02a preview đã có; C02b.1 parent transport có tests, renderer/host authenticated và C02c còn chờ |
 
 ## Quy tắc kỹ thuật
 
@@ -51,7 +51,7 @@ MVP ưu tiên vòng lặp hoàn chỉnh, bảo vệ dữ liệu và khả năng 
 3. Test phù hợp, review diff và `git diff --check`; thất bại thì sửa, không commit lỗi.
 4. Trước **mỗi commit và mỗi push**, xác nhận `git rev-parse --show-toplevel`,
    `git branch --show-current`, `git remote -v` và status đúng đích:
-   - Web: `E:/NOTEBUILDER`, branch `websiteWorkandTest`, remote
+   - Web: `D:/NOTEBUILDER`, branch `websiteWorkandTest`, remote
      `https://github.com/Hoainam4406/NOTEBUILDER.git`.
    - Game: chỉ branch `main`, remote
      `https://github.com/SubNhatSan/isometric_building_game.git`;

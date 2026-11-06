@@ -31,7 +31,7 @@ quyết định triển khai và công việc chưa hoàn thành.
 | X01 | XP ledger, level và rewards atomic | N01 | X01a/b/c code + unit/DB concurrency/rollback đạt; E2E browser còn chờ city |
 | C01 | City API, inventory và version | X01 | C01a/b/c local đạt: catalog/native contract, place/move/remove, owner/CAS/rollback/restart; chờ browser C02 |
 | C02a | Godot Web export và trang game nhúng tương tác | Game main | Local đạt: WASM/WebGL, camera/zoom/place/move/delete, loader/retry/fullscreen; CI remote chưa xác nhận |
-| C02b | Bridge tài khoản và lưu/tải city qua API | C01 + C02a | Server xác thực XP/ownership/placement; reload đúng city, không dùng debug unlock-all |
+| C02b | Bridge tài khoản và lưu/tải city qua API | C01 + C02a | C02b.1 transport/spec có VM tests; còn renderer/host C02b.2 và export/browser C02b.3. Xem GAME_BRIDGE_SPEC.md |
 | C02c | Browser E2E vòng lặp đầy đủ | C02b | E2E-01 account→note→XP→build→reload/login lại, không duplicate XP/reward |
 | L01 | Review, flashcards, onboarding | C02 | Phiên ôn tập có ID, retry an toàn, accessibility |
 | Q01 | Achievement, quest và QOL | L01 | Progress bền vững, không cấp thưởng trùng |

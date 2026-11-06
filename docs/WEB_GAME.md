@@ -12,6 +12,8 @@
 C02a là sandbox preview tự do, bố cục nằm trong RAM và mất khi reload/chơi lại.
 Không cấp server XP/rewards, không đọc/sửa city tài khoản. C02b sẽ nối City API và
 4-item authenticated catalog; C02c mới xác nhận browser core loop hoàn chỉnh.
+Contract/transport C02b.1 ở [GAME_BRIDGE_SPEC.md](GAME_BRIDGE_SPEC.md); chưa attach
+bridge vào preview hoặc bật authenticated renderer.
 
 ## Build và chạy local
 
