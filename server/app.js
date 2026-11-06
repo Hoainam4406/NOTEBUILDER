@@ -71,10 +71,8 @@ function createApp({ NoteModel = Note, auth = createAuth(), progression = create
       : { error: 'Không tìm thấy ghi chú', code: 'NOTE_NOT_FOUND' });
   }
   app.get('/api/godot/export', async (req, res) => {
-    const notes = (await NoteModel.find({ ownerId: req.user._id }).sort({ createdAt: -1 })).map(note => note.toJSON());
-    // Prototype only: X01 replaces this with an authenticated XP ledger.
-    const totalXp = notes.length * 50;
-    res.json({ level: Math.floor(totalXp / 100) + 1, totalXp, notesCount: notes.length,
+    const { notes, progress, rewards } = await progression.exportKnowledge(req.user._id);
+    res.json({ ...progress, progress, rewards, notesCount: notes.length,
       categories: [...new Set(notes.map(note => note.category))],
       source: 'NOTEBUILDER MongoDB Backend', exportedAt: new Date().toISOString(), notes });
   });

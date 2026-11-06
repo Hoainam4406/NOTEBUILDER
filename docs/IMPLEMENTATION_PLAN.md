@@ -9,9 +9,10 @@ quyết định triển khai và công việc chưa hoàn thành.
 - NOTEBUILDER: Express 5, Mongoose/MongoDB, giao diện HTML/JS và Fabric canvas.
 - isometric_building_game: Godot 4.7.2, catalog/placement/collision, ghi chú gắn với công trình.
 - Đã có auth/session/profile, owner isolation và revision CAS ở tầng code/HTTP tests.
-  Chưa kiểm chứng MongoDB thật; chưa có XP ledger hay city backend.
-- XP hiện tại = số note x 50; game unlock theo số kiến thức đang tồn tại.
-  Hai cơ chế này chỉ là prototype, chưa đồng bộ và chưa chống farm.
+  N02 đã kiểm chứng auth/owner/CAS trên MongoDB thật giữa hai API processes.
+- X01 đã có ledger/progress/rewards/inventory atomic và dashboard/export đọc
+  backend; xem PROGRESSION_SPEC.md. Chưa có city backend/Godot bridge.
+- Game local vẫn unlock theo số kiến thức đang tồn tại; chưa đồng bộ entitlement.
 - Giữ stack hiện tại trong MVP; việc chuyển PostgreSQL/Next.js là quyết định kiến trúc riêng,
   cần migration và kiểm thử dữ liệu, không phải điều kiện để bắt đầu sửa nền tảng.
 
@@ -26,7 +27,7 @@ quyết định triển khai và công việc chưa hoàn thành.
 | F05 | CI Linux cho kiểm tra nền tảng | F02-F04 | Syntax + automated tests, không dùng DB production |
 | A01 | Đăng ký/login/logout, session và profile | F02 | Code + HTTP tests đạt; cần gate MongoDB thật |
 | N01 | Owner isolation, note version, search, migration | A01 | Code + HTTP/VM tests đạt; legacy import tắt, note chung không tự gán |
-| X01 | XP ledger, level và rewards atomic | N01 | XP-01..05, RWD-01..02 với DB transaction/concurrency thật |
+| X01 | XP ledger, level và rewards atomic | N01 | X01a/b/c code + unit/DB concurrency/rollback đạt; E2E browser còn chờ city |
 | C01 | City API, inventory và version | X01 | CITY-01..05; ownership/collision/rollback/save-load |
 | C02 | Godot bridge và vòng lặp liên ứng dụng | C01 | E2E-01; frontend không tự cấp XP hay quyền sở hữu |
 | L01 | Review, flashcards, onboarding | C02 | Phiên ôn tập có ID, retry an toàn, accessibility |
@@ -59,16 +60,16 @@ mọi note/export cần session, migration cũ trả 410.
 - Godot: title 1..200, content 1..100000 sau trim; subject 1..100.
   Chỉ công trình thật nhận kiến thức. Lưu lỗi không đổi dữ liệu/unlock và không emit saved.
 
-## Các quyết định phải chốt trước X01/C01
+## Quyết định X01 đã chốt / C01 còn phải chốt
 
-- XP tạo note dự kiến +20 với content >=80 ký tự chuẩn hóa, một lần/note;
+- X01 policy v1: +20 với content >=80 Unicode code points chuẩn hóa, một lần/note;
   fingerprint cùng user để chặn trùng nội dung; cap 200 XP/ngày theo UTC.
 - Save/edit/delete không tự thưởng/thu hồi XP ở MVP; review có event ID riêng.
 - XP_next(L)=100+25*(L-1), milestone cấp qua nhiều level phải được cấp đủ.
 - Auth user ID là khóa ownership cho notes/progress/events/unlocks/inventory/city.
 - Unique event(user,eventKey), unique unlock(user,rewardId), city revision CAS.
-- MongoDB cần replica set và transaction note+ledger+rewards; xác nhận hosting hỗ trợ
-  trước khi chọn giữ MongoDB hay migration PostgreSQL.
+- Đã giữ MongoDB và bắt buộc replica set/transaction, có real-DB tests và startup
+  gate. Hosting staging/production phải hỗ trợ cấu hình này trước khi deploy.
 - Catalog ID/footprint phải thống nhất với catalog Godot; server là nguồn xác thực cuối.
 - Grid bounds, blocked tiles, rotation, inventory count và chính sách thu hồi cần ticket C01.
 

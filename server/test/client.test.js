@@ -8,15 +8,19 @@ const source = fs.readFileSync(path.join(__dirname, '../../notegame-web/js/notes
 function client(fetchImpl, online = true) {
   const effects = { messages: [], storageWrites: 0, closed: 0, reloads: 0, renders: 0 };
   const callbacks = {};
+  const elements = {};
   const fields = { noteTitleInput: 'Test note', noteCategoryInput: 'Vật lý', noteContentInput: 'F = ma', noteTagsInput: '' };
   const context = vm.createContext({
-    document: { getElementById: id => ({ value: fields[id] || '' }), querySelector: () => ({ value: '1' }), addEventListener(name, fn) { callbacks[name] = fn; } },
+    document: { getElementById: id => elements[id] ||= {
+      get value() { return fields[id] || ''; }, set value(value) { fields[id] = value; }, style: {}, textContent: ''
+    }, querySelector: () => ({ value: '1' }), addEventListener(name, fn) { callbacks[name] = fn; } },
     window: { location: { protocol: 'http:', port: '5000' }, crypto: { randomUUID: () => 'client-test-create-request' } },
     fetch: fetchImpl, console: { warn() {}, error() {} }, confirm: () => true,
     localStorage: { setItem() { effects.storageWrites++; }, getItem() { return null; } }, effects
   });
   vm.runInContext(source, context);
   vm.runInContext(`
+    var originalUpdateGamification = updateGamification;
     isMongoConnected = ${online};
     notes = [{id: 'existing', title: 'Original'}];
     showToast = message => effects.messages.push(message);
@@ -25,7 +29,7 @@ function client(fetchImpl, online = true) {
     renderNotes = () => effects.renders++;
     updateGamification = () => {};
   `, context);
-  return { context, effects, callbacks, fields, run: code => vm.runInContext(code, context) };
+  return { context, effects, callbacks, fields, elements, run: code => vm.runInContext(code, context) };
 }
 for (const [label, fetchImpl] of [
   ['HTTP 400', async () => ({ ok: false, status: 400 })],
@@ -134,4 +138,42 @@ test('draft changed after uncertain create remains open once the original save i
   assert.equal(c.run('editingNoteId'), 'confirmed'); assert.equal(c.run('editingRevision'), 0);
   assert.equal(calls[0].body, calls[1].body);
   assert.equal(c.effects.closed, 0); assert.match(c.effects.messages.at(-1), /Bản nháp mới vẫn mở/);
+});
+test('online dashboard uses server XP/rewards even when local note count is different', async () => {
+  const c = client(async url => ({ ok: true, json: async () => url === '/api/progress'
+    ? { totalXp: 250, level: 3, xpInLevel: 25, xpToNextLevel: 125 }
+    : { inventory: [{ catalogId: 'starter', quantity: 1 }, { catalogId: 'house', quantity: 1 }] } }));
+  c.run('notes = Array(200).fill({id: "local"})');
+  assert.equal(await c.run('loadServerProgress()'), true);
+  c.run('originalUpdateGamification()');
+  assert.equal(c.elements.statLevelNum.textContent, 3);
+  assert.match(c.elements.statXpText.textContent, /^250 XP \(25\/150/);
+  assert.match(c.elements.godotAssetStatus.textContent, /2 công trình/);
+  assert.ok(Math.abs(parseFloat(c.elements.statProgressFill.style.width) - 100 / 6) < 0.01);
+});
+test('progress failure clears stale dashboard state and never invents XP from notes', async () => {
+  const c = client(async () => ({ ok: false, status: 503 }));
+  c.run('serverProgress = {totalXp: 500};');
+  assert.equal(await c.run('loadServerProgress()'), false);
+  c.run('originalUpdateGamification()');
+  assert.equal(c.elements.statXpText.textContent, 'XP chưa được xác nhận');
+  assert.equal(c.run('notes.length'), 1);
+  assert.equal(c.elements.statProgressFill.style.width, '0%');
+});
+test('online Godot export uses authenticated server data and fails without a fake fallback', async () => {
+  const c = client(async url => {
+    assert.equal(url, '/api/godot/export');
+    return { ok: true, json: async () => ({ totalXp: 20, level: 1, notesCount: 0, notes: [] }) };
+  });
+  const data = JSON.parse(await c.context.window.GodotBridge.getKnowledgeData());
+  assert.equal(data.totalXp, 20); assert.equal(data.notesCount, 0);
+  const failed = client(async () => ({ ok: false, status: 503 }));
+  await assert.rejects(failed.context.window.GodotBridge.getKnowledgeData(), /Export unavailable/);
+});
+test('file-mode export marks local notes as prototype without authoritative XP', async () => {
+  const c = client(async () => { throw new Error('must not fetch'); }, false);
+  c.context.window.location.protocol = 'file:';
+  const data = JSON.parse(await c.context.window.GodotBridge.getKnowledgeData());
+  assert.equal(data.authoritative, false); assert.equal(data.source, 'offline_prototype');
+  assert.equal(data.totalXp, undefined); assert.equal(data.notes.length, 1);
 });

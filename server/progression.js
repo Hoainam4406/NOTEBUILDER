@@ -71,18 +71,27 @@ function createProgression({ connection = mongoose.connection, now = () => new D
       }
     }
   }
-  async function getProgress(userId) {
-    const stored = await Progress.findOne({ userId });
+  async function getProgress(userId, session = null) {
+    const stored = await Progress.findOne({ userId }).session(session);
     return { ...progressFor(stored?.totalXp || 0), revision: stored?.revision || 0, policyVersion: POLICY_VERSION };
   }
-  async function getRewards(userId) {
-    const unlocks = await Unlock.find({ userId }).sort({ level: 1 });
-    const inventory = await Inventory.find({ userId }).sort({ catalogId: 1 });
+  async function getRewards(userId, session = null) {
+    const unlocks = await Unlock.find({ userId }).sort({ level: 1 }).session(session);
+    const inventory = await Inventory.find({ userId }).sort({ catalogId: 1 }).session(session);
     return { policyVersion: POLICY_VERSION,
       unlocks: unlocks.map(row => ({ rewardId: row.rewardId, catalogId: row.catalogId, level: row.level, grantedAt: row.grantedAt })),
       inventory: inventory.map(row => ({ catalogId: row.catalogId, quantity: row.quantity })) };
   }
-  return { createNote, getProgress, getRewards };
+  async function exportKnowledge(userId) {
+    // Notes and rewards must describe the same committed snapshot during writes.
+    return connection.transaction(async session => {
+      const notes = (await Note.find({ ownerId: userId }).sort({ createdAt: -1 }).session(session)).map(note => note.toJSON());
+      const progress = await getProgress(userId, session);
+      const rewards = await getRewards(userId, session);
+      return { notes, progress, rewards };
+    }, { readConcern: { level: 'snapshot' }, writeConcern: { w: 'majority' } });
+  }
+  return { createNote, getProgress, getRewards, exportKnowledge };
 }
 async function ensureProgressionDatabase(connection = mongoose.connection) {
   const hello = await connection.db.admin().command({ hello: 1 });

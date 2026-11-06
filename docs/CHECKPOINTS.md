@@ -37,6 +37,8 @@
 
 ## X01b — atomic note / XP / rewards
 
+- Commit `24c8330`, đã push websiteWorkandTest.
+
 - Note create có idempotency key, XP events/fingerprint, total XP, unlock và
   inventory cùng MongoDB transaction; GET progress/rewards theo session.
 - Startup yêu cầu replica set/sharded MongoDB và tạo indexes trước khi listen.
@@ -44,6 +46,15 @@
   request cũ. Legacy notes không tự backfill XP.
 - 58/58 regression tests và 16/16 integration tests đạt; syntax/diff checks đạt.
 - Tiếp theo X01c bỏ XP demo online, dùng progress backend cho UI và export.
+
+## X01c — server progress dashboard / export
+
+- Dashboard dùng GET progress/rewards; lỗi tải không suy XP từ notes. Export
+  online lấy snapshot notes/XP/rewards từ backend đã xác thực. File-mode export
+  không xuất XP có thẩm quyền. Bridge JS là async, caller await và xử lý lỗi.
+- 62/62 regression tests và 17/17 real MongoDB integration tests đạt.
+- Tiếp theo C01: specification catalog/footprints, map bounds, inventory/city
+  revision rồi API place/move/remove. C02 Godot bridge và browser E2E sau C01.
 
 | Task | Commit | Kiểm tra local | Push |
 |---|---|---|---|

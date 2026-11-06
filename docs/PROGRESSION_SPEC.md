@@ -12,6 +12,11 @@ Quyết định triển khai từ blueprint v1.0; balance này versioned để p
 - X01c: UI/JSON export dùng progress backend, bỏ XP demo online; regression UI.
 - Sau đó C01: catalog/footprint/inventory/city revision; C02: Godot bridge.
 
+X01c: dashboard GET progress/rewards; khi lỗi hiển thị tiến trình chưa xác nhận,
+không dùng số note thay thế. Godot export online đọc notes/progress/rewards trong
+cùng transaction snapshot. `GodotBridge.getKnowledgeData()` / `exportJSONFile()`
+trả Promise; caller phải await và xử lý lỗi. File-mode giữ prototype riêng.
+
 ## XP policy v1
 
 - Title-only/canvas-only vẫn lưu note; nhận 0 XP. Nội dung plain text sau NFKC,

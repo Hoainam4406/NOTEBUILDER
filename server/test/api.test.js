@@ -27,7 +27,14 @@ class FakeNote {
 }
 before(async () => {
   const auth = { mount() {}, requireUser(req, res, next) { req.user = { _id: 'owner' }; next(); }, csrf(req, res, next) { next(); } };
-  const progression = { async createNote(ownerId, input) { return { note: await new FakeNote({ ...input, ownerId, revision: 0 }).save(), replayed: false }; } };
+  const progression = {
+    async createNote(ownerId, input) { return { note: await new FakeNote({ ...input, ownerId, revision: 0 }).save(), replayed: false }; },
+    async getProgress() { return { totalXp: 20, level: 1 }; },
+    async getRewards() { return { unlocks: [], inventory: [] }; },
+    async exportKnowledge(ownerId) {
+      return { notes: (await FakeNote.find({ ownerId }).sort()).map(note => note.toJSON()), progress: await this.getProgress(), rewards: await this.getRewards() };
+    }
+  };
   server = createApp({ NoteModel: FakeNote, auth, progression, dbReady: () => ready, logger: { error() {} } }).listen(0, '127.0.0.1');
   await once(server, 'listening');
   base = `http://127.0.0.1:${server.address().port}`;

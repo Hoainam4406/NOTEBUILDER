@@ -155,3 +155,13 @@ test('progress/rewards require auth and never use client-supplied user IDs', asy
   assert.equal((await request(`/api/progress?userId=${a.user.id}`, 'GET', undefined, b)).body.totalXp, 0);
   assert.deepEqual((await request('/api/rewards', 'GET', undefined, b)).body.inventory, []);
 });
+test('Godot export preserves earned XP and rewards after all notes have been deleted', async () => {
+  const login = await account();
+  const saved = await request('/api/notes', 'POST', { title: 'Lesson', content }, login);
+  await request(`/api/notes/${saved.body.id}`, 'DELETE', { revision: 0 }, login);
+  const response = await request('/api/godot/export', 'GET', undefined, login);
+  assert.equal(response.status, 200); assert.equal(response.body.totalXp, 20);
+  assert.equal(response.body.notesCount, 0); assert.deepEqual(response.body.notes, []);
+  assert.equal(response.body.progress.totalXp, 20);
+  assert.equal(response.body.rewards.inventory.length, 1);
+});

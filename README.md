@@ -25,10 +25,10 @@ npm run test:integration
 git diff --check
 ```
 
-58 tests dùng HTTP thật trên cổng loopback ngẫu nhiên với model thay thế,
+62 tests dùng HTTP thật trên cổng loopback ngẫu nhiên với model thay thế,
 và VM chạy mã frontend để kiểm tra lỗi save/delete, revision và khởi động session.
 Tests kiểm tra auth/CSRF/owner isolation ở tầng HTTP nhưng không kết nối MongoDB
-thật. Thêm 16 integration tests chạy MongoDB 8.2.6 replica set cục bộ riêng để
+thật. Thêm 17 integration tests chạy MongoDB 8.2.6 replica set cục bộ riêng để
 kiểm tra indexes, auth/owner/CAS giữa hai tiến trình, restart API và rollback.
 Xem [docs/TESTING.md](docs/TESTING.md); chưa xác nhận persistence cross-device.
 GitHub Actions chạy syntax/tests trên Linux khi push feature branch hoặc mở PR.
@@ -45,7 +45,10 @@ GitHub Actions chạy syntax/tests trên Linux khi push feature branch hoặc m�
 - POST note cần `Idempotency-Key`; UI giữ request key/payload khi mất phản hồi,
   retry trả cùng note. Bản nháp thay đổi trong lúc chờ vẫn mở sau khi xác nhận
   lần lưu cũ. Key được giữ trong bộ nhớ của editor hiện tại, không lưu shared storage.
-- XP trên giao diện/export còn là prototype cho đến checkpoint X01c.
+- Dashboard online và JSON export dùng XP/rewards của backend; xóa note không
+  làm mất XP đã nhận. Export đọc notes/progress/rewards trong cùng DB snapshot.
+  `await GodotBridge.getKnowledgeData()` và `await GodotBridge.exportJSONFile()`
+  là async. File-mode export đánh dấu prototype và không xuất XP có thẩm quyền.
 - Auth/session/profile: mở `/account.html`; mật khẩu 12..128 ký tự, session cookie
   HttpOnly, CSRF token và rate limit lưu MongoDB. Startup tạo unique indexes trước
   khi mở cổng. Đặt `NODE_ENV=production` khi dùng HTTPS để cookie có Secure.
@@ -55,7 +58,7 @@ GitHub Actions chạy syntax/tests trên Linux khi push feature branch hoặc m�
 - Notes MongoDB cũ chưa có owner được giữ nguyên, ẩn khỏi mọi tài khoản;
   không tự gán dữ liệu cũ. Import localStorage tự động đã tắt; file HTML mở trực
   tiếp vẫn là prototype offline riêng, không đồng bộ lên tài khoản.
-- **Chưa sẵn sàng production:** còn thiếu UI progress server, city API,
+- **Chưa sẵn sàng production:** còn thiếu city API,
   backup/restore, staging/UAT. Không triển khai công khai dữ liệu người dùng ở trạng thái này.
 
 Kế hoạch task, acceptance criteria và quyết định còn phải chốt:

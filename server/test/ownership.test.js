@@ -25,7 +25,14 @@ const SessionModel = { async findOne(query) {
 } };
 let server, base;
 before(async () => {
-  const progression = { async createNote(ownerId, input) { return { note: await new NoteModel({ ...input, ownerId, revision: 0 }).save(), replayed: false }; } };
+  const progression = {
+    async createNote(ownerId, input) { return { note: await new NoteModel({ ...input, ownerId, revision: 0 }).save(), replayed: false }; },
+    async getProgress() { return { totalXp: 0, level: 1 }; },
+    async getRewards() { return { unlocks: [], inventory: [] }; },
+    async exportKnowledge(ownerId) {
+      return { notes: (await NoteModel.find({ ownerId }).sort()).map(note => note.toJSON()), progress: await this.getProgress(), rewards: await this.getRewards() };
+    }
+  };
   server = createApp({ NoteModel, progression, dbReady: () => true, auth: createAuth({ UserModel, SessionModel }) }).listen(0, '127.0.0.1');
   await once(server, 'listening'); base = `http://127.0.0.1:${server.address().port}`;
 });

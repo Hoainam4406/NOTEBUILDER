@@ -64,6 +64,8 @@ let currentFilter = 'all';
 let editingNoteId = null;
 let editingRevision = null;
 let pendingCreate = null;
+let serverProgress = null;
+let serverRewards = null;
 const noteFetch = (...args) => window.KnowledgeAuth ? window.KnowledgeAuth.fetch(...args) : fetch(...args);
 
 // Paper Template Images
@@ -181,6 +183,7 @@ async function loadNotes() {
       const res = await fetch(url);
       if (res.ok) {
         notes = await res.json();
+        await loadServerProgress();
         updateGamification();
         renderNotes();
         return;
@@ -211,6 +214,25 @@ async function loadNotes() {
 
 function saveNotesToStorage() {
   localStorage.setItem('notebuilder_notes', JSON.stringify(notes));
+}
+
+async function loadServerProgress() {
+  try {
+    const responses = await Promise.all([noteFetch('/api/progress'), noteFetch('/api/rewards')]);
+    if (responses.some(response => !response.ok)) throw new Error('Progress unavailable');
+    const [progress, rewards] = await Promise.all(responses.map(response => response.json()));
+    if (!Number.isSafeInteger(progress.totalXp) || progress.totalXp < 0 || !Number.isSafeInteger(progress.level) || progress.level < 1
+      || !Number.isFinite(progress.xpInLevel) || !Number.isFinite(progress.xpToNextLevel) || progress.xpToNextLevel <= 0
+      || !Array.isArray(rewards.inventory)) throw new Error('Invalid progress response');
+    serverProgress = progress;
+    serverRewards = rewards;
+    return true;
+  } catch {
+    serverProgress = null;
+    serverRewards = null;
+    showToast('Ghi chú đã tải; chưa tải được tiến trình. Hãy tải lại trang để thử lại.');
+    return false;
+  }
 }
 
 /* =======================================================
@@ -494,14 +516,37 @@ function setupEventListeners() {
   });
 
   // Export to Godot
-  btnExportGodot?.addEventListener('click', () => {
-    window.GodotBridge.exportJSONFile();
-    showToast('Đã tải tệp JSON sẵn sàng kết nối với Godot Engine!');
+  btnExportGodot?.addEventListener('click', async () => {
+    try {
+      await window.GodotBridge.exportJSONFile();
+      showToast('Đã tải tệp JSON từ tài khoản hiện tại.');
+    } catch {
+      showToast('Chưa xuất được dữ liệu từ server. Hãy thử lại.');
+    }
   });
 }
 
 // Update Level, XP and Godot Asset tier
 function updateGamification() {
+  if (window.location.protocol.startsWith('http')) {
+    if (!serverProgress) {
+      if (statLevelNum) statLevelNum.textContent = '—';
+      if (statLevelTitle) statLevelTitle.textContent = 'Chưa tải được tiến trình';
+      if (statXpText) statXpText.textContent = 'XP chưa được xác nhận';
+      if (statProgressFill) statProgressFill.style.width = '0%';
+      if (godotAssetStatus) godotAssetStatus.textContent = 'Chưa tải được công trình đã nhận';
+      return;
+    }
+    const { totalXp, level, xpInLevel, xpToNextLevel } = serverProgress;
+    const levelCost = xpInLevel + xpToNextLevel;
+    if (statLevelNum) statLevelNum.textContent = level;
+    if (statLevelTitle) statLevelTitle.textContent = `Hành trình tri thức · Cấp ${level}`;
+    if (statXpText) statXpText.textContent = `${totalXp} XP (${xpInLevel}/${levelCost} để lên cấp)`;
+    if (statProgressFill) statProgressFill.style.width = `${Math.min(100, Math.max(0, xpInLevel / levelCost * 100))}%`;
+    const count = serverRewards.inventory.reduce((sum, item) => sum + item.quantity, 0);
+    if (godotAssetStatus) godotAssetStatus.textContent = count ? `Đã nhận ${count} công trình trong kho` : 'Lưu bài học đầu tiên để nhận công trình khởi đầu';
+    return;
+  }
   const noteCount = notes.length;
   const xpPerNote = 50;
   const totalXp = noteCount * xpPerNote;
@@ -529,7 +574,7 @@ function updateGamification() {
   }
 
   if (statLevelNum) statLevelNum.textContent = level;
-  if (statLevelTitle) statLevelTitle.textContent = `Cấp ${level}: ${tierName}`;
+  if (statLevelTitle) statLevelTitle.textContent = `Demo cục bộ · Cấp ${level}: ${tierName}`;
   if (statXpText) statXpText.textContent = `${totalXp} XP (${xpInCurrentLevel}/100 để lên cấp)`;
   if (statProgressFill) statProgressFill.style.width = `${progressPercent}%`;
   if (godotAssetStatus) godotAssetStatus.textContent = godotAsset;
@@ -793,7 +838,7 @@ async function saveNoteFromForm() {
       ...notePayload
     };
     notes.unshift(newNote);
-    showToast('Đã lưu ghi chú mới! Bạn nhận được +50 XP Tri Thức 🌟');
+    showToast('Đã lưu ghi chú cục bộ (tiến trình demo, chưa đồng bộ tài khoản).');
   }
 
   saveNotesToStorage();
@@ -881,20 +926,23 @@ function escapeHtml(str) {
    Ready for integration with Godot HTML5 / WebAssembly export
    ======================================================= */
 window.GodotBridge = {
-  getKnowledgeData: function() {
-    const totalXp = notes.length * 50;
-    const level = Math.floor(totalXp / 100) + 1;
+  getKnowledgeData: async function() {
+    if (window.location.protocol.startsWith('http')) {
+      const response = await noteFetch('/api/godot/export');
+      if (!response.ok) throw new Error('Export unavailable');
+      return JSON.stringify(await response.json());
+    }
     return JSON.stringify({
-      level: level,
-      totalXp: totalXp,
+      source: 'offline_prototype',
+      authoritative: false,
       notesCount: notes.length,
       categories: [...new Set(notes.map(n => n.category))],
       notes: notes
     });
   },
 
-  exportJSONFile: function() {
-    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(this.getKnowledgeData());
+  exportJSONFile: async function() {
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(await this.getKnowledgeData());
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute('href', dataStr);
     downloadAnchor.setAttribute('download', 'notebuilder_knowledge_data.json');
