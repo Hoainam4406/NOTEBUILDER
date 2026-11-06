@@ -1,5 +1,18 @@
 # Kiểm thử local và CI
 
+## Windows editor / shared cache
+
+Khi agent và người dùng chạy Godot bằng hai tài khoản Windows khác nhau, kiểm tra
+ACL `.godot` nếu editor báo safe-save failed. Cache do sandbox tạo có thể cho user
+tạo temp file nhưng không thay được metadata cũ; không kết luận antivirus từ thông báo.
+Chỉ sửa quyền Modify cho đúng editor user trong cache, không cấp Everyone/FullControl
+toàn ổ đĩa và không tắt safe save để che lỗi. Lưu snapshot ACL local trước khi sửa.
+
+2026-11-06: main worktree đã sửa quyền inheritable cho Admin; xác minh dưới Admin
+không nâng quyền: mở ghi metadata cũ, atomic replacement probe và Godot headless
+editor import/quit đạt; log không có ERROR/safe-save/parent-popup. Không suy diễn
+đã kiểm thử GUI tương tác hoặc plugin dialogs từ headless. Không commit cache/ACL.
+
 ## Commands
 
 ```text

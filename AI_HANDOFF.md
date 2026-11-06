@@ -68,6 +68,15 @@ không tự cấp server XP/inventory. Bản tích hợp dữ liệu đầy đ�
 
 ## Known gaps và verification
 
+- Windows editor safe-save fix (2026-11-06): `.godot` thuộc CodexSandboxOffline,
+  Admin không nâng quyền bị từ chối mở ghi `editor/project_metadata.cfg`.
+  Đã cấp Modify inheritable **chỉ cho Admin trong .godot**; giữ safe save.
+  ACL trước sửa lưu local tại `.godot/acl-before-admin-fix.json` (ignored).
+  Admin non-elevated đã mở ghi metadata và atomic replace probe thành công;
+  Godot `--headless --editor --import --quit` hoàn tất, log mới không có ERROR,
+  safe-save hoặc parent/popup errors. GUI tương tác chưa được kiểm chứng lại.
+  Popup cũ nhiều khả năng là hệ quả báo lỗi lưu lặp; không sửa plugin/gameplay
+  khi chưa có evidence lỗi độc lập. Cache/ACL là sửa local, không versioned.
 - Chẩn đoán parser error (2026-11-06): checkout game gốc thiếu
   `Scenes/Knowledge/knowledge_validation.gd` và `.uid` vì local uncommitted
   deletions; không phải feature chờ C02. File đã có trong HEAD và game main.
@@ -95,7 +104,8 @@ không tự cấp server XP/inventory. Bản tích hợp dữ liệu đầy đ�
 
 - Web repo `E:/NOTEBUILDER`, branch `websiteWorkandTest`, origin
   `https://github.com/Hoainam4406/NOTEBUILDER.git`.
-- Baseline trước chẩn đoán parser: `8197b7e` (C01c), push đã xác nhận.
+- Baseline trước sửa quyền editor: `1cab981` (chẩn đoán parser), đã push;
+  C01c ở `8197b7e`. Checkpoint này chỉ cập nhật docs; ACL sửa local.
   Lấy hash checkpoint đang chứa snapshot bằng
   `git log -1 --oneline -- AGENTS.md AI_HANDOFF.md`. Không cần lịch sử chat.
 - Web checkout sạch khi bắt đầu C01; chỉ các file C01 nêu trên được sửa.
@@ -104,6 +114,8 @@ không tự cấp server XP/inventory. Bản tích hợp dữ liệu đầy đ�
 - Game worktree làm việc: `E:/isometric_building_game/.worktrees/knowledge-main`,
   branch `main`, HEAD `0d1721a`, origin `https://github.com/SubNhatSan/isometric_building_game.git`,
   C01a contract + placement 498 scenes đạt; commit main đã push.
+  Có untracked `tests/city_catalog_contract.gd.uid` do editor sinh, đã có trước
+  task safe-save; chưa đưa vào commit, giữ nguyên. Source game không bị sửa.
 - **Không sửa checkout game gốc để đổi branch:** `E:/isometric_building_game`
   đang ở `websiteWorkandTest` với user changes: README modified,
   `Scenes/Knowledge/knowledge_validation.gd` và `.uid` deleted. Phải giữ nguyên.
