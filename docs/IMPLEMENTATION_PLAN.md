@@ -29,7 +29,9 @@ quyết định triển khai và công việc chưa hoàn thành.
 | N01 | Owner isolation, note version, search, migration | A01 | Code + HTTP/VM tests đạt; legacy import tắt, note chung không tự gán |
 | X01 | XP ledger, level và rewards atomic | N01 | X01a/b/c code + unit/DB concurrency/rollback đạt; E2E browser còn chờ city |
 | C01 | City API, inventory và version | X01 | CITY-01..05; ownership/collision/rollback/save-load |
-| C02 | Godot bridge và vòng lặp liên ứng dụng | C01 | E2E-01; frontend không tự cấp XP hay quyền sở hữu |
+| C02a | Godot Web export và trang game nhúng tương tác | Game main; có thể preview trước C01 | Browser tải game thật; camera/input/placement dùng được, lỗi tải rõ ràng |
+| C02b | Bridge tài khoản và lưu/tải city qua API | C01 + C02a | Server xác thực XP/ownership/placement; reload đúng city, không dùng debug unlock-all |
+| C02c | Browser E2E vòng lặp đầy đủ | C02b | E2E-01 account→note→XP→build→reload/login lại, không duplicate XP/reward |
 | L01 | Review, flashcards, onboarding | C02 | Phiên ôn tập có ID, retry an toàn, accessibility |
 | Q01 | Achievement, quest và QOL | L01 | Progress bền vững, không cấp thưởng trùng |
 | O01 | Staging, backup/restore, rollback, monitoring | C02 | DEP-01..02 và release checklist |
@@ -37,6 +39,30 @@ quyết định triển khai và công việc chưa hoàn thành.
 
 Mỗi task phải test/review, commit Conventional Commits và push websiteWorkandTest.
 Không đánh dấu staging/UAT hoặc test DB concurrency đạt khi mới chạy unit test.
+
+## C02 — game Godot chạy trong website (chưa triển khai)
+
+`GodotBridge`/JSON export hiện tại chỉ xuất dữ liệu. Rà soát source H01 chưa thấy
+Web export preset/artifacts hoặc trang nhúng game; không coi đây là game đã tích hợp.
+C02a/b/c là phần tách chi tiết của C02 cũ; L01/O01 vẫn phụ thuộc C02 hoàn chỉnh.
+
+- **C02a — chơi thử trên web:** cấu hình Web export Godot 4.7.2; xác minh export
+  templates, cấu hình threaded/non-threaded và yêu cầu hosting/header/MIME thực tế.
+  Build artifact do pipeline/deployment quản lý, không commit build vào source.
+  Có trang/đường dẫn vào game từ website, canvas hoặc iframe, loading/error/retry,
+  resize/focus và hướng dẫn điều khiển. Acceptance: mở từ web, di chuyển camera,
+  chọn/đặt/di chuyển/xóa công trình bằng input thật; kiểm tra trên browser mục tiêu.
+  Có thể triển khai preview trước C01; ghi rõ preview/local, chưa đồng bộ tài khoản.
+- **C02b — tích hợp dữ liệu:** chọn và đặc tả bridge async, lifecycle và xử lý lỗi;
+  nếu dùng message giữa frames phải xác thực origin/message schema. Đọc progress,
+  inventory/catalog và city của user hiện tại; mọi mutation qua API có auth,
+  validation/revision; retry không nhân thưởng hoặc tiêu inventory hai lần.
+  Không dùng client XP hay local/debug unlock làm entitlement server.
+- **C02c — xác nhận sản phẩm:** browser E2E đăng ký/đăng nhập → note hợp lệ → XP →
+  mở game → xây → reload/đăng nhập lại thấy đúng city; thử placement sai, save lỗi,
+  session hết hạn và hai tab ghi đồng thời. Lưu evidence browser và smoke hosting.
+
+Handoff vận hành: đọc `AGENTS.md` và `AI_HANDOFF.md` ở root trước mỗi session.
 
 ## Specification của batch nền tảng
 

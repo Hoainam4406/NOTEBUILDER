@@ -3,6 +3,14 @@
 Website ghi chú HTML/JavaScript/Fabric với Express 5 và MongoDB; city renderer nằm
 ở repository `isometric_building_game` (Godot 4.7.2).
 
+**Game chưa chạy nhúng trong website.** Hiện có JSON export cho Godot; phần game
+chơi tương tác trên browser thuộc C02a (Web export/embed), rồi C02b (nối City API)
+và C02c (browser E2E). Chi tiết ở implementation plan; có thể làm preview C02a
+trước City API, còn bản đồng bộ tài khoản cần C01 hoàn thành.
+
+Agent tiếp quản: đọc [AGENTS.md](AGENTS.md) và [AI_HANDOFF.md](AI_HANDOFF.md)
+trước khi làm việc. Snapshot trạng thái, Git và bước tiếp theo nằm trong handoff.
+
 ## Chạy local
 
 1. Dùng Node 24.14.0 (xem `.nvmrc`).
