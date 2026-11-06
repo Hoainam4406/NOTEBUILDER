@@ -33,7 +33,7 @@ MVP ưu tiên vòng lặp hoàn chỉnh, bảo vệ dữ liệu và khả năng 
   dependency, abstraction hoặc thay đổi format hàng loạt khi không cần thiết.
 - Blueprint là định hướng; viết acceptance criteria/specification trước feature.
   Tham chiếu `docs/IMPLEMENTATION_PLAN.md`, `AUTH_NOTES_SPEC.md`,
-  `PROGRESSION_SPEC.md`, `TESTING.md` (ba file sau nằm trong `docs/`).
+  `PROGRESSION_SPEC.md`, `CITY_SPEC.md`, `TESTING.md` (các file sau nằm trong `docs/`).
 - Backend xác thực ownership, XP, reward và placement; không tin giá trị client.
 - Note create cần `Idempotency-Key`; retry giữ key/payload. Update/delete cần
   revision. Không bỏ owner filter, CSRF, unique constraints hoặc transaction.

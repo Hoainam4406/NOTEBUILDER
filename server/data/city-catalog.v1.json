@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "sourceCommit": "0f35952",
+  "grid": { "width": 32, "height": 32, "tileWidth": 128, "tileHeight": 64, "coordinateSystem": "axial", "nativeLayout": "stacked-offset", "nativeCellMapping": "[floor((x-y)/2), x+y]" },
+  "blockedTiles": [[15, 15], [15, 16], [16, 15], [16, 16]],
+  "maxBuildings": 256,
+  "items": [
+    { "id": "bld_apartments_brickbrown_a", "name": "Apartments Brickbrown A", "scenePath": "res://Scenes/Buildings/bld_apartments_brickbrown_a.tscn", "rotations": [0], "footprint": [[0, -32], [64, 0], [0, 32], [-64, 0]] },
+    { "id": "bld_house_small_brickred_a", "name": "House Small Brickred A", "scenePath": "res://Scenes/Buildings/bld_house_small_brickred_a.tscn", "rotations": [0], "footprint": [[0, -17], [34, 0], [0, 17], [-34, 0]] },
+    { "id": "prop_tree_pine_small", "name": "Tree Pine Small", "scenePath": "res://Scenes/Props/prop_tree_pine_small.tscn", "rotations": [0], "footprint": [[0, -10], [18, 0], [0, 10], [-18, 0]] },
+    { "id": "bld_cafe_a", "name": "Cafe A", "scenePath": "res://Scenes/Buildings/bld_cafe_a.tscn", "rotations": [0], "footprint": [[-16, -24], [48, 8], [16, 24], [-48, -8]] }
+  ]
+}
