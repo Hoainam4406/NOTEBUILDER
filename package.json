@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "npm --prefix server run dev",
     "start": "npm --prefix server start",
-    "seed": "npm --prefix server run seed"
+    "seed": "npm --prefix server run seed",
+    "test": "npm --prefix server test",
+    "check": "npm --prefix server run check && node --check notegame-web/js/notes.js && node --check notegame-web/js/main.js"
   },
   "keywords": [
     "notebuilder",
