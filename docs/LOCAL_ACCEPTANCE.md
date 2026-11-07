@@ -1,5 +1,10 @@
 # Nghiệm thu localhost
 
+Cập nhật: UI core-loop localhost thực đã PASS sau browser được bật lại.
+Xem [LOCAL_UI_ACCEPTANCE.md](LOCAL_UI_ACCEPTANCE.md) cho bước thực tế và giới hạn.
+Các mục browser disabled/pending bên dưới giữ mốc lịch sử trước nghiệm thu.
+
+
 Mốc user: đủ chức năng/UI tương tác và backend, chưa tính polish thẩm mỹ/deploy.
 Q01 local đạt; bước tiếp theo xác minh cấu hình ứng dụng và toàn bộ core loop.
 

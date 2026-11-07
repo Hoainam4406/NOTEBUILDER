@@ -1,5 +1,18 @@
 # Kiểm thử local và CI
 
+## UI localhost thực — 2026-11-07
+
+- PASS core-loop browser trên source4899f98/MongoDB ứng dụng: xem
+  [LOCAL_UI_ACCEPTANCE.md](LOCAL_UI_ACCEPTANCE.md) cho steps/snapshot/screenshots.
+- Tài khoản synthetic riêng: autosave/restore/publish20XP,city đặt/di chuyển/
+  thu hồi/đặt lại,reload,3reviews/5claims,restart API/logout/login,edit/search.
+  Text/canvas/state giữ đúng,XP không tăng thêm.390px notes/editor/journey đạt.
+- Snapshot cuối1note/1XPevent/20XP,cityrev4/1building/kho0/4receipts,3completed
+  reviews/5claims/0draft. Console normal không warn/error. Đã logout/dọn server.
+- Runtime không đổi;127 regression/59 integration là evidence checkpoint trước,
+  không chạy lại trong lượt docs này. Staging/UAT/deploy/cross-device riêng.
+
+
 ## Core-loop HTTP acceptance/restart, 2026-11-07
 
 - Mới: integration/core-loop.test.js. Chỉ public API, disposable replica set,

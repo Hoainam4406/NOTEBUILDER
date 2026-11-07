@@ -4,6 +4,16 @@ Cập nhật 2026-11-07. Đọc cùng AGENTS.md; đối chiếu Git/source trư�
 
 ## Checkpoint hiện tại
 
+- Browser đã hoạt động sau user mở lại ứng dụng. UI core-loop localhost thực
+  PASS trên source4899f98; xem docs/LOCAL_UI_ACCEPTANCE.md. Autosave/restore/canvas,
+  publish20XP/1starter,city place/move/refund/re-place,3review sessions,5claims,
+  restart/logout/login/edit/search và390px đạt. Runtime không đổi; account test
+  riêng được giữ, đã logout/server tạm dừng. UI blocked bên dưới là lịch sử.
+- Snapshot chỉ account test:1note/0draft/1XpEvent/20XP,city rev4/1building
+  axial(21,18),inventory0/4receipts,3completed reviews/5claims. Không đụng dữ
+  liệu user khác. Checkpoint chỉ docs/evidence; không chạy lại127/59 suites.
+
+
 - Baseline sạch `f5f7aa4`. Thêm core-loop HTTP acceptance/restart test, không sửa
   runtime:1note/20XP/1starter→city→review→5claims,2 API restarts và logout/login
   giữ mọi state; replay không debit/XP trùng. Test DB riêng không seed/grant.
@@ -67,7 +77,7 @@ Cập nhật 2026-11-07. Đọc cùng AGENTS.md; đối chiếu Git/source trư�
 | C02a/b/c | Web export thật/account city/core loop + faults local Chromium đạt; game6 suites baseline |
 | L01 | Review/flashcards/onboarding local verified |
 | Q01a/b | Local verified scope specs; 127 regression/58 DB, browser drafts/replay/conflict/expiry/390px |
-| Nghiệm thu localhost cuối | DB ứng dụng/startup/artifacts và full core-loop HTTP/restart DB riêng đạt; UI bản cuối/QA tổng thể pending (browser disabled) |
+| Nghiệm thu localhost cuối | DB ứng dụng/startup/artifacts và full core-loop HTTP/restart DB riêng đạt; UI core-loop bản cuối PASS; user UAT/QA ngoài phạm vi còn riêng |
 | O01 | Staging/backup-restore/rollback/monitoring pending; deploy sau theo user |
 | AI01 | V2 sau O01; không gate MVP |
 
@@ -114,7 +124,7 @@ Cập nhật 2026-11-07. Đọc cùng AGENTS.md; đối chiếu Git/source trư�
 ## Tiếp theo
 
 1. Nghiệm thu localhost cuối theo LOCAL_PROGRESS.md/LOCAL_ACCEPTANCE.md: smoke và
-   core-loop HTTP/restart đã đạt; còn UI bản cuối khi browser được bật lại hoặc
+   core-loop HTTP/restart đã đạt; UI core-loop đã PASS (LOCAL_UI_ACCEPTANCE.md), tiếp theo user UAT hoặc
    người dùng thực hiện runbook. Không tự thay Work settings hoặc gọi API case là UI E2E.
    Giữ dữ liệu hiện hữu; không tự seed hoặc destructive test lên DB người dùng.
 2. Không triển khai lại Q01/L01; nếu gặp lỗi mới tạo task nhỏ/repro/test trước sửa.

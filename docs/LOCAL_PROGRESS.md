@@ -9,6 +9,13 @@ rộng trong blueprint. Không đổi Definition of Done staging/production thà
 
 ## Ước lượng hiện tại
 
+Checkpoint mới: UI core-loop localhost thực đã PASS (LOCAL_UI_ACCEPTANCE.md):
+notes/drafts/canvas,XP/city,review/claims,restart/login và390px. Ước lượng
+**95% ±5%** cho bản localhost; còn user UAT và QA tổng thể ngoài core-loop.
+Không tự gọi mọi ý tưởng blueprint hoặc production readiness đã hoàn tất.
+Các tỷ lệ bên dưới là checkpoint cũ.
+
+
 Đầu checkpoint Q01a (`cf8bfdc`): khoảng **80% ±5%**. Sau implementation và desktop
 verification Q01a: khoảng **84% ±5%**. Sau Q01b/hoàn tất Q01 local: khoảng
 **89% ±5%**. Đây là ước lượng kỹ thuật có trọng số,
