@@ -11,7 +11,7 @@
     "build:game": "node server/scripts/build-game.js",
     "build:game:city": "node server/scripts/build-game.js --city",
     "preview:game": "node server/preview.js",
-    "check": "npm --prefix server run check && node --check notegame-web/js/notes.js && node --check notegame-web/js/main.js && node --check notegame-web/js/auth.js && node --check notegame-web/js/account.js && node --check notegame-web/js/game.js && node --check notegame-web/js/city-bridge.js && node --check notegame-web/js/review.js"
+    "check": "npm --prefix server run check && node --check notegame-web/js/notes.js && node --check notegame-web/js/main.js && node --check notegame-web/js/auth.js && node --check notegame-web/js/account.js && node --check notegame-web/js/game.js && node --check notegame-web/js/city-bridge.js && node --check notegame-web/js/review.js && node --check notegame-web/js/journey.js"
   },
   "keywords": [
     "notebuilder",

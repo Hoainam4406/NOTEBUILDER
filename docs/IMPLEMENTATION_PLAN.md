@@ -34,7 +34,8 @@ quyết định triển khai và công việc chưa hoàn thành.
 | C02b | Bridge tài khoản và lưu/tải city qua API | C01 + C02a | Local đạt: city.html, renderer riêng, auth/CAS/idempotency, 6 native suites, 2 exports pin f1739c7 |
 | C02c | Browser E2E vòng lặp đầy đủ | C02b | Local Chromium đạt: account→note→XP→build→reload/login lại; 503/retry, ô cấm, hai tab, expiry/refund. CI browser/staging chưa có |
 | L01 | Review, flashcards, onboarding | C02 | Local đạt 2026-11-07: REVIEW_SPEC.md, snapshot/session ID, CAS/receipts, resume/retry, keyboard/mobile và onboarding; chưa staging |
-| Q01 | Achievement, quest và QOL | L01 | Progress bền vững, không cấp thưởng trùng |
+| Q01a | Achievement gallery và daily quest | L01 | Implemented/desktop local verified: JOURNEY_SPEC.md, UTC/evidence/unique claims; 113 regression/53 DB toàn suite; mobile verification pending |
+| Q01b | Autosave/khôi phục nháp và QOL | Q01a | Chưa làm; spec trước code, account isolation/CAS/retry, không mất canvas hoặc nhân note/XP |
 | O01 | Staging, backup/restore, rollback, monitoring | C02 | DEP-01..02 và release checklist |
 | AI01 | AI có quota và kiểm soát đầu ra | O01 | V2; không là điều kiện MVP |
 
@@ -46,9 +47,10 @@ Không đánh dấu staging/UAT hoặc test DB concurrency đạt khi mới ch�
 `GodotBridge` vẫn là data export. C02a đã có Web preset/custom shell, staging
 builder và `/game.html` iframe preview; xem `WEB_GAME.md` để build/host.
 C02b/c đã có evidence local ở TESTING.md; preview vẫn là sandbox riêng.
-C02a/b/c là phần tách chi tiết của C02 cũ; L01 đã local đạt, tiếp theo Q01;
-chưa là staging/UAT. Q01 cần acceptance/spec trước code, không tự thêm phần
-thưởng review hoặc đổi XP policy v1.
+C02a/b/c là phần tách chi tiết của C02 cũ; L01 local đạt, Q01a desktop local
+verified, tiếp theo Q01b và nghiệm thu localhost; chưa là staging/UAT. Xem
+LOCAL_PROGRESS.md cho mốc localhost user xác nhận; không tự thêm phần thưởng
+review hoặc đổi XP policy v1.
 
 - **C02a — chơi thử trên web:** cấu hình Web export Godot 4.7.2; xác minh export
   templates, cấu hình threaded/non-threaded và yêu cầu hosting/header/MIME thực tế.

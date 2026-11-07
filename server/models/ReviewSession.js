@@ -23,4 +23,5 @@ const schema = new mongoose.Schema({
 schema.index({ userId: 1, createKey: 1 }, { unique: true });
 schema.index({ userId: 1 }, { unique: true, partialFilterExpression: { status: 'active' } });
 schema.index({ userId: 1, updatedAt: -1 });
+schema.index({ userId: 1, 'cards.reviewedAt': 1 });
 module.exports = mongoose.model('ReviewSession', schema);

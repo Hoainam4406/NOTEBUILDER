@@ -8,8 +8,9 @@ const { createProgression, ProgressionError, idempotencyKey } = require('./progr
 const { createCityService } = require('./city');
 const { CATALOG, CityError, mutationInput, buildingId } = require('./city-rules');
 const { createReviewService, ReviewError, startInput, actionInput } = require('./reviews');
+const { createJourneyService, JourneyError, claimInput } = require('./journey');
 
-function createApp({ NoteModel = Note, auth = createAuth(), progression = createProgression(), city = createCityService(), reviews = createReviewService(), dbReady = () => mongoose.connection.readyState === 1, logger = console } = {}) {
+function createApp({ NoteModel = Note, auth = createAuth(), progression = createProgression(), city = createCityService(), reviews = createReviewService(), journey = createJourneyService(), dbReady = () => mongoose.connection.readyState === 1, logger = console } = {}) {
   const app = express();
   app.disable('x-powered-by');
   app.use(express.json({ limit: '25mb' }));
@@ -26,7 +27,10 @@ function createApp({ NoteModel = Note, auth = createAuth(), progression = create
     next();
   });
   auth.mount(app);
-  app.use(['/api/notes', '/api/godot', '/api/progress', '/api/rewards', '/api/city', '/api/reviews'], auth.requireUser, auth.csrf);
+  app.use(['/api/notes', '/api/godot', '/api/progress', '/api/rewards', '/api/city', '/api/reviews', '/api/journey'], auth.requireUser, auth.csrf);
+  app.get('/api/journey', async (req, res) => res.json(await journey.dashboard(req.user._id)));
+  app.put('/api/journey/achievements/:id', async (req, res) => res.json(await journey.claim(req.user._id, 'achievement', req.params.id, claimInput('achievement', req.body))));
+  app.put('/api/journey/quests/:id', async (req, res) => res.json(await journey.claim(req.user._id, 'quest', req.params.id, claimInput('quest', req.body))));
   app.get('/api/reviews/notes', async (req, res) => res.json(await reviews.availableNotes(req.user._id)));
   app.get('/api/reviews', async (req, res) => res.json(await reviews.list(req.user._id)));
   app.post('/api/reviews', async (req, res) => {
@@ -106,7 +110,7 @@ function createApp({ NoteModel = Note, auth = createAuth(), progression = create
   app.use('/api', (req, res) => res.status(404).json({ error: 'API không tồn tại', code: 'NOT_FOUND' }));
   app.use((error, req, res, next) => {
     if (res.headersSent) return next(error);
-    const domainError = error instanceof ProgressionError || error instanceof CityError || error instanceof ReviewError;
+    const domainError = error instanceof ProgressionError || error instanceof CityError || error instanceof ReviewError || error instanceof JourneyError;
     const status = domainError ? error.status : error instanceof InputError || error.type === 'entity.parse.failed' ? 400
       : error.type === 'entity.too.large' ? 413 : 500;
     if (status === 500) logger.error('API request failed', { method: req.method, path: req.path, name: error.name });

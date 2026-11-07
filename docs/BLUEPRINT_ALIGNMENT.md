@@ -11,6 +11,12 @@ và evidence mới trong [TESTING.md](TESTING.md) (104 regression/46 integration
 Các bảng dưới giữ mốc audit 2026-11-06, không phải trạng thái L01 mới nhất.
 Scope một concept city và giới hạn staging vẫn có hiệu lực.
 
+Checkpoint Q01a cùng ngày: gallery/UTC daily quests + idempotent claims đã có
+implementation/desktop local verification; M08 không còn hoàn toàn chưa làm.
+Q01b autosave/QOL và responsive toàn app còn pending. User chốt mốc 100% localhost
+chưa tính deploy/thẩm mỹ: [LOCAL_PROGRESS.md](LOCAL_PROGRESS.md). Audit bên dưới
+vẫn giữ mốc 2026-11-06; evidence mới: 113 regression/53 integration, TESTING.md.
+
 ## Kết luận và cách sử dụng
 
 Hướng sản phẩm, core loop và thứ tự triển khai đang khớp blueprint. Không có cơ sở

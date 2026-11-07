@@ -4,12 +4,18 @@ Cập nhật 2026-11-07. Đọc cùng AGENTS.md; đối chiếu Git/source trư�
 
 ## Checkpoint hiện tại
 
-- User đã yêu cầu tiếp tục sau audit blueprint. Baseline web sạch `1349478`;
+- User đã yêu cầu tiếp tục sau audit blueprint. Baseline Q01a web sạch `cf8bfdc`;
   blueprint user commit `95db3fa`, audit `docs/BLUEPRINT_ALIGNMENT.md` vẫn giữ
   scope một concept city/assets. Không làm lại auth/notes/XP/city đã có evidence.
 - L01 đã triển khai và verified local: flashcards từ title/content, phiên owner
   snapshot, resume/retry/CAS, tổng kết/history và onboarding trong kho ghi chú.
   Spec/acceptance: `docs/REVIEW_SPEC.md`; evidence: `docs/TESTING.md`.
+- Q01a đã có 5 thành tựu/2 UTC daily quests, claims bền vững và UI journey;
+  desktop local verified, mobile pending (tool resize không đổi viewport thật).
+  `docs/JOURNEY_SPEC.md` chốt scope; Q01b autosave/khôi phục nháp còn chưa làm.
+- User chốt 100% là bản localhost đầy đủ logic/backend/UI tương tác, chưa tính
+  thẩm mỹ/deploy. Ước lượng trước Q01a ~80%, sau ~84% (±5%, không metric đo):
+  `docs/LOCAL_PROGRESS.md`. Không đồng nhất với staging/production readiness.
 - C02b/c vẫn local verified, chưa staging/UAT hoặc browser CI tự động.
   `/city.html` lưu account; `/game.html` sandbox RAM riêng. Không sửa game repo
   trong checkpoint L01; pin web giữ full hash `f1739c7` ở `server/game-source.json`.
@@ -30,6 +36,10 @@ Cập nhật 2026-11-07. Đọc cùng AGENTS.md; đối chiếu Git/source trư�
   Chọn 1..20 notes có content, một active/user. Start snapshot transaction;
   answer/close dùng atomic CAS + receipts. Replay trả state hiện tại.
   Active giữ text kể cả note gốc bị sửa/xóa; complete/close xóa snapshot text.
+- Journey progress từ awarded XpEvent/ReviewSession metadata/City revision,
+  không từ counters client. Claim transaction + unique(owner,kind,period,entryId),
+  PUT resource idempotent; quest day UTC server, stale day không tự claim hôm mới.
+  Phần thưởng là badge/xác nhận, không đổi XP/inventory. Không phạt ngày nghỉ.
 - Review/bridge: owner check trước write/retry, timeout 20s/abort; uncertain write
   chỉ retry key/body cũ. Conflict không tự gửi lại lựa chọn; expiry/account switch
   xóa private state/khóa. Không localStorage cho nội dung phiên/receipts/auth.
@@ -43,7 +53,7 @@ Cập nhật 2026-11-07. Đọc cùng AGENTS.md; đối chiếu Git/source trư�
   unlock-all; native World/preview giữ local progression. Không sửa game đang mở
   để export, không commit WASM/PCK/cache hoặc đổi pin chưa kiểm chứng.
 - Specs: docs/AUTH_NOTES_SPEC.md, PROGRESSION_SPEC.md, CITY_SPEC.md,
-  GAME_BRIDGE_SPEC.md, REVIEW_SPEC.md. Build/host: docs/WEB_GAME.md.
+  GAME_BRIDGE_SPEC.md, REVIEW_SPEC.md, JOURNEY_SPEC.md. Build/host: docs/WEB_GAME.md.
 
 ## Task state
 
@@ -55,40 +65,40 @@ Cập nhật 2026-11-07. Đọc cùng AGENTS.md; đối chiếu Git/source trư�
 | C02a | Preview WASM chơi thật; không lưu account |
 | C02b/c | Auth city/renderer, 6 native suites, hai exports pin f1739c7, core loop/faults local Chromium đạt |
 | L01 | Implemented/local verified: spec, backend, UI, onboarding, 104 regression/46 DB tổng suite, browser; chưa staging-accepted |
-| Q01 | Chưa làm: achievements/quests/QOL; ưu tiên feature tiếp theo, cần spec/acceptance trước code |
+| Q01a | Implemented/desktop local verified: achievements/UTC quests/claims, 113 regression/53 DB tổng suite; mobile/Accepted pending |
+| Q01b | Chưa làm: autosave/khôi phục nháp/QOL; spec/acceptance trước code; ưu tiên tiếp theo |
 | O01 | Chưa làm: staging, backup/restore, rollback, monitoring |
 | AI01 | V2 sau O01, không là điều kiện MVP |
 
-## Files của checkpoint L01
+## Files của checkpoint Q01a
 
-- `server/reviews.js`, `models/ReviewSession.js`: owner selection/snapshots,
-  indexes one-active/create-key, CAS/receipts, replay, cleanup, controlled errors.
-  `server/app.js` mount auth/CSRF API; startup gate tự init model indexes.
-- `notegame-web/review.html`, `css/review.css`, `js/review.js`: chọn/resume/flip/
-  rating, retry/conflict/expiry, progress/history. Reveal toggle giữ keyboard focus;
-  selection checkbox được clear sau start. Render textContent, không note HTML.
-- `notes.html`/`css/notes.css`: hướng dẫn bốn bước không chặn editor; links review
-  thêm ở home/notes/city. Không đổi toàn bộ UI hoặc gameplay/assets.
-- Tests mới review-rules/review-client/integration/reviews; game-http kiểm tra
-  semantic page/onboarding. Fixture browser-server thêm fault review + serialized
-  stdin queue để inspections không đua với teardown. Faults không vào app thật.
-- Docs/spec/instructions/plan/README cập nhật; product blueprint nguyên bản giữ nguyên.
+- `server/journey.js`, `models/JourneyClaim.js`: evidence snapshot/read-only GET,
+  strict input, owner/UTC/eligibility, transaction claim/replay. `app.js` thêm auth/
+  CSRF endpoints. ReviewSession thêm index user/cards.reviewedAt cho daily query.
+- `journey.html`, `css/journey.css`, `js/journey.js`: progress/claim/UTC, immutable
+  retry, expiry, keyboard focus. Links ở notes/home/review; không sửa gameplay.
+- Tests journey-client/journey-rules/integration/journey, game-http; fixture thêm
+  fault PUT journey + snapshot metadata. Không có fault controls trong app thật.
+- Docs/JOURNEY_SPEC.md, LOCAL_PROGRESS.md và docs/instructions/handoff cập nhật;
+  blueprint nguyên bản, XP policy và game pin giữ nguyên.
 
 ## Verification và giới hạn
 
 - Node 24.14.0 từ npm cache, không đổi Node hệ thống; dependencies theo lockfile,
-  không thêm package. Syntax + 104 regression + 46 MongoDB 8.2.6 integration đạt;
-  sau client/fault-helper fixes chạy lại syntax/104 regression và diff check đạt.
-- 12 DB cases L01 mới kiểm tra owner/CSRF, bounds/snapshot, two-process races,
-  identical replay/key conflicts, CAS, restart/corrupt/rollback, no XP mutation.
-- Chromium local fixture riêng: empty → onboarding → hai note (40 XP/1 starter)
-  → flip/grade → lost-response sau commit → retry → reload/resume → complete.
-  Completed rev2/index2/2 receipts, text stripped, XP40/inventory1 không đổi.
-- Hai tab stale conflict không auto-grade; expiry xóa private state; login lại
-  resume đúng thẻ; early-close 1/2 rev2/2 receipts/text stripped. Keyboard Enter/
-  Tab đạt; review responsive 390x844 không overflow; normal console không lỗi.
-  Screenshots ignored `.artifacts/review-*.png`; fixture đã dừng. Chạy pipe ba
-  commands snapshot/snapshot/stop sau sửa queue teardown đạt exit 0.
+  không thêm package. Syntax + 113 regression + 53 MongoDB 8.2.6 integration đạt;
+  sau client focus fix chạy lại 113 regression/diff check đạt.
+- 7 DB cases Q01a mới: auth/CSRF/owner, strict input, ledger/rating/city evidence,
+  two-process claims một record/timestamp, no XP/rewards, restart/UTC/rollback.
+- Chromium desktop fixture: register/note → badge/quest eligible → lost-response
+  sau commit → peer tab replay + retry → reload đúng claim. 3 rating UI (gồm again)
+  → review quest + first_review. Cuối: 4 claims, XP20/inventory1 không đổi.
+- 503 qua Enter đưa focus tới retry; retry Enter đạt. Expiry xóa private progress;
+  normal console sau reload không warn/error. Ảnh `.artifacts/journey-desktop.png`,
+  journey-retry.png, journey-expiry.png ignored. Fixture teardown exit 0.
+- Mobile journey pending: tool resize báo thành công nhưng DOM vẫn 1280px,
+  không coi ảnh tên journey-mobile.png là evidence mobile. CSS responsive có,
+  cần kiểm chứng Q01b; desktop local verified chưa Accepted toàn phần.
+- L01 browser/restart/CAS/cleanup evidence giữ ở docs/TESTING.md; không làm lại.
 - Game 6 native suites/hai exports/Chromium city core loop là evidence C02 trước;
   không chạy lại hoặc khẳng định kiểm chứng mới game trong task L01.
 - Pending: CI remote Linux/browser CI, Safari/mobile thật, cross-device, staging/
@@ -112,9 +122,10 @@ Cập nhật 2026-11-07. Đọc cùng AGENTS.md; đối chiếu Git/source trư�
 
 ## Tiếp quản tiếp theo
 
-1. Đối chiếu Git/source; đọc blueprint/alignment/plan. Q01 cần spec acceptance
-   achievement/quest/QOL bền vững trước code; không tự thêm review XP, scheduler,
-   AI hoặc Subject District/multi-theme. L01 đã có evidence, không triển khai lại.
+1. Đối chiếu Git/source; đọc blueprint/alignment/plan và LOCAL_PROGRESS.md.
+   Tiếp theo Q01b: spec autosave/khôi phục nháp account/CAS/canvas/retry trước code,
+   kiểm chứng mobile journey và audit UI toàn app. Không tự thêm review/quest XP,
+   scheduler, AI hoặc Subject District/multi-theme; L01/Q01a không triển khai lại.
 2. Vận hành O01 còn độc lập: cần replica set/HTTPS, staging, backup/restore và
    rollback/monitoring trước release. Không gọi local verified là staging accepted.
 3. Browser regression dùng fixture riêng không .env/seed; xem docs/TESTING.md.

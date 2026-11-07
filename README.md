@@ -20,6 +20,11 @@ trước khi làm việc. Snapshot trạng thái, Git và bước tiếp theo n�
 Kho ghi chú có hướng dẫn lưu note → XP → thành phố → ôn tập. Xem
 [docs/REVIEW_SPEC.md](docs/REVIEW_SPEC.md); đã kiểm chứng local, chưa staging/UAT.
 
+Hành trình tại `/journey.html` (Q01a): 5 thành tựu, 2 nhiệm vụ ngày UTC, progress
+và claim theo tài khoản; phần thưởng là huy hiệu/xác nhận, không thêm XP/inventory.
+Xem [docs/JOURNEY_SPEC.md](docs/JOURNEY_SPEC.md). Tiến độ mục tiêu localhost và
+những việc còn thiếu: [docs/LOCAL_PROGRESS.md](docs/LOCAL_PROGRESS.md).
+
 ## Chạy local
 
 1. Dùng Node 24.14.0 (xem `.nvmrc`).
@@ -42,10 +47,10 @@ npm run test:integration
 git diff --check
 ```
 
-104 tests dùng HTTP thật trên cổng loopback ngẫu nhiên với model thay thế,
+113 tests dùng HTTP thật trên cổng loopback ngẫu nhiên với model thay thế,
 và VM chạy mã frontend để kiểm tra lỗi save/delete, revision và khởi động session.
 Tests kiểm tra auth/CSRF/owner isolation ở tầng HTTP nhưng không kết nối MongoDB
-thật. Thêm 46 integration tests chạy MongoDB 8.2.6 replica set cục bộ riêng để
+thật. Thêm 53 integration tests chạy MongoDB 8.2.6 replica set cục bộ riêng để
 kiểm tra indexes, auth/owner/CAS giữa hai tiến trình, restart API và rollback.
 Xem [docs/TESTING.md](docs/TESTING.md); chưa xác nhận persistence cross-device.
 GitHub Actions chạy syntax/tests trên Linux khi push feature branch hoặc mở PR.

@@ -18,6 +18,14 @@ test('authenticated city page loads auth and bridge before host without claiming
 });
 after(() => new Promise(resolve => server.close(resolve)));
 
+test('journey UI and navigation expose semantic progress and authenticated script order', async () => {
+  const response = await fetch(base + '/journey.html'); assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.ok(html.indexOf('js/auth.js') < html.indexOf('js/journey.js'));
+  assert.match(html, /aria-live="polite"/); assert.match(html, /không cộng thêm XP/);
+  assert.match(await (await fetch(base + '/notes.html')).text(), /href="journey.html"/);
+});
+
 test('review page is reachable without DB and links to notes/account with accessible controls and onboarding', async () => {
   const response = await fetch(base + '/review.html'); assert.equal(response.status, 200);
   const html = await response.text();

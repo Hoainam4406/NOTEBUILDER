@@ -1,5 +1,35 @@
 # Kiểm thử local và CI
 
+## Q01a — achievements/UTC daily quests, 2026-11-07
+
+- [JOURNEY_SPEC.md](JOURNEY_SPEC.md) có acceptance trước implementation.
+  Node 24.14.0: syntax, 113 regression và 53 MongoDB 8.2.6 integration tests đạt;
+  diff check đạt. Sau UI focus fix chạy lại 113 regression đạt. Không thêm dependency.
+- 7 DB cases mới: auth/CSRF/owner, body/day injection, only awarded ledger,
+  delete note không mất progress, confirmed ratings active/closed/completed,
+  two-process concurrent claims (chỉ một record/timestamp), no XP/inventory
+  mutation, API restart, UTC boundary/stale day, claim rollback, persisted city.
+- 7 client VM cases + input rules + static HTTP: literal data, safe links,
+  uncertain PUT identical retry, UTC conflict không auto-claim, confirmed PUT
+  rồi GET lỗi vẫn là đã nhận, expiry/owner switch, timeout/pagehide/late result,
+  visibility refresh không tự retry. Focus sau lỗi chuyển tới nút retry.
+- Chromium desktop 1280px, DB fixture riêng: account → note đủ điều kiện (20 XP,
+  1 starter) → gallery/quest eligible → claim → lost-response sau commit → tab
+  thứ hai replay → explicit retry → reload giữ huy hiệu. Server chỉ một first_note.
+  Quest note được nhận; 3 phiên một thẻ qua UI (gồm `again`) làm quest review đủ
+  3/3; nhận first_review và daily_review. Snapshot cuối: 4 claims (2 badge,
+  2 quest), XP vẫn 20, inventory vẫn 1. Không có grant endpoint/debug trong app.
+- 503 fixture: Enter claim → focus nút retry → Enter retry thành công. Refresh
+  sau thu hồi session xóa gallery/progress riêng, hiện login link. Console normal
+  sau reload không warn/error. Fixture server/replica set teardown exit 0.
+- Screenshots ignored `.artifacts/journey-desktop.png`, journey-retry.png,
+  journey-expiry.png. Thử resize 390x844 qua tool không đổi viewport thật
+  (DOM vẫn 1280px); **không xác nhận mobile**. CSS một cột đã có nhưng cần kiểm
+  chứng sau ở Q01b. File ảnh tên journey-mobile.png chỉ là lần thử resize, không
+  được dùng làm evidence mobile.
+- Staging/UAT/CI remote/browser CI/cross-device pending; Q01a desktop verified
+  chưa là Accepted toàn phần, Q01b autosave/QOL chưa làm. Game pin không đổi.
+
 ## L01 — review/flashcards/onboarding, 2026-11-07
 
 - Spec/acceptance REV-01..06: [REVIEW_SPEC.md](REVIEW_SPEC.md). Node 24.14.0:
