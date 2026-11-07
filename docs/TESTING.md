@@ -1,5 +1,17 @@
 # Kiểm thử local và CI
 
+## Local startup/artifacts smoke, 2026-11-07
+
+- Thêm `npm run check:local` / scripts/check-local.js và LOCAL_ACCEPTANCE.md.
+  Chạy Node24.14.0 với .env ứng dụng thực: MongoDB kết nối, transaction-capable/
+  writable primary. Startup transaction/index gate đạt, cổng tạm, không browser.
+- Command exit0: sáu pages200, health200/online, năm API anonymous401; cả preview/
+  city manifest đúng pin f1739c7/clean/engine, 8 file checksums, HTTP/MIME đạt.
+  Không seed hoặc account/note/draft/XP/city writes; startup có thể init indexes.
+  Server/disconnect dọn sau chạy. Không log secrets/URI/stack.
+- Đây là smoke startup/host với database ứng dụng, không thay thế authenticated
+  browser core loop/UAT trên bản cuối. Q01 browser evidence ở fixture vẫn giữ riêng.
+
 ## Q01b.2 — hoàn tất Q01 chức năng local, 2026-11-07
 
 - Spec/acceptance trước code: [DRAFT_SPEC.md](DRAFT_SPEC.md). Server drafts theo

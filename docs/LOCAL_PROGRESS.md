@@ -14,6 +14,10 @@ verification Q01a: khoảng **84% ±5%**. Sau Q01b/hoàn tất Q01 local: khoả
 **89% ±5%**. Đây là ước lượng kỹ thuật có trọng số,
 không phải metric tự đo, số tests hoặc cam kết thời gian còn lại.
 
+Sau startup/artifacts smoke trên cấu hình ứng dụng: khoảng **90% ±5%**.
+MongoDB thực hỗ trợ transaction/primary, startup và `npm run check:local` đạt;
+QA localhost tăng6→7/10. Authenticated nghiệm thu bản cuối vẫn cần thực hiện.
+
 | Hạng mục | Trọng số | Trước Q01a | Sau Q01a | Căn cứ / phần còn lại |
 |---|---:|---:|---:|---|
 | Auth/profile/ownership | 10 | 9 | 9 | Session/CSRF/owner đạt; còn nghiệm thu toàn app |
@@ -37,8 +41,9 @@ nghiệm thu toàn bộ bản localhost chưa được kiểm chứng ở checkp
 2. Rà soát UI tương tác/responsive/accessibility toàn ứng dụng và luồng chuyển
    notes ↔ review ↔ journey ↔ city/account. Journey/notes/editor đã có evidence
    responsive Chromium390px; mobile thật/Safari vẫn chưa kiểm chứng.
-3. Xác minh MongoDB ứng dụng hỗ trợ transactions và startup `npm run dev` trên
-   cấu hình localhost thực. Test replica set riêng không thay bằng chứng này.
+3. Đã xác minh MongoDB ứng dụng transactions/primary và startup thật qua
+   `npm run check:local`, hai exports/checksums/HTTP/MIME đạt. Dev watcher và
+   authenticated browser bản cuối còn riêng; xem LOCAL_ACCEPTANCE.md.
 4. Nghiệm thu bản localhost cuối: auth → notes → XP/rewards → city → review →
    quests, save/reload/logout/login/restart, lỗi mạng và hai tab, không mất dữ liệu.
    Khắc phục mọi blocker phát hiện trước khi gọi 100%.

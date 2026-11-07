@@ -60,6 +60,10 @@ kiểm tra indexes, auth/owner/CAS giữa hai tiến trình, restart API và rol
 Xem [docs/TESTING.md](docs/TESTING.md); chưa xác nhận persistence cross-device.
 GitHub Actions chạy syntax/tests trên Linux khi push feature branch hoặc mở PR.
 
+Nghiệm thu cấu hình localhost thực: `npm run check:local` (dùng .env, startup
+transaction/index gate, HTTP và checksum hai exports; không seed hoặc sửa dữ liệu
+học tập). Xem [docs/LOCAL_ACCEPTANCE.md](docs/LOCAL_ACCEPTANCE.md).
+
 ## Trạng thái
 
 - Đã có notes CRUD/canvas, search, export Godot ở mức prototype.

@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "NOTEBUILDER - Gamified Knowledge Hub & Godot Integration with MongoDB",
   "scripts": {
+    "check:local": "node server/scripts/check-local.js",
     "dev": "npm --prefix server run dev",
     "start": "npm --prefix server start",
     "seed": "npm --prefix server run seed",

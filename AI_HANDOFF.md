@@ -4,6 +4,12 @@ Cập nhật 2026-11-07. Đọc cùng AGENTS.md; đối chiếu Git/source trư�
 
 ## Checkpoint hiện tại
 
+- Q01 đã commit/push `2ffc07c` (127 regression/58 DB). Game main f1739c7 sạch,
+  chỉ read Git, không sửa trong lượt này.
+- Bắt đầu nghiệm thu localhost: `npm run check:local` mới đạt exit0 với .env ứng
+  dụng thật. MongoDB transaction-capable/primary; startup/index gate, sáu pages/
+  health, năm anonymous API guards, hai game pins/checksums/MIME đều đạt. Không
+  seed/domain writes. Xem LOCAL_ACCEPTANCE.md/TESTING.md; ước lượng mới90% ±5%.
 - User yêu cầu làm nốt Q01. Baseline web sạch `80a159c`; đã hoàn tất Q01 trong
   scope specs ở mức implemented/local verified, chưa staging-accepted.
 - Q01a: 5 achievements/2 UTC daily quests, server evidence + unique claims, không
@@ -54,7 +60,7 @@ Cập nhật 2026-11-07. Đọc cùng AGENTS.md; đối chiếu Git/source trư�
 | C02a/b/c | Web export thật/account city/core loop + faults local Chromium đạt; game6 suites baseline |
 | L01 | Review/flashcards/onboarding local verified |
 | Q01a/b | Local verified scope specs; 127 regression/58 DB, browser drafts/replay/conflict/expiry/390px |
-| Nghiệm thu localhost cuối | Pending DB ứng dụng/startup, full run/restart và QA tổng thể |
+| Nghiệm thu localhost cuối | DB ứng dụng/startup/artifact smoke đạt; authenticated full run/restart/QA tổng thể pending |
 | O01 | Staging/backup-restore/rollback/monitoring pending; deploy sau theo user |
 | AI01 | V2 sau O01; không gate MVP |
 
@@ -92,15 +98,16 @@ Cập nhật 2026-11-07. Đọc cùng AGENTS.md; đối chiếu Git/source trư�
 - Game `D:/isometric-grid-building-game/isometric_building_game`, main, origin
   https://github.com/SubNhatSan/isometric_building_game.git; f1739c7/16721be đã push
   từ checkpoint C02; user c39347f không bị ghi đè. Không sửa repo game trong Q01.
-- App MongoDB local từng standalone/startup lỗi. Q01 không đổi service/.env/dữ
-  liệu ứng dụng; tests chỉ DB riêng. Không coi DB suite đạt là npm run dev app đạt.
+- App MongoDB từng standalone/startup lỗi; hiện transactions/primary và startup
+  thật đạt qua check:local. Không đổi service/.env/domain data. Không đồng nhất
+  smoke startup với dev watcher/authenticated browser nghiệm thu.
 - Không tái tạo worktree/đường dẫn E:/ACL/cache cũ. GCM dùng account hiện hữu;
   auth lỗi báo một lần, không lặp đăng nhập. Không commit env/dependencies/artifacts.
 
 ## Tiếp theo
 
-1. Nghiệm thu localhost cuối theo LOCAL_PROGRESS.md: xác minh cấu hình MongoDB
-   ứng dụng/transaction và startup, chạy core loop đầy đủ/restart/failure regression.
+1. Nghiệm thu localhost cuối theo LOCAL_PROGRESS.md/LOCAL_ACCEPTANCE.md: cấu hình
+   MongoDB/startup/artifacts smoke đã đạt, tiếp theo core loop đầy đủ/restart/failure.
    Giữ dữ liệu hiện hữu; không tự seed hoặc destructive test lên DB người dùng.
 2. Không triển khai lại Q01/L01; nếu gặp lỗi mới tạo task nhỏ/repro/test trước sửa.
 3. O01/deploy giai đoạn sau; staging/production gate vẫn nguyên. Không tự mở
