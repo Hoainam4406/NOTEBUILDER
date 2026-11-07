@@ -35,7 +35,7 @@ quyết định triển khai và công việc chưa hoàn thành.
 | C02c | Browser E2E vòng lặp đầy đủ | C02b | Local Chromium đạt: account→note→XP→build→reload/login lại; 503/retry, ô cấm, hai tab, expiry/refund. CI browser/staging chưa có |
 | L01 | Review, flashcards, onboarding | C02 | Local đạt 2026-11-07: REVIEW_SPEC.md, snapshot/session ID, CAS/receipts, resume/retry, keyboard/mobile và onboarding; chưa staging |
 | Q01a | Achievement gallery và daily quest | L01 | Implemented/desktop local verified: JOURNEY_SPEC.md, UTC/evidence/unique claims; 113 regression/53 DB toàn suite; mobile verification pending |
-| Q01b | Autosave/khôi phục nháp và QOL | Q01a | Chưa làm; spec trước code, account isolation/CAS/retry, không mất canvas hoặc nhân note/XP |
+| Q01b | Autosave/khôi phục nháp và QOL | Q01a | Q01b.1 phím tắt lưu + chặn submit đồng thời đạt VM (EDITOR_SHORTCUT_SPEC.md); autosave/khôi phục nháp chưa làm |
 | O01 | Staging, backup/restore, rollback, monitoring | C02 | DEP-01..02 và release checklist |
 | AI01 | AI có quota và kiểm soát đầu ra | O01 | V2; không là điều kiện MVP |
 

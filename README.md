@@ -47,7 +47,7 @@ npm run test:integration
 git diff --check
 ```
 
-113 tests dùng HTTP thật trên cổng loopback ngẫu nhiên với model thay thế,
+115 tests dùng HTTP thật trên cổng loopback ngẫu nhiên với model thay thế,
 và VM chạy mã frontend để kiểm tra lỗi save/delete, revision và khởi động session.
 Tests kiểm tra auth/CSRF/owner isolation ở tầng HTTP nhưng không kết nối MongoDB
 thật. Thêm 53 integration tests chạy MongoDB 8.2.6 replica set cục bộ riêng để

@@ -4,6 +4,10 @@ Cập nhật 2026-11-07. Đọc cùng AGENTS.md; đối chiếu Git/source trư�
 
 ## Checkpoint hiện tại
 
+- Q01b.1 checkpoint nhỏ theo ngân sách user: Ctrl/Cmd+S lưu editor active và
+  single-flight guard cho mọi submit. Spec `docs/EDITOR_SHORTCUT_SPEC.md`;
+  VM/local checks đạt, browser/OS shortcut smoke chưa chạy. Baseline sạch `026cf70`.
+  Autosave/khôi phục nháp chưa triển khai; không mở thêm task trong lượt này.
 - User đã yêu cầu tiếp tục sau audit blueprint. Baseline Q01a web sạch `cf8bfdc`;
   blueprint user commit `95db3fa`, audit `docs/BLUEPRINT_ALIGNMENT.md` vẫn giữ
   scope một concept city/assets. Không làm lại auth/notes/XP/city đã có evidence.
@@ -66,7 +70,7 @@ Cập nhật 2026-11-07. Đọc cùng AGENTS.md; đối chiếu Git/source trư�
 | C02b/c | Auth city/renderer, 6 native suites, hai exports pin f1739c7, core loop/faults local Chromium đạt |
 | L01 | Implemented/local verified: spec, backend, UI, onboarding, 104 regression/46 DB tổng suite, browser; chưa staging-accepted |
 | Q01a | Implemented/desktop local verified: achievements/UTC quests/claims, 113 regression/53 DB tổng suite; mobile/Accepted pending |
-| Q01b | Chưa làm: autosave/khôi phục nháp/QOL; spec/acceptance trước code; ưu tiên tiếp theo |
+| Q01b | Q01b.1 shortcut/single-flight đạt VM; autosave/khôi phục nháp và QA QOL còn pending |
 | O01 | Chưa làm: staging, backup/restore, rollback, monitoring |
 | AI01 | V2 sau O01, không là điều kiện MVP |
 
@@ -84,6 +88,10 @@ Cập nhật 2026-11-07. Đọc cùng AGENTS.md; đối chiếu Git/source trư�
 
 ## Verification và giới hạn
 
+- Q01b.1: Node 24.14.0 syntax + 115 regression/53 DB đạt, diff check đạt;
+  thêm 2 VM cases shortcut scope/repeat và concurrent save/failure/identical retry.
+  Chỉ notes.js, tooltip/aria shortcut nút lưu, client tests và docs đổi; không DB/
+  game/XP/storage changes. Chưa browser/OS shortcut smoke; xem TESTING.md.
 - Node 24.14.0 từ npm cache, không đổi Node hệ thống; dependencies theo lockfile,
   không thêm package. Syntax + 113 regression + 53 MongoDB 8.2.6 integration đạt;
   sau client focus fix chạy lại 113 regression/diff check đạt.

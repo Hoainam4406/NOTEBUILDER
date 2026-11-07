@@ -183,6 +183,35 @@ function modalClient() {
   return { ...c, timers };
 }
 
+test('save shortcut only submits an active editor with Ctrl/Cmd+S and respects composition/modifiers/repeat', () => {
+  const c = modalClient(); let active = false, submitted = 0, prevented = 0;
+  c.elements.noteModal.classList.contains = () => active;
+  c.elements.noteForm.requestSubmit = () => submitted++;
+  c.context.shortcut = options => ({ key: 's', ctrlKey: true, preventDefault() { prevented++; }, ...options });
+  c.run('handleEditorSaveShortcut(shortcut({}))'); assert.equal(prevented, 0);
+  active = true;
+  for (const options of [{ altKey: true }, { shiftKey: true }, { isComposing: true }, { ctrlKey: false }, { key: 'x' }]) {
+    c.context.options = options; c.run('handleEditorSaveShortcut(shortcut(options))');
+  }
+  assert.equal(submitted, 0); assert.equal(prevented, 0);
+  c.run('handleEditorSaveShortcut(shortcut({})); handleEditorSaveShortcut(shortcut({ctrlKey:false,metaKey:true,key:"S"})); handleEditorSaveShortcut(shortcut({repeat:true}));');
+  assert.equal(submitted, 2); assert.equal(prevented, 3);
+});
+
+test('concurrent editor saves send one request and failure unlocks an identical-key retry', async () => {
+  let finish, requests = [];
+  const c = client((_url, options) => { requests.push(options); return new Promise(resolve => { finish = resolve; }); });
+  const saving = c.run('saveNoteFromForm()');
+  await c.run('saveNoteFromForm()'); assert.equal(requests.length, 1);
+  finish({ ok: false, status: 503 }); await saving;
+  assert.equal(c.run('noteSaveInFlight'), false); assert.equal(c.effects.closed, 0);
+  const retry = c.run('saveNoteFromForm()'); assert.equal(requests.length, 2);
+  assert.equal(requests[0].body, requests[1].body);
+  assert.equal(requests[0].headers['Idempotency-Key'], requests[1].headers['Idempotency-Key']);
+  finish({ ok: true, json: async () => ({ id: 'created', revision: 0 }) }); await retry;
+  assert.equal(c.run('noteSaveInFlight'), false); assert.equal(c.effects.closed, 1);
+});
+
 test('delayed canvas startup never resets new text typed immediately after opening create or edit', () => {
   for (const edit of [false, true]) {
     const c = modalClient();

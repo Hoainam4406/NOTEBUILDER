@@ -1,5 +1,17 @@
 # Kiểm thử local và CI
 
+## Q01b.1 — phím tắt lưu editor, 2026-11-07
+
+- Scope nhỏ theo yêu cầu tiết kiệm ngân sách: EDITOR_SHORTCUT_SPEC.md.
+  Ctrl/Cmd+S chỉ khi editor active; giữ HTML validation qua requestSubmit.
+  Single-flight guard chung cho shortcut/button; finally mở khóa để retry.
+- Hai VM regression mới: active/modifiers/composition/repeat và concurrent save
+  chỉ gửi một request, sau 503 retry cùng key/body và success mở khóa.
+- Node 24.14.0: syntax, **115 regression + 53 MongoDB integration tests** đạt;
+  diff check đạt. Không sửa backend/dependencies/game/XP/storage.
+- Chưa chạy browser/OS shortcut smoke; VM không thay thế evidence này. Autosave,
+  phục hồi nháp, mobile journey và các giới hạn Q01b còn nguyên; chưa Accepted.
+
 ## Q01a — achievements/UTC daily quests, 2026-11-07
 
 - [JOURNEY_SPEC.md](JOURNEY_SPEC.md) có acceptance trước implementation.

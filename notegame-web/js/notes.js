@@ -65,6 +65,7 @@ let editingNoteId = null;
 let editingRevision = null;
 let editorGeneration = 0;
 let pendingCreate = null;
+let noteSaveInFlight = false;
 let serverProgress = null;
 let serverRewards = null;
 const noteFetch = (...args) => window.KnowledgeAuth ? window.KnowledgeAuth.fetch(...args) : fetch(...args);
@@ -467,6 +468,7 @@ function undoCanvasState() {
    GENERAL APP & MODAL SETUP
    ======================================================= */
 function setupEventListeners() {
+  document.addEventListener('keydown', handleEditorSaveShortcut);
   // Open Create Modal
   btnOpenCreateModal?.addEventListener('click', () => {
     openModal();
@@ -735,7 +737,21 @@ function closeModal() {
 }
 
 // Save or Update Note
+function handleEditorSaveShortcut(event) {
+  if (!noteModal?.classList.contains('active') || event.isComposing || event.altKey || event.shiftKey ||
+      !(event.ctrlKey || event.metaKey) || event.key?.toLowerCase() !== 's') return;
+  event.preventDefault();
+  if (!event.repeat && !noteSaveInFlight) noteForm?.requestSubmit();
+}
+
 async function saveNoteFromForm() {
+  if (noteSaveInFlight) return;
+  noteSaveInFlight = true;
+  try { return await persistNoteFromForm(); }
+  finally { noteSaveInFlight = false; }
+}
+
+async function persistNoteFromForm() {
   const title = document.getElementById('noteTitleInput').value.trim();
   const category = document.getElementById('noteCategoryInput').value.trim() || 'Tri Thức';
   const content = document.getElementById('noteContentInput').value.trim();
