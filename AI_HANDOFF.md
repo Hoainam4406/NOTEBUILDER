@@ -1,129 +1,123 @@
 # Active Development State — Knowledge City
 
-Cập nhật 2026-11-06. Đọc cùng AGENTS.md; đối chiếu Git/source trước khi sửa.
+Cập nhật 2026-11-07. Đọc cùng AGENTS.md; đối chiếu Git/source trước khi sửa.
 
 ## Checkpoint hiện tại
 
-- User yêu cầu tạm dừng feature để audit blueprint; không tự tiếp tục L01.
-  Đã đọc đủ 14 mục trong `docs/Knowledge_City_Product_Blueprint_14_Muc.md`
-  (user commit `95db3fa`). Kết luận/đối chiếu từng mục: `docs/BLUEPRINT_ALIGNMENT.md`.
-  Chỉ một concept city/assets hiện có; nhiều theme/Subject District khác concept
-  ngoài scope, không tự xếp lại V2. Audit chỉ đổi docs/instructions, không code.
-- C02b đã có thành phố tài khoản thật tại `/city.html`, renderer Godot riêng,
-  session/CSRF + catalog/progress/unlocks/city/inventory qua async parent bridge.
-- C02c local Chromium đã kiểm chứng core loop và failure cases; chưa có browser
-  CI tự động, chưa staging/UAT/production. `/game.html` vẫn sandbox RAM riêng.
-- Game main đã push `16721be` (renderer/preset/shell) và `f1739c7` (QA fixes).
-  Pin web hiện là full hash f1739c7 trong `server/game-source.json`.
-- Web baseline tiếp quản `5631105`; checkpoint mới lấy hash bằng
-  `git log -1 --oneline -- AI_HANDOFF.md`. Xác minh push bằng HEAD và ls-remote,
-  không suy ra push thành công chỉ từ snapshot tài liệu này.
+- User đã yêu cầu tiếp tục sau audit blueprint. Baseline web sạch `1349478`;
+  blueprint user commit `95db3fa`, audit `docs/BLUEPRINT_ALIGNMENT.md` vẫn giữ
+  scope một concept city/assets. Không làm lại auth/notes/XP/city đã có evidence.
+- L01 đã triển khai và verified local: flashcards từ title/content, phiên owner
+  snapshot, resume/retry/CAS, tổng kết/history và onboarding trong kho ghi chú.
+  Spec/acceptance: `docs/REVIEW_SPEC.md`; evidence: `docs/TESTING.md`.
+- C02b/c vẫn local verified, chưa staging/UAT hoặc browser CI tự động.
+  `/city.html` lưu account; `/game.html` sandbox RAM riêng. Không sửa game repo
+  trong checkpoint L01; pin web giữ full hash `f1739c7` ở `server/game-source.json`.
+- Hash checkpoint lấy bằng `git log -1 --oneline -- AI_HANDOFF.md`. Xác minh push
+  bằng HEAD/ls-remote, không suy ra push thành công từ snapshot tài liệu này.
 
 ## Quyết định có hiệu lực
 
-- Giữ HTML/JS/Fabric + Express/Mongoose modular monolith; Node 24.14.0,
-  MongoDB replica set/sharded bắt buộc transaction; không đổi stack/UI hàng loạt.
-- Cookie HttpOnly/SameSite Strict, CSRF, shared DB rate limit; mọi dữ liệu theo
-  owner. Notes create idempotent, update/delete revision CAS. Legacy unowned ẩn,
-  không tự gán/import shared storage; save lỗi giữ draft, không giả thành công.
-- XP v1: +20 nếu content chuẩn hóa >=80 Unicode code points; fingerprint/user
-  vĩnh viễn, cap 200/ngày UTC; edit/delete không đổi XP. Note/ledger/reward/
-  inventory atomic. Dashboard/export online đọc server; export cùng DB snapshot.
-- City v1 chỉ 4 reward IDs, axial 32x32, rotation 0, 4 blocked cells; native cell
-  `(floor((x-y)/2),x+y)` trước map_to_local. Polygon native/SAT, tối đa 256 instances.
-- Inventory.quantity là lượng chưa đặt: place -1, move 0, remove +1; city/inventory/
-  receipt cùng transaction. Replay trả state hiện tại, không hồi sinh building cũ.
-- Bridge không chuyển credentials qua URL/message; origin/source/schema/requestId
-  đúng mới xử lý. Parent giữ revision/key/body, check owner trước mutation/retry.
-  20s API timeout; uncertain write chỉ retry request cũ. Conflict reload giữ ghost;
-  expiry/account switch khóa bridge. Dispose/abort trước restart/pagehide.
-- Renderer chính chỉ áp server snapshot; ghost/original giữ khi chờ/lỗi. Refresh
-  kho giữ draft chưa gửi. Chỉ dùng 4 native scenes cố định, không debug entitlement.
-- Hai Web exports single-thread/WebGL2; staging copy bỏ editor tooling. Chỉ City
-  staging đổi main_scene/tắt unlock-all. Không sửa project đang mở khi export,
-  không commit WASM/PCK/cache. Native World và preview giữ local progression.
-- Spec: docs/AUTH_NOTES_SPEC.md, PROGRESSION_SPEC.md, CITY_SPEC.md,
-  GAME_BRIDGE_SPEC.md; build/host: docs/WEB_GAME.md; evidence: docs/TESTING.md.
+- HTML/JS/Fabric + Express/Mongoose modular monolith, Node 24.14.0; MongoDB
+  replica set/sharded bắt buộc transaction. Không tự đổi stack/UI hàng loạt.
+- Cookie HttpOnly/SameSite Strict, CSRF, shared DB rate limit; dữ liệu theo owner.
+  Notes create idempotent, update/delete CAS. Legacy unowned ẩn, không tự import/
+  gán owner. Lưu lỗi giữ draft; không giả thành công hoặc fallback shared storage.
+- XP v1: +20 cho content chuẩn hóa >=80 Unicode code points, fingerprint/user
+  vĩnh viễn, cap 200/ngày UTC; edit/delete không đổi XP. Note/ledger/rewards/
+  inventory atomic. Dashboard/export online đọc server, export cùng DB snapshot.
+- Review tự đánh giá `again`/`remembered`, không chấm đúng/sai hoặc cấp XP/reward.
+  Chọn 1..20 notes có content, một active/user. Start snapshot transaction;
+  answer/close dùng atomic CAS + receipts. Replay trả state hiện tại.
+  Active giữ text kể cả note gốc bị sửa/xóa; complete/close xóa snapshot text.
+- Review/bridge: owner check trước write/retry, timeout 20s/abort; uncertain write
+  chỉ retry key/body cũ. Conflict không tự gửi lại lựa chọn; expiry/account switch
+  xóa private state/khóa. Không localStorage cho nội dung phiên/receipts/auth.
+- City v1: 4 reward IDs, axial 32x32, rotation 0, 4 blocked cells, tối đa 256
+  instances. Native cell `(floor((x-y)/2),x+y)` rồi map_to_local; polygon/SAT.
+  Inventory.quantity là lượng chưa đặt: place -1, move 0, remove +1; layout/
+  inventory/receipt transaction. Replay không hồi sinh building cũ.
+- Parent bridge kiểm tra origin/source/schema/requestId; không truyền credentials
+  qua URL/message. Renderer chỉ áp server snapshot; giữ ghost/original khi lỗi.
+  Hai Web exports single-thread/WebGL2, chỉ staging city đổi main_scene/tắt debug
+  unlock-all; native World/preview giữ local progression. Không sửa game đang mở
+  để export, không commit WASM/PCK/cache hoặc đổi pin chưa kiểm chứng.
+- Specs: docs/AUTH_NOTES_SPEC.md, PROGRESSION_SPEC.md, CITY_SPEC.md,
+  GAME_BRIDGE_SPEC.md, REVIEW_SPEC.md. Build/host: docs/WEB_GAME.md.
 
 ## Task state
 
 | Task | Evidence / trạng thái |
 |---|---|
 | Foundation/A01/N01/N02 | Auth/owner/CAS; multi-process MongoDB/restart/rollback đạt |
-| X01a/b/c | Policy, transaction XP/rewards, dashboard/export server đã có |
-| C01a/b/c | Catalog/native contract + place/move/remove/refund/CAS/idempotency; 34 DB cases đạt |
-| C02a | Preview WASM chơi thật, loader/lifecycle/input; vẫn không lưu account |
-| C02b.1 | `5631105`: spec/parent transport; checkpoint mới thêm timeout/abort |
-| C02b.2/.3 | `/city.html`, renderer riêng, hai exports pin f1739c7; local đạt |
-| C02c | Local Chromium core loop + 503/retry/blocked/two-tabs/expiry/refund đạt |
-| L01 | Chưa làm: review/flashcards/onboarding; ưu tiên tiếp theo, viết spec trước |
-| Q01 | Chưa làm: achievements/quests/QOL, sau L01 |
+| X01a/b/c | Policy/transaction XP/rewards/dashboard/export server đã có |
+| C01a/b/c | Catalog/native contract/place/move/remove/refund/CAS/idempotency; 34 DB cases baseline đạt |
+| C02a | Preview WASM chơi thật; không lưu account |
+| C02b/c | Auth city/renderer, 6 native suites, hai exports pin f1739c7, core loop/faults local Chromium đạt |
+| L01 | Implemented/local verified: spec, backend, UI, onboarding, 104 regression/46 DB tổng suite, browser; chưa staging-accepted |
+| Q01 | Chưa làm: achievements/quests/QOL; ưu tiên feature tiếp theo, cần spec/acceptance trước code |
 | O01 | Chưa làm: staging, backup/restore, rollback, monitoring |
-| AI01 | V2, sau O01; không là điều kiện MVP |
+| AI01 | V2 sau O01, không là điều kiện MVP |
 
-## Files của checkpoint
+## Files của checkpoint L01
 
-- Web: `city.html`, navigation home/notes/preview, `js/game.js` host cả hai modes,
-  `js/city-bridge.js`, `auth.js` nhận AbortSignal. Pagehide/obsolete async load không
-  được khôi phục frame cũ; loader có timeout cả giai đoạn auth/manifest.
-- Notes UI bỏ nhãn +50 XP cũ; kho trống nhưng đã unlock không báo chưa nhận starter.
-  Sửa reset form sau 100 ms xóa tiêu đề nhập sớm: form fill/reset đồng bộ trước
-  khi hiện modal, guard delayed init khi đóng/thay editor; 2 VM regression cases.
-- Builder hỗ trợ `npm run build:game:city`, artifact `game-city-build/` ignored;
-  chỉ release source committed đúng pin. CI build cả preview/city, chưa xác nhận remote.
-- Tests mới/mở rộng: `city-bridge.test.js`, `game-client.test.js`, `game-http.test.js`,
-  `client.test.js`; `test/helpers/browser-server.js` chạy DB riêng, fault qua stdin,
-  không có fault endpoints/seed/URI ứng dụng. Console tương tác; gõ stop để teardown.
-- Game: `Scenes/City/server_city.gd/.tscn`, `web/city-shell.html`, Web City preset,
-  `tests/server_city_regression.gd`, docs và CI suite thứ sáu. Native main không đổi.
+- `server/reviews.js`, `models/ReviewSession.js`: owner selection/snapshots,
+  indexes one-active/create-key, CAS/receipts, replay, cleanup, controlled errors.
+  `server/app.js` mount auth/CSRF API; startup gate tự init model indexes.
+- `notegame-web/review.html`, `css/review.css`, `js/review.js`: chọn/resume/flip/
+  rating, retry/conflict/expiry, progress/history. Reveal toggle giữ keyboard focus;
+  selection checkbox được clear sau start. Render textContent, không note HTML.
+- `notes.html`/`css/notes.css`: hướng dẫn bốn bước không chặn editor; links review
+  thêm ở home/notes/city. Không đổi toàn bộ UI hoặc gameplay/assets.
+- Tests mới review-rules/review-client/integration/reviews; game-http kiểm tra
+  semantic page/onboarding. Fixture browser-server thêm fault review + serialized
+  stdin queue để inspections không đua với teardown. Faults không vào app thật.
+- Docs/spec/instructions/plan/README cập nhật; product blueprint nguyên bản giữ nguyên.
 
 ## Verification và giới hạn
 
-- Node pin 24.14.0 dùng từ npm cache; Node hệ thống 26.13.0 không bị đổi. Dependencies
-  theo lockfile, không thêm package. Syntax, 92 regression + 34 MongoDB 8.2.6 cases đạt.
-- 6 native suites đạt; sau QA fixes chạy lại server_city regression đạt. Sandbox
-  vẫn cảnh báo root certificate store; không có parser/test failures. Không lặp
-  ACL/editor-cache fix lịch sử; chưa có evidence lỗi editor mới độc lập.
-- Hai exports từ f1739c7, sourceDirty=false; 4 checksums/build và WASM/PCK MIME đạt.
-- Chromium local: UI register/login → note → 20 XP/1 starter → place/move → reload/
-  logout/login đúng city. 503 giữ ghost/original, retry thành công; two-tab conflict
-  reload giữ draft; blocked không trừ kho; expiry xóa private state/khóa frame.
-- DB snapshot sau place/move/remove: revision=3, receipts=3, inventory=1, XP=20;
-  sau đặt lại/reload: revision=4, receipts=4, 1 building, inventory=0, XP=20.
-- Preview vẫn start/place được. Normal console không warn/error. Ảnh ignored tại
-  `.artifacts/city-persisted.png`, city-retry.png, city-conflict.png, city-expiry.png.
-  Browser tabs/viewport đã dọn; các fixture servers/replica sets đã dừng.
-- Pending: browser CI tự động, CI remote Linux, Safari/mobile, cross-device,
-  public hosting, staging/UAT, TTL physical cleanup, failover/network partition,
-  backup/restore. Không đánh đồng local/browser smoke với các gate này.
-- DoD blueprint 9.5 cần staging xác nhận: C02b/C02c đang ở mức implemented/local
-  verified, chưa Accepted/Done toàn phần. Autosave chưa có; responsive/accessibility,
-  review/onboarding và đo tác động giáo dục vẫn là khoảng trống cần theo dõi.
+- Node 24.14.0 từ npm cache, không đổi Node hệ thống; dependencies theo lockfile,
+  không thêm package. Syntax + 104 regression + 46 MongoDB 8.2.6 integration đạt;
+  sau client/fault-helper fixes chạy lại syntax/104 regression và diff check đạt.
+- 12 DB cases L01 mới kiểm tra owner/CSRF, bounds/snapshot, two-process races,
+  identical replay/key conflicts, CAS, restart/corrupt/rollback, no XP mutation.
+- Chromium local fixture riêng: empty → onboarding → hai note (40 XP/1 starter)
+  → flip/grade → lost-response sau commit → retry → reload/resume → complete.
+  Completed rev2/index2/2 receipts, text stripped, XP40/inventory1 không đổi.
+- Hai tab stale conflict không auto-grade; expiry xóa private state; login lại
+  resume đúng thẻ; early-close 1/2 rev2/2 receipts/text stripped. Keyboard Enter/
+  Tab đạt; review responsive 390x844 không overflow; normal console không lỗi.
+  Screenshots ignored `.artifacts/review-*.png`; fixture đã dừng. Chạy pipe ba
+  commands snapshot/snapshot/stop sau sửa queue teardown đạt exit 0.
+- Game 6 native suites/hai exports/Chromium city core loop là evidence C02 trước;
+  không chạy lại hoặc khẳng định kiểm chứng mới game trong task L01.
+- Pending: CI remote Linux/browser CI, Safari/mobile thật, cross-device, staging/
+  UAT/production, TTL cleanup vật lý/failover/network partition, backup/restore.
+  DoD blueprint 9.5 chưa Accepted toàn phần. Autosave, accessibility/responsive
+  toàn ứng dụng và đo tác động giáo dục vẫn cần theo dõi; L01 chỉ kiểm tra review.
 
-## Git / môi trường / thay đổi ngoài scope
+## Git / môi trường
 
-- Web `D:/NOTEBUILDER`, branch websiteWorkandTest, origin
+- Web `D:/NOTEBUILDER`, websiteWorkandTest, origin
   https://github.com/Hoainam4406/NOTEBUILDER.git.
 - Game `D:/isometric-grid-building-game/isometric_building_game`, main, origin
-  https://github.com/SubNhatSan/isometric_building_game.git. f1739c7 đã push; parent
-  16721be; trước đó user commit c39347f sửa Godot AI, không bị ghi đè.
-- Blueprint đã được user commit trong `95db3fa`; audit giữ nguyên nội dung file.
-  Trước audit working tree web sạch. Tên tương tự từng xuất hiện untracked ở game
-  nhưng không còn tại kiểm tra cuối session trước; agent không thao tác file đó.
-  Audit chỉ đối chiếu source web/cập nhật docs, không sửa hoặc xác nhận mới repo game.
-- Đường dẫn E: và dirty checkout/worktree cũ trong lịch sử là môi trường trước;
-  không restore/reset để tái tạo chúng. Game sandbox ownership mismatch có thể dùng
-  git -c safe.directory=<đúng repo> cho read, không thêm global safe.directory.
-- GCM hoạt động, tự commit/push đúng branch sau checks; auth lỗi báo một lần.
+  https://github.com/SubNhatSan/isometric_building_game.git. Pin `f1739c7` đã push
+  ở checkpoint trước, parent `16721be`; user commit `c39347f` không bị ghi đè.
+- App MongoDB local từng báo standalone/khởi động không được. Task này không đổi
+  service/cấu hình/.env hoặc dữ liệu ứng dụng. Test dùng replica set riêng tự tạo;
+  local test đạt không chứng minh `npm run dev` đã chạy trên DB ứng dụng.
+- Không tái tạo dirty worktree/đường dẫn E: cũ bằng reset/restore. Không sửa cache/
+  ACL/editor game khi chưa có evidence lỗi mới. GCM hiện có dùng commit/push đúng
+  branch; lỗi auth báo một lần, không lặp đăng nhập.
 
 ## Tiếp quản tiếp theo
 
-1. Đang tạm dừng theo yêu cầu user. Đọc instructions/handoff, blueprint và audit;
-   chỉ tiếp tục feature khi user yêu cầu. Không tự thực hiện Subject District/
-   multi-theme hoặc đổi stack theo bảng gợi ý.
-2. Khi được tiếp tục L01: viết acceptance/spec review/flashcards/onboarding; review events cần ID và
-   retry an toàn, không tự dùng edit/delete để cấp XP hoặc đổi XP policy v1.
-3. Browser regression có thể tái chạy bằng helper riêng; cần backend replica set,
-   không dùng preview server để test auth. Không đưa fault controls vào app thật.
-4. Sau checkpoint cập nhật handoff, check/diff review, commit Conventional Commits
-   và push đúng repo/branch. Không đánh dấu CI remote/staging khi chưa có evidence.
+1. Đối chiếu Git/source; đọc blueprint/alignment/plan. Q01 cần spec acceptance
+   achievement/quest/QOL bền vững trước code; không tự thêm review XP, scheduler,
+   AI hoặc Subject District/multi-theme. L01 đã có evidence, không triển khai lại.
+2. Vận hành O01 còn độc lập: cần replica set/HTTPS, staging, backup/restore và
+   rollback/monitoring trước release. Không gọi local verified là staging accepted.
+3. Browser regression dùng fixture riêng không .env/seed; xem docs/TESTING.md.
+   Không đưa fault controls vào app hoặc chạy destructive test trên DB người dùng.
+4. Sau task cập nhật handoff, checks/review, Conventional Commit và tự push đúng
+   repo/branch; xác minh đích trước mỗi commit/push.

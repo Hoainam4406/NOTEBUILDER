@@ -5,6 +5,12 @@ Ngày 2026-11-06. Đã đọc toàn bộ
 thêm trong commit `95db3fa`. Đối chiếu web `37489c6`, game pin `f1739c7`, source
 và specs hiện tại. Đây là audit tài liệu; không triển khai feature mới.
 
+Cập nhật 2026-11-07: user đã yêu cầu tiếp tục. L01/M07 flashcards, phiên review
+và onboarding đã triển khai, verified local; xem [REVIEW_SPEC.md](REVIEW_SPEC.md)
+và evidence mới trong [TESTING.md](TESTING.md) (104 regression/46 integration).
+Các bảng dưới giữ mốc audit 2026-11-06, không phải trạng thái L01 mới nhất.
+Scope một concept city và giới hạn staging vẫn có hiệu lực.
+
 ## Kết luận và cách sử dụng
 
 Hướng sản phẩm, core loop và thứ tự triển khai đang khớp blueprint. Không có cơ sở
@@ -27,7 +33,7 @@ hiện trạng; khi lệch yêu cầu phải báo/đối chiếu, không coi cod
   không phải hai concept thành phố.
 - Phân môn/tag/review trong website vẫn phù hợp. Liên kết công trình hiện có với
   chức năng học tập không mặc nhiên yêu cầu mở concept/asset mới; chưa triển khai.
-- User đang yêu cầu tạm dừng feature để audit. Không tự tiếp tục L01.
+- Tạm dừng audit ngày 2026-11-06 đã kết thúc theo yêu cầu tiếp tục ngày 2026-11-07.
 
 ## Đối chiếu 14 mục
 

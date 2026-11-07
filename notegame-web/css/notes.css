@@ -1,4 +1,11 @@
 /* NOTEBUILDER - Notes Hub Stylesheet */
+.learning-guide { padding-top:20px; padding-bottom:20px; }
+.learning-guide details { border:1px solid #ffffff25; border-radius:10px; padding:14px 18px; }
+.learning-guide summary { cursor:pointer; font-weight:700; }
+.learning-guide ol { margin:14px 0 0; padding-left:22px; }
+.learning-guide li { margin:10px 0; overflow-wrap:anywhere; }
+.learning-guide a { color:#f5d47a; text-decoration:underline; }
+.learning-guide summary:focus-visible { outline:2px solid #ffd15f; outline-offset:5px; }
 :root {
   --notes-bg: #24262c;
   --notes-surface: #2c2f36;

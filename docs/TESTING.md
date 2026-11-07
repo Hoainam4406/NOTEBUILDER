@@ -1,5 +1,39 @@
 # Kiểm thử local và CI
 
+## L01 — review/flashcards/onboarding, 2026-11-07
+
+- Spec/acceptance REV-01..06: [REVIEW_SPEC.md](REVIEW_SPEC.md). Node 24.14.0:
+  `npm run check`, 104 regression và 46 MongoDB 8.2.6 integration tests đạt;
+  `git diff --check` đạt. Không thêm dependency hoặc đổi game pin `f1739c7`.
+- 12 integration cases mới dùng replica set riêng/hai API processes: auth/CSRF/
+  owner, foreign/legacy/empty notes, tối đa 100 choices và 20 cards, snapshots
+  đúng thứ tự sau edit/delete, same-key starts/ratings, one-active races,
+  CAS winner, key/payload/operation conflict, early close, restart, corrupt data
+  và rollback. XP/reward/inventory không thay đổi khi tự đánh giá.
+- VM client kiểm tra text literal, reveal gate, immutable retry sau timeout/
+  network/503/malformed response, conflict không tự grade, owner switch/expiry
+  xóa private state, summary/history, abort/pagehide và late async results.
+- Chromium local, fixture DB riêng: empty state → onboarding → tạo hai notes
+  qua UI (40 XP, 1 starter) → chọn/flip/grade → reload đúng thẻ → complete/history.
+  Response rating bị cắt sau commit: UI giữ thẻ/lựa chọn, explicit retry đúng
+  request chuyển đúng một thẻ. Snapshot completed: revision=2, receipts=2,
+  nextIndex=2; không còn text trong session. XP vẫn 40, inventory vẫn 1.
+- Hai tab: tab stale nhận 409, tải thẻ mới và giữ nhãn lựa chọn chưa xác nhận,
+  không tự gửi lại. Expire session: khóa và xóa nội dung riêng; login lại resume
+  đúng thẻ. Kết thúc sớm 1/2: closed, revision=2, receipts=2, không còn text.
+- Keyboard reveal bằng Enter rồi Tab tới rating; đã sửa reveal toggle giữ focus.
+  Viewports 1280x900 và 390x844, trang review không tràn ngang; console bình
+  thường không warn/error. Đây là responsive Chromium, chưa test Safari/mobile thật.
+- Screenshots ignored: `.artifacts/review-desktop.png`, `review-mobile.png`,
+  `review-retry.png`, `review-conflict.png`, `review-expiry.png`, `review-summary.png`.
+- Fixture thêm stdin `fail-next-review`, `drop-next-review-response` (partial
+  response sau commit để browser không che lỗi bằng HTTP retry), `review-snapshot`.
+  Command queue được tuần tự hóa để snapshot không chạy đồng thời teardown;
+  pipe review-snapshot/snapshot/stop đạt exit 0 sau sửa. Không đọc app .env/DB.
+- L01 implemented/local verified; CI remote, browser CI tự động, staging/UAT,
+  cross-device và tác động học tập chưa được xác nhận. Không có XP tự đánh giá,
+  AI, scheduler spaced repetition hoặc quest trong scope L01.
+
 ## C02b/C02c — authenticated city, 2026-11-06
 
 - Node 24.14.0: syntax, 92 regression tests và 34 MongoDB integration tests.

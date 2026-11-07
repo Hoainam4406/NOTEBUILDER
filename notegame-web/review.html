@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Ôn tập — Knowledge City</title>
+  <link rel="stylesheet" href="css/game.css"><link rel="stylesheet" href="css/review.css">
+</head>
+<body>
+  <a class="skip-link" href="#reviewMain">Đến nội dung ôn tập</a>
+  <header class="game-header">
+    <a class="brand" href="index.html">▱ NOTEBUILDER</a>
+    <nav aria-label="Điều hướng"><a href="notes.html">Ghi chú</a><a href="city.html">Thành phố</a><a href="account.html">Tài khoản</a></nav>
+  </header>
+  <main id="reviewMain">
+    <p class="eyebrow">NHỚ LẠI TỪNG ĐIỀU ĐÃ HỌC</p>
+    <h1>Một chút ôn tập, kiến thức ở lại lâu hơn.</h1>
+    <p class="intro-copy">Nhìn tiêu đề, tự nhớ lại bài học rồi mở tóm tắt để đối chiếu. Bạn tự đánh giá mức ghi nhớ; lượt ôn này không cộng XP.</p>
+    <p id="reviewStatus" role="status" aria-live="polite">Đang tải phiên ôn tập…</p>
+    <a id="loginLink" href="account.html" hidden>Đăng nhập để mở ghi chú và phiên ôn tập của bạn</a>
+    <div class="review-actions">
+      <button id="refreshReview" type="button" disabled>Tải lại trạng thái</button>
+      <button id="retryReview" type="button" hidden>Thử lại yêu cầu cũ</button>
+    </div>
+    <section id="sessionPanel" class="study-panel" hidden aria-labelledby="cardQuestion">
+      <div class="study-progress"><p id="cardProgress"></p><progress id="sessionProgress" max="20" value="0" aria-label="Số thẻ đã đánh giá"></progress></div>
+      <p class="snapshot-note">Thẻ dùng nội dung ghi chú lúc bắt đầu phiên. Phiên hiện tại vẫn giữ nội dung đó nếu bạn sửa hoặc xóa ghi chú gốc.</p>
+      <article class="flashcard">
+        <span class="eyebrow">BẠN CÒN NHỚ GÌ VỀ…</span>
+        <h2 id="cardQuestion" tabindex="-1"></h2>
+        <button id="revealAnswer" type="button" aria-expanded="false" aria-controls="cardAnswer">Xem tóm tắt</button>
+        <p id="cardAnswer" hidden></p>
+      </article>
+      <p id="ratingDraft" class="snapshot-note" hidden></p>
+      <div class="rating-actions" role="group" aria-label="Tự đánh giá mức ghi nhớ">
+        <button id="rateAgain" type="button" disabled>Cần ôn lại</button>
+        <button id="rateRemembered" type="button" disabled>Đã nhớ</button>
+      </div>
+      <button id="closeReview" class="quiet-button" type="button">Kết thúc phiên sớm</button>
+    </section>
+    <section id="reviewSummary" class="study-panel" hidden aria-labelledby="summaryTitle">
+      <h2 id="summaryTitle" tabindex="-1">Tổng kết phiên</h2><p id="summaryText"></p>
+      <p>Đánh giá giúp bạn chọn điều cần ôn thêm. Đây không phải kết quả kiểm tra đúng/sai.</p>
+    </section>
+    <form id="reviewSetup" class="study-panel" hidden>
+      <h2>Chọn ghi chú để ôn</h2>
+      <p>Chọn tối đa 20 thẻ từ 100 ghi chú có tóm tắt được cập nhật gần nhất. Mặt trước là tiêu đề, mặt sau là Tóm tắt ý chính.</p>
+      <p id="reviewEmpty" hidden>Chưa có ghi chú có tóm tắt. <a href="notes.html">Viết ghi chú đầu tiên</a> hoặc bổ sung Tóm tắt ý chính cho ghi chú đã có.</p>
+      <fieldset id="reviewNotes"><legend>Ghi chú của bạn</legend><div id="noteChoices"></div></fieldset>
+      <p id="selectionCount" aria-live="polite">Đã chọn 0/20</p>
+      <button id="startReview" type="submit" disabled>Bắt đầu ôn tập</button>
+    </form>
+    <section id="reviewHistory" hidden aria-labelledby="historyTitle">
+      <h2 id="historyTitle">Những phiên gần đây</h2><ul id="historyList"></ul>
+      <p class="snapshot-note">Khi kết thúc phiên, nội dung thẻ được gỡ khỏi bản chụp ôn tập; lịch sử chỉ giữ tiến độ và tự đánh giá. Ghi chú gốc không đổi.</p>
+    </section>
+  </main>
+  <script src="js/auth.js"></script><script src="js/review.js"></script>
+</body>
+</html>

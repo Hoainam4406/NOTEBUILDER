@@ -17,6 +17,15 @@ test('authenticated city page loads auth and bridge before host without claiming
   assert.equal((await fetch(base + '/game-city-build/missing.wasm')).status, 404);
 });
 after(() => new Promise(resolve => server.close(resolve)));
+
+test('review page is reachable without DB and links to notes/account with accessible controls and onboarding', async () => {
+  const response = await fetch(base + '/review.html'); assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.ok(html.indexOf('js/auth.js') < html.indexOf('js/review.js'));
+  assert.match(html, /aria-live="polite"/); assert.match(html, /aria-controls="cardAnswer"/); assert.match(html, /không cộng XP/);
+  const notes = await (await fetch(base + '/notes.html')).text();
+  assert.match(notes, /href="review.html"/); assert.match(notes, /Hướng dẫn bắt đầu Knowledge City/);
+});
 test('game preview shell and navigation are served even without a database', async () => {
   const response = await fetch(base + '/game.html'); assert.equal(response.status, 200);
   const html = await response.text();
