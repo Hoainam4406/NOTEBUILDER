@@ -1,5 +1,45 @@
 # Kiểm thử local và CI
 
+## Q01b.2 — hoàn tất Q01 chức năng local, 2026-11-07
+
+- Spec/acceptance trước code: [DRAFT_SPEC.md](DRAFT_SPEC.md). Server drafts theo
+  owner, revision CAS/last-hash replay, document <=12MiB, raw fields/canvas,
+  pending publish bền vững. Không autosave vào Note/XP; không localStorage online.
+- Node 24.14.0: syntax, **127 regression + 58 MongoDB 8.2.6 integration tests**
+  đạt; diff check đạt. 11 VM draft tests + 1 static HTTP mới, 5 DB cases mới.
+  Sau response validation/focus/status fixes chạy lại syntax/127 regression đạt.
+- DB tests: auth/CSRF/owner, raw/blank input/size/canvas validation, list chỉ
+  metadata, two-process same-body replay/changed-body CAS winner, API restart
+  giữ pending/canvas; autosave không Note/XP; replay publish một note/event;
+  xóa nháp CAS độc lập. Tất cả dùng DB test riêng, không đọc .env ứng dụng.
+- VM: debounce/no publish, canvas restore, uncertain/malformed CAS identical
+  retry trước input mới, POST pending lưu trước Notes API và khôi phục cùng key,
+  typing during save giữ editor, PUT chỉ xác nhận revision+1/payload khớp,
+  conflict/owner switch/expiry, pagehide/abort/late results, invalid input sửa lại.
+- Chromium desktop fixture: nhập tóm tắt + Sticky Vàng → autosave → reload →
+  restore vẫn có text/canvas. Trước publish: 0 notes/events. Ctrl+S create response
+  bị cắt sau commit → reload/restore/retry đúng request: 1 note/event, XP20/kho1.
+  Edit title → mất response PUT sau commit → reload/restore/retry, xác nhận đúng
+  revision/payload và dọn draft; vẫn 1 note/event, XP20/kho1.
+- Hai tab cùng draft: A ghi revision mới; B 409 giữ title riêng và không overwrite
+  server. Snapshot cuối chỉ title A ở revision2; không đổi Note/XP. Thu hồi session
+  rồi retry A xóa editor fields/canvas/list riêng. Fixture teardown exit0.
+- Responsive: dùng `agent.browsers.get('2').capabilities.get('viewport')` qua CUA,
+  set390x844 làm DOM width thực390 (wrapper cua browser cũ không tác động đúng).
+  Notes/editor: scrollWidth375, grid một cột270px, canvas box270px/footer318px.
+  Escape flush rồi đóng an toàn. Journey: grid346.667px/scroll375; claim huy hiệu
+  qua UI thành công. Screenshot viewport (`fullPage:false`) đạt; fullPage hẹp
+  tool không capture được. Đây là Chromium responsive, chưa mobile/Safari thật.
+- Dialog inactive inert, focus vào title/giữ Tab trong editor/trả focus khi đóng;
+  tooltip/aria Ctrl/Cmd+S. Browser kiểm chứng Ctrl+S; Cmd+S chỉ VM, chưa macOS.
+- Ảnh ignored `.artifacts/draft-restored.png` (canvas Sticky), draft-conflict.png,
+  draft-expiry.png, journey-mobile-verified.png. Không dùng ảnh journey-mobile.png
+  cũ làm evidence. Browser tabs/viewport và fixture DB đã dọn.
+- Q01 local implemented/verified trong scope specs, chưa staging Accepted.
+  Không gồm mọi nice-to-have (themes, city undo/presets, AI, import...); không có
+  offline draft bền vững khi write chưa ACK. QA sản phẩm cuối/cross-device,
+  staging/UAT, performance/load, TTL/failover/backup/restore vẫn cần gate riêng.
+
 ## Q01b.1 — phím tắt lưu editor, 2026-11-07
 
 - Scope nhỏ theo yêu cầu tiết kiệm ngân sách: EDITOR_SHORTCUT_SPEC.md.

@@ -10,7 +10,8 @@ rộng trong blueprint. Không đổi Definition of Done staging/production thà
 ## Ước lượng hiện tại
 
 Đầu checkpoint Q01a (`cf8bfdc`): khoảng **80% ±5%**. Sau implementation và desktop
-verification Q01a: khoảng **84% ±5%**. Đây là ước lượng kỹ thuật có trọng số,
+verification Q01a: khoảng **84% ±5%**. Sau Q01b/hoàn tất Q01 local: khoảng
+**89% ±5%**. Đây là ước lượng kỹ thuật có trọng số,
 không phải metric tự đo, số tests hoặc cam kết thời gian còn lại.
 
 | Hạng mục | Trọng số | Trước Q01a | Sau Q01a | Căn cứ / phần còn lại |
@@ -24,12 +25,18 @@ không phải metric tự đo, số tests hoặc cam kết thời gian còn lạ
 | Nghiệm thu localhost dùng hằng ngày | 10 | 6 | 6 | Cần xác nhận DB ứng dụng/startup, full run/restart, responsive/a11y toàn app |
 | Tổng | 100 | 80 | 84 | Không tính deploy hoặc polish thẩm mỹ |
 
+Q01b tăng Notes từ17→19/20 và Achievements/quests/QOL từ6→9/10: đã có autosave
+nháp server/khôi phục và responsive journey/editor. Tổng mới89/100. Các cột trên
+giữ mốc Q01a để theo dõi; không tăng điểm QA ứng dụng vì MongoDB thực/startup và
+nghiệm thu toàn bộ bản localhost chưa được kiểm chứng ở checkpoint này.
+
 ## Các việc đưa sản phẩm tới 100% localhost
 
-1. Q01b: đặc tả/triển khai autosave hoặc phục hồi nháp an toàn theo account,
-   không ghi đè note khi conflict, không làm mất canvas hoặc nhân note/XP khi retry.
+1. Q01b đã local đạt: autosave/phục hồi nháp theo account, CAS/pending publish,
+   canvas/retry. Giữ các case này trong nghiệm thu bản cuối.
 2. Rà soát UI tương tác/responsive/accessibility toàn ứng dụng và luồng chuyển
-   notes ↔ review ↔ journey ↔ city/account; mobile journey chưa có evidence thật.
+   notes ↔ review ↔ journey ↔ city/account. Journey/notes/editor đã có evidence
+   responsive Chromium390px; mobile thật/Safari vẫn chưa kiểm chứng.
 3. Xác minh MongoDB ứng dụng hỗ trợ transactions và startup `npm run dev` trên
    cấu hình localhost thực. Test replica set riêng không thay bằng chứng này.
 4. Nghiệm thu bản localhost cuối: auth → notes → XP/rewards → city → review →

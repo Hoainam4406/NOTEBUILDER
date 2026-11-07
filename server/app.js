@@ -9,6 +9,7 @@ const { createCityService } = require('./city');
 const { CATALOG, CityError, mutationInput, buildingId } = require('./city-rules');
 const { createReviewService, ReviewError, startInput, actionInput } = require('./reviews');
 const { createJourneyService, JourneyError, claimInput } = require('./journey');
+const { createDraftService, DraftError, draftInput, draftId } = require('./drafts');
 
 function createApp({ NoteModel = Note, auth = createAuth(), progression = createProgression(), city = createCityService(), reviews = createReviewService(), journey = createJourneyService(), dbReady = () => mongoose.connection.readyState === 1, logger = console } = {}) {
   const app = express();
@@ -27,6 +28,12 @@ function createApp({ NoteModel = Note, auth = createAuth(), progression = create
     next();
   });
   auth.mount(app);
+  const drafts = createDraftService();
+  app.use('/api/drafts', auth.requireUser, auth.csrf);
+  app.get('/api/drafts', async (req, res) => res.json(await drafts.list(req.user._id)));
+  app.get('/api/drafts/:id', async (req, res) => res.json(await drafts.get(req.user._id, draftId(req.params.id))));
+  app.put('/api/drafts/:id', async (req, res) => res.json(await drafts.save(req.user._id, draftId(req.params.id), draftInput(req.body))));
+  app.delete('/api/drafts/:id', async (req, res) => { const { revision } = draftInput(req.body, true); await drafts.remove(req.user._id, draftId(req.params.id), revision); res.status(204).end(); });
   app.use(['/api/notes', '/api/godot', '/api/progress', '/api/rewards', '/api/city', '/api/reviews', '/api/journey'], auth.requireUser, auth.csrf);
   app.get('/api/journey', async (req, res) => res.json(await journey.dashboard(req.user._id)));
   app.put('/api/journey/achievements/:id', async (req, res) => res.json(await journey.claim(req.user._id, 'achievement', req.params.id, claimInput('achievement', req.body))));
@@ -110,7 +117,7 @@ function createApp({ NoteModel = Note, auth = createAuth(), progression = create
   app.use('/api', (req, res) => res.status(404).json({ error: 'API không tồn tại', code: 'NOT_FOUND' }));
   app.use((error, req, res, next) => {
     if (res.headersSent) return next(error);
-    const domainError = error instanceof ProgressionError || error instanceof CityError || error instanceof ReviewError || error instanceof JourneyError;
+    const domainError = error instanceof ProgressionError || error instanceof CityError || error instanceof ReviewError || error instanceof JourneyError || error instanceof DraftError;
     const status = domainError ? error.status : error instanceof InputError || error.type === 'entity.parse.failed' ? 400
       : error.type === 'entity.too.large' ? 413 : 500;
     if (status === 500) logger.error('API request failed', { method: req.method, path: req.path, name: error.name });

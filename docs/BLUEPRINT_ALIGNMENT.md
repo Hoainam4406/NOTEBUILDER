@@ -17,6 +17,13 @@ Q01b autosave/QOL và responsive toàn app còn pending. User chốt mốc 100% 
 chưa tính deploy/thẩm mỹ: [LOCAL_PROGRESS.md](LOCAL_PROGRESS.md). Audit bên dưới
 vẫn giữ mốc 2026-11-06; evidence mới: 113 regression/53 integration, TESTING.md.
 
+Checkpoint hoàn tất Q01 local: autosave nháp server/khôi phục canvas, frozen
+publish/retry qua reload, shortcut và QOL editor đã có. Journey/notes/editor đã
+kiểm chứng ở Chromium 390px (DOM width thực, một cột/không tràn, claim thành công),
+khép pending responsive Q01a. Evidence hiện hành: 127 regression/58 DB,
+TESTING.md và DRAFT_SPEC.md. Không coi mọi nice-to-have 6.2 là scope bắt buộc Q01;
+QA toàn sản phẩm cuối/staging/UAT/production vẫn riêng.
+
 ## Kết luận và cách sử dụng
 
 Hướng sản phẩm, core loop và thứ tự triển khai đang khớp blueprint. Không có cơ sở

@@ -1,4 +1,11 @@
 /* NOTEBUILDER - Notes Hub Stylesheet */
+.drafts-panel { padding:20px; }
+.drafts-panel p,#draftStatus { overflow-wrap:anywhere; }
+#draftList { padding:0; list-style:none; }
+#draftList li { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:12px 0; }
+#draftList li span { flex:1 1 200px; overflow-wrap:anywhere; }
+.drafts-panel button { min-height:44px; padding:8px 12px; cursor:pointer; }
+#draftStatus { flex:1 1 100%; margin:0; font-size:14px; }
 .learning-guide { padding-top:20px; padding-bottom:20px; }
 .learning-guide details { border:1px solid #ffffff25; border-radius:10px; padding:14px 18px; }
 .learning-guide summary { cursor:pointer; font-weight:700; }
@@ -39,6 +46,7 @@ body.notes-body {
 }
 
 .notes-nav-inner {
+  flex-wrap:wrap;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -72,6 +80,7 @@ body.notes-body {
 }
 
 .nav-right-actions {
+  flex-wrap:wrap;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -1083,4 +1092,8 @@ body.notes-body {
   .modal-studio-layout {
     grid-template-columns: 1fr;
   }
+  .studio-canvas-column,.studio-meta-column { min-width:0; }
+  .canvas-paper-wrapper { max-width:100%; overflow:auto; }
+  .modal-footer { flex-wrap:wrap; }
+  .modal-footer button { min-height:44px; }
 }

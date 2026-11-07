@@ -38,4 +38,5 @@ progress { width:min(320px,80%); height:10px; margin:15px 0; accent-color:#e9ca6
 kbd { align-self:flex-start; font:11px system-ui,sans-serif; padding:5px 9px; border:1px solid #50604f; border-radius:5px; color:#dbe3d2; background:#223027; }
 .footnote { font-size:11px; color:#889e8d; margin-top:20px; }
 [hidden] { display:none; }
+@media(max-width:650px) { .game-header { flex-wrap:wrap; gap:14px; } nav { flex-wrap:wrap; } }
 @media(max-width:800px) { main { padding:24px 14px; } .game-header { padding:18px 16px; } .intro { align-items:flex-start; } .preview-badge { margin-top:4px; } .controls { grid-template-columns:repeat(3,1fr); gap:18px; } nav { gap:14px; } .game-stage { height:600px; } }

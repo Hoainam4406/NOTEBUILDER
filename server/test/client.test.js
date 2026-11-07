@@ -183,6 +183,18 @@ function modalClient() {
   return { ...c, timers };
 }
 
+test('draft expiry clears private editor, notes and server XP/reward snapshots', () => {
+  const c = modalClient(); let hooks;
+  c.context.window.EditorDrafts = { create(options) { hooks = options; return {}; } };
+  for (const id of ['refreshDrafts', 'retryDraft', 'noteForm']) c.context.document.getElementById(id).addEventListener = () => {};
+  c.context.document.getElementById('draftList').replaceChildren = () => {};
+  c.run('setupDrafts("owner"); serverProgress = {totalXp:40}; serverRewards = {inventory:[1]};');
+  hooks.onExpire();
+  assert.equal(c.fields.noteTitleInput, ''); assert.equal(c.run('notes.length'), 0);
+  assert.equal(c.run('serverProgress'), null); assert.equal(c.run('serverRewards'), null);
+  assert.equal(c.elements.noteModal.inert, true);
+});
+
 test('save shortcut only submits an active editor with Ctrl/Cmd+S and respects composition/modifiers/repeat', () => {
   const c = modalClient(); let active = false, submitted = 0, prevented = 0;
   c.elements.noteModal.classList.contains = () => active;
@@ -229,6 +241,13 @@ test('closing or replacing an editor invalidates its pending canvas initializati
   c.run('openModal({id:"old",title:"Old"}); openModal({id:"new",title:"New"});');
   c.timers[1](); assert.equal(c.effects.canvasInits, undefined);
   c.timers[2](); assert.equal(c.effects.canvasInits, 1); assert.equal(c.fields.noteTitleInput, 'New');
+});
+
+test('closing during a save is blocked but a confirmed legacy/file-mode save can close its editor', async () => {
+  const c = modalClient(); let closed = 0;
+  c.elements.noteModal.classList.remove = () => closed++;
+  c.run('noteSaveInFlight = true'); await c.run('originalCloseModal()');
+  assert.equal(closed, 0); await c.run('originalCloseModal(true)'); assert.equal(closed, 1);
 });
 test('online Godot export uses authenticated server data and fails without a fake fallback', async () => {
   const c = client(async url => {

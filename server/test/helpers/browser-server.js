@@ -12,12 +12,14 @@ async function start() {
     const mutation = ['POST', 'PATCH', 'DELETE'].includes(req.method) && req.url.startsWith('/api/city/buildings');
     const reviewMutation = req.method === 'POST' && (req.url === '/api/reviews' || req.url.startsWith('/api/reviews/'));
     const journeyMutation = req.method === 'PUT' && req.url.startsWith('/api/journey/');
-    if ((reviewMutation && fault === 'review-fail') || (journeyMutation && fault === 'journey-fail')) {
+    const draftMutation = req.method === 'PUT' && req.url.startsWith('/api/drafts/');
+    const noteMutation = ['POST', 'PUT'].includes(req.method) && (req.url === '/api/notes' || req.url.startsWith('/api/notes/'));
+    if ((reviewMutation && fault === 'review-fail') || (journeyMutation && fault === 'journey-fail') || (draftMutation && fault === 'draft-fail')) {
       fault = null;
       res.writeHead(503, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify({ error: 'Test outage', code: 'DATABASE_UNAVAILABLE' }));
     }
-    if ((reviewMutation && fault === 'review-drop') || (journeyMutation && fault === 'journey-drop')) {
+    if ((reviewMutation && fault === 'review-drop') || (journeyMutation && fault === 'journey-drop') || (noteMutation && fault === 'note-drop')) {
       fault = null;
       const end = res.end;
       res.end = function (...args) {
@@ -71,6 +73,14 @@ async function start() {
       else if (command === 'drop-next-review-response') { fault = 'review-drop'; console.log('Armed: drop committed review response'); }
       else if (command === 'fail-next-journey') { fault = 'journey-fail'; console.log('Armed: reject next journey claim with 503'); }
       else if (command === 'drop-next-journey-response') { fault = 'journey-drop'; console.log('Armed: drop committed journey response'); }
+      else if (command === 'fail-next-draft') { fault = 'draft-fail'; console.log('Armed: reject next draft save'); }
+      else if (command === 'drop-next-note-response') { fault = 'note-drop'; console.log('Armed: drop committed note response'); }
+      else if (command === 'draft-snapshot') {
+        const rows = await require('../../models/NoteDraft').find({}).lean();
+        console.log(JSON.stringify({ drafts: rows.map(row => ({ id: row.draftId, revision: row.revision, title: row.data.fields.title,
+          hasCanvas: !!row.data.fields.canvasJSON, pendingMethod: row.data.pending?.method || null })),
+          notes: await require('../../models/Note').countDocuments(), events: await require('../../models/XpEvent').countDocuments() }));
+      }
       else if (command === 'journey-snapshot') {
         const claims = await require('../../models/JourneyClaim').find({}).select('kind period entryId claimedAt -_id').lean();
         console.log(JSON.stringify({ claims }));

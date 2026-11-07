@@ -72,6 +72,13 @@
   <!-- =========================================
        GAMIFICATION DASHBOARD (PROGRESS & GODOT STATUS)
        ========================================= -->
+  <section class="drafts-panel container" aria-label="Bản nháp tài khoản">
+    <h2>Bản nháp của bạn</h2>
+    <p>Nháp tự lưu trên server sau khi ngừng nhập/vẽ. Chỉ bấm Lưu mới xuất bản note và xét XP. Khi mất mạng, giữ trang mở tới khi nháp được xác nhận.</p>
+    <button id="refreshDrafts" type="button">Tải lại nháp</button>
+    <p id="draftEmpty">Chưa có nháp đã lưu.</p><ul id="draftList"></ul>
+    <p id="draftListStatus" role="status" aria-live="polite"></p>
+  </section>
   <section class="gamification-bar">
     <div class="container gamification-grid">
       <!-- Left: Player Level & Progress -->
@@ -143,7 +150,7 @@
        MODAL: FABRIC.JS INTERACTIVE CANVAS STUDIO
        (Drawing directly on paper, pen mode, sticky text mode)
        ========================================= -->
-  <div class="modal-overlay" id="noteModal">
+  <div class="modal-overlay" id="noteModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" inert>
     <div class="modal-card">
       <div class="modal-header">
         <div style="display: flex; align-items: center; gap: 10px;">
@@ -304,7 +311,9 @@
         </div>
 
         <div class="modal-footer">
-          <button type="button" class="btn-secondary" id="btnCancelModal">Hủy Bỏ</button>
+          <p id="draftStatus" role="status" aria-live="polite">Chưa có thay đổi.</p>
+          <button type="button" class="btn-secondary" id="retryDraft">Thử lưu nháp lại</button>
+          <button type="button" class="btn-secondary" id="btnCancelModal">Đóng (giữ nháp)</button>
           <button type="submit" class="btn-save-note" title="Lưu ghi chú (Ctrl+S / Cmd+S)" aria-keyshortcuts="Control+S Meta+S">
             <span>💾 Lưu Ghi Chú Vào Bảng</span>
           </button>
@@ -322,6 +331,7 @@
   <!-- Scripts: Fabric.js Canvas Library + Custom Script -->
   <script src="js/fabric.min.js"></script>
   <script src="js/auth.js"></script>
+  <script src="js/editor-drafts.js"></script>
   <script src="js/notes.js"></script>
 </body>
 </html>

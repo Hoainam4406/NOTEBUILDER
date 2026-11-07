@@ -32,6 +32,7 @@ MVP ưu tiên vòng lặp hoàn chỉnh, bảo vệ dữ liệu và khả năng 
 | Progression | `server/progression-policy.js`, `progression.js` | Note + ledger + fingerprint + XP + unlock/inventory cùng transaction |
 | Persistence | `server/models/`, `server/index.js` | Unique indexes và kiểm tra transaction trước khi listen |
 | Web UI | `notegame-web/js/notes.js`, `auth.js`, `account.js` | Online đọc XP từ server; lỗi lưu giữ bản nháp |
+| Drafts | `server/drafts.js`, `models/NoteDraft.js`, `js/editor-drafts.js` | Autosave owner/CAS; pending publish bền vững trước Notes API; không tự cấp XP |
 | City API | `server/city.js`, `city-rules.js`, `models/City.js`, `CityMutation.js` | Layout/inventory/receipt atomic; revision CAS; catalog/map ở `server/data/` |
 | Review | `server/reviews.js`, `models/ReviewSession.js`, `notegame-web/js/review.js` | Owner snapshots; một active/user; CAS + receipts; tự đánh giá không cấp XP |
 | Journey | `server/journey.js`, `models/JourneyClaim.js`, `notegame-web/js/journey.js` | Evidence server; unique claim owner/kind/period/ID; UTC quests, không thêm XP/inventory |
@@ -44,7 +45,7 @@ MVP ưu tiên vòng lặp hoàn chỉnh, bảo vệ dữ liệu và khả năng 
 - Blueprint là định hướng; viết acceptance criteria/specification trước feature.
   Tham chiếu `docs/IMPLEMENTATION_PLAN.md`, `AUTH_NOTES_SPEC.md`,
   `PROGRESSION_SPEC.md`, `CITY_SPEC.md`, `REVIEW_SPEC.md`, `JOURNEY_SPEC.md`,
-  `TESTING.md` (các file sau nằm trong `docs/`).
+  `DRAFT_SPEC.md`, `TESTING.md` (các file sau nằm trong `docs/`).
 - Backend xác thực ownership, XP, reward và placement; không tin giá trị client.
 - Note create cần `Idempotency-Key`; retry giữ key/payload. Update/delete cần
   revision. Không bỏ owner filter, CSRF, unique constraints hoặc transaction.

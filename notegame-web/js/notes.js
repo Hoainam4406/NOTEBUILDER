@@ -66,6 +66,8 @@ let editingRevision = null;
 let editorGeneration = 0;
 let pendingCreate = null;
 let noteSaveInFlight = false;
+let draftController = null;
+let editorReady = false;
 let serverProgress = null;
 let serverRewards = null;
 const noteFetch = (...args) => window.KnowledgeAuth ? window.KnowledgeAuth.fetch(...args) : fetch(...args);
@@ -129,7 +131,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (window.location.protocol.startsWith('http')) {
     // Served mode must never silently expose shared localStorage after auth/DB failure.
     isMongoConnected = true;
-    try { await window.KnowledgeAuth.me(); }
+    try {
+      const account = await window.KnowledgeAuth.me();
+      if (window.EditorDrafts) setupDrafts(account.user.id);
+    }
     catch (error) {
       if (error.status === 401) window.location.href = 'account.html';
       else showToast('Không thể kết nối tài khoản. Hãy tải lại trang để thử lại.');
@@ -139,7 +144,67 @@ document.addEventListener('DOMContentLoaded', async () => {
     isMongoConnected = true;
   }
   await loadNotes();
+  if (draftController) await draftController.list();
 });
+
+function editorDraftState() {
+  if (!editorReady) return null;
+  return { noteId: editingNoteId, baseRevision: editingRevision, fields: {
+    title: document.getElementById('noteTitleInput').value,
+    category: document.getElementById('noteCategoryInput').value,
+    content: document.getElementById('noteContentInput').value,
+    tags: document.getElementById('noteTagsInput').value,
+    template: document.querySelector('input[name="noteTemplate"]:checked')?.value || '1',
+    canvasJSON: fabricCanvas ? JSON.stringify(fabricCanvas.toJSON()) : null
+  } };
+}
+function setupDrafts(ownerId) {
+  const status = message => {
+    document.getElementById('draftStatus').textContent = message;
+    document.getElementById('draftListStatus').textContent = message;
+  };
+  draftController = window.EditorDrafts.create({ ownerId, getState: editorDraftState, status,
+    onPublished(note) { editingNoteId = note.id; editingRevision = note.revision; },
+    onRestore(record) {
+      if (noteSaveInFlight) return;
+      const { fields, noteId, baseRevision } = record.data;
+      openModal({ id: noteId, revision: baseRevision, ...fields, tags: [], canvasImage: null }, record);
+      document.getElementById('noteTagsInput').value = fields.tags;
+    },
+    onExpire() {
+      editorGeneration++; editorReady = false; noteModal?.classList.remove('active'); noteModal.inert = true;
+      noteForm.reset(); fabricCanvas?.clear(); notes = []; renderNotes();
+      serverProgress = null; serverRewards = null; updateGamification();
+      editingNoteId = null; editingRevision = null; pendingCreate = null;
+      document.getElementById('draftList').replaceChildren();
+      status('Tài khoản đã đổi hoặc hết hạn. Đăng nhập và tải lại trang trước khi tiếp tục.');
+    },
+    onList(rows) {
+      const list = document.getElementById('draftList'); list.replaceChildren();
+      for (const row of rows) {
+        const item = document.createElement('li'), label = document.createElement('span');
+        label.textContent = row.title || 'Nháp chưa có tiêu đề';
+        const restore = document.createElement('button'); restore.type = 'button'; restore.textContent = 'Khôi phục';
+        restore.setAttribute('aria-label', `Khôi phục: ${row.title || 'Nháp chưa có tiêu đề'}`);
+        restore.addEventListener('click', () => { if (!noteSaveInFlight) draftController.restore(row.id); });
+        const remove = document.createElement('button'); remove.type = 'button'; remove.textContent = 'Xóa nháp';
+        remove.setAttribute('aria-label', `Xóa nháp: ${row.title || 'Nháp chưa có tiêu đề'}`);
+        remove.addEventListener('click', async () => {
+          if (noteSaveInFlight || noteModal.classList.contains('active')) { status('Đóng editor trước khi xóa nháp.'); return; }
+          if (confirm('Xóa vĩnh viễn bản nháp này? Ghi chú đã xuất bản không bị xóa.')) {
+            try { await draftController.remove(row.id, row.revision); } catch { status('Chưa xác nhận xóa nháp. Hãy tải lại danh sách.'); }
+          }
+        });
+        item.append(label, restore, remove); list.append(item);
+      }
+      document.getElementById('draftEmpty').hidden = rows.length !== 0;
+    }
+  });
+  document.getElementById('refreshDrafts').addEventListener('click', () => draftController.list());
+  document.getElementById('retryDraft').addEventListener('click', () => draftController.flush().catch(() => {}));
+  noteForm.addEventListener('input', () => draftController.changed());
+  noteForm.addEventListener('change', () => draftController.changed());
+}
 
 // Check MongoDB Connection via Backend API
 async function checkDatabaseConnection() {
@@ -264,6 +329,7 @@ function initFabricCanvas() {
   fabricCanvas.on('object:modified', () => {
     if (!isUndoAction) saveCanvasState();
   });
+  fabricCanvas.on('object:removed', () => { if (editorReady) draftController?.changed(); });
 
   setupCanvasControls();
 }
@@ -447,6 +513,7 @@ function createStickyMemo(bgColor, textColor, defaultText) {
 
 // History Stack for Undo
 function saveCanvasState() {
+  if (editorReady) draftController?.changed();
   if (!fabricCanvas || isUndoAction) return;
   const json = JSON.stringify(fabricCanvas.toJSON());
   if (canvasUndoStack.length > 25) canvasUndoStack.shift();
@@ -461,6 +528,7 @@ function undoCanvasState() {
   fabricCanvas.loadFromJSON(prevState, () => {
     fabricCanvas.renderAll();
     isUndoAction = false;
+    draftController?.changed();
   });
 }
 
@@ -469,6 +537,14 @@ function undoCanvasState() {
    ======================================================= */
 function setupEventListeners() {
   document.addEventListener('keydown', handleEditorSaveShortcut);
+  document.addEventListener('keydown', event => { if (event.key === 'Escape' && noteModal?.classList.contains('active')) closeModal(); });
+  document.addEventListener('keydown', event => {
+    if (event.key !== 'Tab' || !noteModal?.classList.contains('active')) return;
+    const controls = [...noteModal.querySelectorAll('button,input,textarea,select,a[href],[tabindex="0"]')].filter(element => !element.disabled && element.getClientRects().length);
+    const first = controls[0], last = controls.at(-1);
+    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+  });
   // Open Create Modal
   btnOpenCreateModal?.addEventListener('click', () => {
     openModal();
@@ -665,7 +741,12 @@ function renderNotes() {
 }
 
 // Modal Actions
-function openModal(noteToEdit = null) {
+function openModal(noteToEdit = null, draftRecord = null) {
+  if (noteSaveInFlight) { showToast('Đang lưu. Hãy chờ xác nhận trước khi đổi editor.'); return; }
+  if (draftController && noteModal.classList.contains('active') && draftController.dirty() && !draftRecord) {
+    showToast('Đóng editor để xác nhận lưu nháp trước khi mở bản khác.'); return;
+  }
+  editorReady = false;
   const generation = ++editorGeneration;
   editingNoteId = noteToEdit ? noteToEdit.id : null;
   editingRevision = noteToEdit?.revision ?? null;
@@ -682,6 +763,9 @@ function openModal(noteToEdit = null) {
     noteForm.reset();
   }
   noteModal?.classList.add('active');
+  noteModal.inert = false;
+  draftController?.attach(draftRecord);
+  document.getElementById('noteTitleInput').focus?.();
 
   // Initialize Fabric.js if not yet ready
   setTimeout(() => {
@@ -700,14 +784,17 @@ function openModal(noteToEdit = null) {
       // Load saved canvas state or initialize paper
       if (noteToEdit.canvasJSON) {
         fabricCanvas.loadFromJSON(noteToEdit.canvasJSON, () => {
+          if (generation !== editorGeneration) return;
           setCanvasPaperBackground(noteToEdit.template);
           fabricCanvas.renderAll();
           canvasUndoStack = [JSON.stringify(fabricCanvas.toJSON())];
+          editorReady = true;
         });
       } else {
         fabricCanvas.clear();
         setCanvasPaperBackground(noteToEdit.template);
         canvasUndoStack = [];
+        editorReady = true;
       }
     } else {
       // Default select template 1
@@ -721,6 +808,7 @@ function openModal(noteToEdit = null) {
       fabricCanvas.clear();
       setCanvasPaperBackground('1');
       canvasUndoStack = [];
+      editorReady = true;
     }
 
     // Default to Pen Mode
@@ -728,12 +816,21 @@ function openModal(noteToEdit = null) {
   }, 100);
 }
 
-function closeModal() {
+async function closeModal(confirmed = false) {
+  if (noteSaveInFlight && confirmed !== true) { showToast('Đang lưu. Hãy chờ xác nhận.'); return; }
+  if (draftController?.dirty()) {
+    try { await draftController.flush(); } catch { return; }
+  }
+  draftController?.detach();
   editorGeneration++;
+  editorReady = false;
   noteModal?.classList.remove('active');
+  noteModal.inert = true;
   editingNoteId = null;
   editingRevision = null;
   pendingCreate = null;
+  if (draftController) draftController.list();
+  btnOpenCreateModal?.focus?.();
 }
 
 // Save or Update Note
@@ -752,6 +849,7 @@ async function saveNoteFromForm() {
 }
 
 async function persistNoteFromForm() {
+  if (draftController && !editorReady) { showToast('Canvas đang tải. Hãy chờ trước khi lưu.'); return; }
   const title = document.getElementById('noteTitleInput').value.trim();
   const category = document.getElementById('noteCategoryInput').value.trim() || 'Tri Thức';
   const content = document.getElementById('noteContentInput').value.trim();
@@ -793,6 +891,18 @@ async function persistNoteFromForm() {
   // Lưu vào MongoDB nếu đang kết nối
   if (isMongoConnected) {
     try {
+      if (draftController) {
+        const completed = await draftController.publish(notePayload);
+        await loadNotes();
+        if (completed) {
+          showToast('Đã lưu ghi chú trên server.');
+          // publish has confirmed the note and detached its draft.
+          editorGeneration++; editorReady = false; noteModal.classList.remove('active'); noteModal.inert = true;
+          editingNoteId = null; editingRevision = null; pendingCreate = null;
+          btnOpenCreateModal?.focus?.();
+        }
+        return;
+      }
       if (editingNoteId) {
         const res = await noteFetch(`${API_BASE_URL}/api/notes/${editingNoteId}`, {
           method: 'PUT',
@@ -802,7 +912,7 @@ async function persistNoteFromForm() {
         if (res.ok) {
           showToast('Đã lưu bài học vào MongoDB! 🍃');
           await loadNotes();
-          closeModal();
+          closeModal(true);
           return;
         }
         if (res.status === 409) {
@@ -831,7 +941,7 @@ async function persistNoteFromForm() {
           }
           showToast('Đã lưu ghi chú mới vào MongoDB! 🍃');
           await loadNotes();
-          closeModal();
+          closeModal(true);
           return;
         }
         throw new Error('Server từ chối tạo ghi chú');
@@ -867,7 +977,7 @@ async function persistNoteFromForm() {
   saveNotesToStorage();
   updateGamification();
   renderNotes();
-  closeModal();
+  closeModal(true);
 }
 
 // Global functions for inline HTML buttons

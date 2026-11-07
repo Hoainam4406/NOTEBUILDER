@@ -26,6 +26,13 @@ test('journey UI and navigation expose semantic progress and authenticated scrip
   assert.match(await (await fetch(base + '/notes.html')).text(), /href="journey.html"/);
 });
 
+test('notes editor exposes account drafts, inert closed dialog and loads draft controller before editor', async () => {
+  const html = await (await fetch(base + '/notes.html')).text();
+  assert.ok(html.indexOf('js/auth.js') < html.indexOf('js/editor-drafts.js'));
+  assert.ok(html.indexOf('src="js/editor-drafts.js"') < html.indexOf('src="js/notes.js"'));
+  assert.match(html, /role="dialog"[^>]*inert/); assert.match(html, /id="draftStatus" role="status"/);
+});
+
 test('review page is reachable without DB and links to notes/account with accessible controls and onboarding', async () => {
   const response = await fetch(base + '/review.html'); assert.equal(response.status, 200);
   const html = await response.text();
