@@ -55,7 +55,7 @@ git diff --check
 127 tests dùng HTTP thật trên cổng loopback ngẫu nhiên với model thay thế,
 và VM chạy mã frontend để kiểm tra lỗi save/delete, revision và khởi động session.
 Tests kiểm tra auth/CSRF/owner isolation ở tầng HTTP nhưng không kết nối MongoDB
-thật. Thêm 58 integration tests chạy MongoDB 8.2.6 replica set cục bộ riêng để
+thật. Thêm 59 integration tests chạy MongoDB 8.2.6 replica set cục bộ riêng để
 kiểm tra indexes, auth/owner/CAS giữa hai tiến trình, restart API và rollback.
 Xem [docs/TESTING.md](docs/TESTING.md); chưa xác nhận persistence cross-device.
 GitHub Actions chạy syntax/tests trên Linux khi push feature branch hoặc mở PR.

@@ -18,6 +18,10 @@ Sau startup/artifacts smoke trên cấu hình ứng dụng: khoảng **90% ±5%*
 MongoDB thực hỗ trợ transaction/primary, startup và `npm run check:local` đạt;
 QA localhost tăng6→7/10. Authenticated nghiệm thu bản cuối vẫn cần thực hiện.
 
+Core-loop HTTP acceptance sau đó đã xác nhận2 API restarts, logout/login và
+persisted draft/note/XP/city/review/claims trong DB test riêng. Giữ khoảng90% ±5%
+cho đến nghiệm thu UI bản cuối: browser tool đang disabled trong Work settings.
+
 | Hạng mục | Trọng số | Trước Q01a | Sau Q01a | Căn cứ / phần còn lại |
 |---|---:|---:|---:|---|
 | Auth/profile/ownership | 10 | 9 | 9 | Session/CSRF/owner đạt; còn nghiệm thu toàn app |

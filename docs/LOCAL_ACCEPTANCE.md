@@ -25,6 +25,22 @@ Không chạy song song với thay đổi cấu hình/export. Không cần admin
   account200. Anonymous notes/drafts/journey401. Server đã đóng, không data writes.
 - Kết quả command check:local và giới hạn thêm xem TESTING.md.
 
+## Kiểm thử API xuyên module và restart
+
+```text
+node --test server/test/integration/core-loop.test.js
+```
+
+Case này tạo replica set riêng, dùng public HTTP API để register/login → lưu nháp
+pending/canvas → restart → restore/publish/replay → XP/reward → place/move city →
+3 review sessions → 5 claims → restart → logout/login → replay place không debit
+lại → remove/refund → export. Không seed entitlement hay chạm DB ứng dụng.
+Đã đạt với Node24.14.0/MongoDB8.2.6. Chi tiết snapshot: TESTING.md.
+
+Lượt nghiệm thu hiện tại: browser tool báo **Local browser use is disabled in
+Work settings** trước khi mở trang. Không tạo account/data test trong DB ứng dụng;
+tiến trình app tạm cổng5062 đã dừng. Không gọi case HTTP này là browser E2E.
+
 ## Gate tương tác bản cuối còn lại
 
 1. Chạy `npm run dev`, đăng nhập bằng account kiểm thử do user chọn; không tự dùng

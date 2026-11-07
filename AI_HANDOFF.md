@@ -4,6 +4,13 @@ Cập nhật 2026-11-07. Đọc cùng AGENTS.md; đối chiếu Git/source trư�
 
 ## Checkpoint hiện tại
 
+- Baseline sạch `f5f7aa4`. Thêm core-loop HTTP acceptance/restart test, không sửa
+  runtime:1note/20XP/1starter→city→review→5claims,2 API restarts và logout/login
+  giữ mọi state; replay không debit/XP trùng. Test DB riêng không seed/grant.
+  Tổng127 regression/59 integration; xem TESTING.md/LOCAL_ACCEPTANCE.md.
+- UI nghiệm thu bản cuối đang pending vì browser tool báo local browser use
+  disabled trong Work settings trước khi mở trang. Không bypass, không tạo data
+  trên DB ứng dụng. Server app tạm5062 đã dừng; chỉ startup/index init như trước.
 - Q01 đã commit/push `2ffc07c` (127 regression/58 DB). Game main f1739c7 sạch,
   chỉ read Git, không sửa trong lượt này.
 - Bắt đầu nghiệm thu localhost: `npm run check:local` mới đạt exit0 với .env ứng
@@ -60,7 +67,7 @@ Cập nhật 2026-11-07. Đọc cùng AGENTS.md; đối chiếu Git/source trư�
 | C02a/b/c | Web export thật/account city/core loop + faults local Chromium đạt; game6 suites baseline |
 | L01 | Review/flashcards/onboarding local verified |
 | Q01a/b | Local verified scope specs; 127 regression/58 DB, browser drafts/replay/conflict/expiry/390px |
-| Nghiệm thu localhost cuối | DB ứng dụng/startup/artifact smoke đạt; authenticated full run/restart/QA tổng thể pending |
+| Nghiệm thu localhost cuối | DB ứng dụng/startup/artifacts và full core-loop HTTP/restart DB riêng đạt; UI bản cuối/QA tổng thể pending (browser disabled) |
 | O01 | Staging/backup-restore/rollback/monitoring pending; deploy sau theo user |
 | AI01 | V2 sau O01; không gate MVP |
 
@@ -106,8 +113,9 @@ Cập nhật 2026-11-07. Đọc cùng AGENTS.md; đối chiếu Git/source trư�
 
 ## Tiếp theo
 
-1. Nghiệm thu localhost cuối theo LOCAL_PROGRESS.md/LOCAL_ACCEPTANCE.md: cấu hình
-   MongoDB/startup/artifacts smoke đã đạt, tiếp theo core loop đầy đủ/restart/failure.
+1. Nghiệm thu localhost cuối theo LOCAL_PROGRESS.md/LOCAL_ACCEPTANCE.md: smoke và
+   core-loop HTTP/restart đã đạt; còn UI bản cuối khi browser được bật lại hoặc
+   người dùng thực hiện runbook. Không tự thay Work settings hoặc gọi API case là UI E2E.
    Giữ dữ liệu hiện hữu; không tự seed hoặc destructive test lên DB người dùng.
 2. Không triển khai lại Q01/L01; nếu gặp lỗi mới tạo task nhỏ/repro/test trước sửa.
 3. O01/deploy giai đoạn sau; staging/production gate vẫn nguyên. Không tự mở

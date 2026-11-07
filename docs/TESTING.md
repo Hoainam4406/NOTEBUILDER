@@ -1,5 +1,22 @@
 # Kiểm thử local và CI
 
+## Core-loop HTTP acceptance/restart, 2026-11-07
+
+- Mới: integration/core-loop.test.js. Chỉ public API, disposable replica set,
+  không seed/manual grant, không .env/DB ứng dụng. 1 case xuyên toàn bộ modules.
+- Register/login → raw fields/canvas/pending draft → restart1 → session/draft
+  restore → POST replay tạo đúng1 note/event →20XP/1 starter → city place/move
+  (rev2/kho0) →3 reviews completed →3 lifetime +2 daily claims.
+- Restart2 giữ city/review summary/5 claims; logout thu hồi session, login lại
+  vẫn notes/canvas/city. Replay place cũ trả moved layout, không debit lại.
+  Remove refund kho1, city badge vẫn retained; export20XP/1note. Cuối1 XpEvent,
+  5 JourneyClaim,1 unlock. Child processes/database teardown đạt.
+- Node24.14.0: targeted case đạt; tổng hiện hành127 regression/59 integration.
+  Syntax/diff check và full suites chạy ở checkpoint này; không sửa runtime app.
+- Browser tool hiện bị tắt trong Work settings; không bypass qua native/engine
+  khác, không tạo account trên DB ứng dụng. App tạm5062 đã dừng, không domain
+  data writes. UI nghiệm thu bản cuối pending; đây là API/DB persistence evidence.
+
 ## Local startup/artifacts smoke, 2026-11-07
 
 - Thêm `npm run check:local` / scripts/check-local.js và LOCAL_ACCEPTANCE.md.
